@@ -8,6 +8,9 @@
 #include <omp.h>
 #include <gmp.h>
 
+#include "utils.h"
+#include "select_degree.h"
+
 int main()
 {
     printf("program started\n");
@@ -34,6 +37,17 @@ int main()
     mpz_init(n);
 
     mpz_init_set_str(n, number, 10);
+
+    // Initialization
+
+    gmp_randstate_t state;
+
+    mpf_t ln10, ln2, e;
+    mpf_inits(ln2, ln10, e, NULL);
+
+    initialize_params(state, ln10, ln2, e);
+
+    unsigned long degree = compute_degree(n, ln2, e);
 
     // The GNFS algorithm is split in 4 main steps
 

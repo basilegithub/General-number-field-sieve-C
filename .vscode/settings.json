@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "gmp.h": "c",
+        "select_degree.h": "c",
+        "stdlib.h": "c"
+    }
+}
