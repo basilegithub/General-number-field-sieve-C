@@ -9,7 +9,7 @@
 #include <gmp.h>
 
 #include "utils.h"
-#include "select_degree.h"
+#include "init_functions.h"
 
 int main()
 {
