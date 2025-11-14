@@ -102,6 +102,17 @@ int main()
         }
     }
 
+    mpz_t large_prime_constant1, large_prime_constant2;
+    mpz_inits(large_prime_constant1, large_prime_constant2, NULL);
+
+    mpz_set_ui(large_prime_constant1, primes.start[primes.len - 1]);
+    mpz_mul_ui(large_prime_constant1, large_prime_constant1, 100);
+
+    mpz_mul_ui(large_prime_constant2, large_prime_constant1, primes.start[primes.len - 1]);
+
+    log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %Zd*p_max", large_prime_constant1, primes.start[primes.len - 1]);
+    log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %Zd*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
+
     // The GNFS algorithm is split in 4 main steps
 
     // Polynomial selection
