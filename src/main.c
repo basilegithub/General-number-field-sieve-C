@@ -11,8 +11,10 @@
 #include "logs.h"
 #include "utils.h"
 #include "dynamic_arrays.h"
+#include "polynomial_structures.h"
 #include "init_functions.h"
 #include "generate_primes.h"
+#include "polynomial_selection.h"
 
 int main()
 {
@@ -56,10 +58,14 @@ int main()
 
     unsigned long degree = compute_degree(n, ln2, e);
 
+    log_msg(logfile, "Degree selected is d = %lu", degree);
+
     mpz_t smooth_bound;
     mpz_init(smooth_bound);
 
     compute_smooth_bound(n, smooth_bound, ln2, e);
+
+    mpz_set_ui(smooth_bound, 10);
 
     dyn_array_classic primes;
     init_classic(&primes);
@@ -67,13 +73,13 @@ int main()
     erasthotenes_sieve(&primes, smooth_bound);
 
     log_msg(logfile, "Factor base of %lu primes generated.", primes.len);
-    log_gmp_msg(logfile, "Lrgest prime = %Zd", primes.start[primes.len - 1]);
+    log_msg(logfile, "Largest prime = %lu", primes.start[primes.len - 1]);
 
     // Look for small factors
 
     for (size_t i = 0 ; i < primes.len ; i++)
     {
-        if (mpz_divisible_p(n, primes.start[i]))
+        if (mpz_divisible_ui_p(n, primes.start[i]))
         {
             mpz_t factor1, factor2;
             mpz_inits(factor1, factor2, NULL);
@@ -110,8 +116,15 @@ int main()
 
     mpz_mul_ui(large_prime_constant2, large_prime_constant1, primes.start[primes.len - 1]);
 
-    log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %Zd*p_max", large_prime_constant1, primes.start[primes.len - 1]);
-    log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %Zd*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
+    log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
+    log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
+
+    polynomial_mpz polynomial;
+    init_poly(&polynomial);
+
+    basic_polynomial_selection(&polynomial, n, degree);
+
+    print_polynomial(&polynomial);
 
     // The GNFS algorithm is split in 4 main steps
 

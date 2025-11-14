@@ -4,7 +4,9 @@
         "select_degree.h": "c",
         "stdlib.h": "c",
         "generate_primes.h": "c",
-        "dynamic_arrays.h": "c"
+        "dynamic_arrays.h": "c",
+        "utils.h": "c",
+        "polynomial_structures.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -11,7 +11,6 @@ void basic_polynomial_selection(polynomial_mpz *polynomial, mpz_t n, unsigned lo
     mpf_t tmpf;
     mpf_init(tmpf);
     mpf_set_z(tmpf, n);
-
     nth_root(tmpf, tmpf, d);
 
     mpz_set_f(d_root, tmpf);

@@ -1,8 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <gmp.h>
 
 #include "polynomial_structures.h"
 
-void init(polynomial_mpz *polynomial)
+void init_poly(polynomial_mpz *polynomial)
 {
     polynomial->coeffs = calloc(1, sizeof(mpz_t));
     mpz_init_set_ui(polynomial->coeffs[0], 0);
@@ -10,7 +12,7 @@ void init(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
-void init_degree(polynomial_mpz *polynomial, unsigned long degree)
+void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree)
 {
     polynomial->coeffs = calloc(degree+1, sizeof(mpz_t));
     for (size_t i = 0 ; i <= degree ; i++)
@@ -38,7 +40,7 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
 
         for (size_t i = polynomial->degree+1 ; i <= index ; i++)
         {
-            mpz_set_ui(new_array[i], 0);
+            mpz_set_ui(new_array[i], 0);void print_polynomial(polynomial_mpz *polynomial);
         }
 
         for (size_t i = 0 ; i <= polynomial->degree ; i++)
@@ -86,4 +88,16 @@ void free_polynomial(polynomial_mpz *polynomial)
     polynomial->coeffs = NULL;
 
     polynomial->degree = 0;
+}
+
+void print_polynomial(polynomial_mpz *polynomial)
+{
+    printf("[");
+
+    for (size_t i = 0 ; i < polynomial->degree ; i++)
+    {
+        gmp_printf("%Zd, ", polynomial->coeffs[i]);
+    }
+
+    gmp_printf("%Zd]\n", polynomial->coeffs[polynomial->degree]);
 }

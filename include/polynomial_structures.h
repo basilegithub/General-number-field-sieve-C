@@ -11,10 +11,11 @@ typedef struct
 
 // Functions definition
 
-void init(polynomial_mpz *polynomial);
-void init_degree(polynomial_mpz *polynomial, unsigned long degree);
+void init_poly(polynomial_mpz *polynomial);
+void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree);
 void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index);
 void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2);
 void free_polynomial(polynomial_mpz *polynomial);
+void print_polynomial(polynomial_mpz *polynomial);
 
 #endif // POLYNOMIAL_STRUCTURES_H
