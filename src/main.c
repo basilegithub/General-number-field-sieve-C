@@ -117,6 +117,8 @@ int main()
 
     // Polynomial selection
 
+    // For now, very easy polynomial selection
+
     // Sieving
 
     // Linear algebra
