@@ -73,14 +73,14 @@ int main()
 
     for (size_t i = 0 ; i < primes.len ; i++)
     {
-        if (mpz_divisible_p(n, primes[i]))
+        if (mpz_divisible_p(n, primes.start[i]))
         {
             mpz_t factor1, factor2;
             mpz_inits(factor1, factor2, NULL);
 
             char primality_factor1, primality_factor2;
 
-            mpz_set_ui(factor1, primes[i]);
+            mpz_set_ui(factor1, primes.start[i]);
             mpz_divexact(factor2, n, factor1);
 
             if (mpz_probab_prime_p(factor1, 100) > 0)
