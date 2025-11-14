@@ -69,6 +69,39 @@ int main()
     log_msg(logfile, "Factor base of %lu primes generated.", primes.len);
     log_gmp_msg(logfile, "Lrgest prime = %Zd", primes.start[primes.len - 1]);
 
+    // Look for small factors
+
+    for (size_t i = 0 ; i < primes.len ; i++)
+    {
+        if (mpz_divisible_p(n, primes[i]))
+        {
+            mpz_t factor1, factor2;
+            mpz_inits(factor1, factor2, NULL);
+
+            char primality_factor1, primality_factor2;
+
+            mpz_set_ui(factor1, primes[i]);
+            mpz_divexact(factor2, n, factor1);
+
+            if (mpz_probab_prime_p(factor1, 100) > 0)
+            {
+                primality_factor1 = 'p';
+            } else {primality_factor1 = 'C';}
+
+            if (mpz_probab_prime_p(factor2, 100) > 0)
+            {
+                primality_factor2 = 'p';
+            } else {primality_factor2 = 'C';}
+
+            log_blank_line(logfile);
+            log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
+            if (logfile) fclose(logfile);
+
+            mpz_clears(factor1, factor2);
+            return 1;
+        }
+    }
+
     // The GNFS algorithm is split in 4 main steps
 
     // Polynomial selection
