@@ -63,3 +63,15 @@ void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2) /
 
     polynomial1->degree = polynomial2->degree;
 }
+
+void free_polynomial(polynomial_mpz *polynomial)
+{
+    for (size_t i = 0 ; i <= polynomial->degree ; i++)
+    {
+        mpz_clear(polynomial->coeffs[i]);
+    }
+
+    free(polynomial->coeffs);
+
+    polynomial->degree = 0;
+}
