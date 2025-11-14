@@ -10,6 +10,17 @@ void init(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
+void init_degree(polynomial_mpz *polynomial, unsigned long degree)
+{
+    polynomial->coeffs = calloc(degree+1, sizeof(mpz_t));
+    for (size_t i = 0 ; i <= degree ; i++)
+    {
+        mpz_init_set_ui(polynomial->coeffs[i], 0);
+    }
+
+    polynomial->degree = degree;
+}
+
 void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
 {
     if (polynomial->degree >= index)
@@ -72,6 +83,7 @@ void free_polynomial(polynomial_mpz *polynomial)
     }
 
     free(polynomial->coeffs);
+    polynomial->coeffs = NULL;
 
     polynomial->degree = 0;
 }
