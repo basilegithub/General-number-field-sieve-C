@@ -8,6 +8,7 @@
 #include <omp.h>
 #include <gmp.h>
 
+#include "logs.h"
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "init_functions.h"
@@ -16,6 +17,12 @@
 int main()
 {
     printf("program started\n");
+
+    // Setup logfile
+
+    FILE *logfile = NULL;
+
+    init_log(&logfile);
 
     // Initialize random seed
 
@@ -60,6 +67,9 @@ int main()
     init_classic(&primes);
 
     erasthotenes_sieve(&primes, smooth_bound);
+
+    log_msg(logfile, "Factor base of %lu primes generated.", primes.len);
+    log_gmp_msg(logfile, "Lrgest prime = %Zd", primes.start[primes.len - 1]);
 
     // The GNFS algorithm is split in 4 main steps
 
