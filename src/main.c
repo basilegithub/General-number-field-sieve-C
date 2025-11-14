@@ -9,7 +9,9 @@
 #include <gmp.h>
 
 #include "utils.h"
+#include "structures.h"
 #include "init_functions.h"
+#include "generate_primes.h"
 
 int main()
 {
@@ -53,6 +55,11 @@ int main()
     mpz_init(smooth_bound);
 
     compute_smooth_bound(n, smooth_bound, ln2, e);
+
+    dyn_array_classic primes;
+    init_classic(&primes);
+
+    erasthotenes_sieve(&primes, smooth_bound);
 
     // The GNFS algorithm is split in 4 main steps
 
