@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "structures.h"
+#include "dynamic_arrays.h"
 #include "utils.h"
 
 void poly_anul(mpz_t D, mpz_t B, unsigned long m)

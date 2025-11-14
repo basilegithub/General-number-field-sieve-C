@@ -2,6 +2,9 @@
     "files.associations": {
         "gmp.h": "c",
         "select_degree.h": "c",
-        "stdlib.h": "c"
-    }
+        "stdlib.h": "c",
+        "generate_primes.h": "c",
+        "dynamic_arrays.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
 }

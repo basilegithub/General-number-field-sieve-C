@@ -1,7 +1,7 @@
 #include <gmp.h>
 #include <stdlib.h>
 
-#include "structures.h"
+#include "dynamic_arrays.h"
 
 void erasthotenes_sieve(dyn_array_classic* primes, mpz_t bound)
 {

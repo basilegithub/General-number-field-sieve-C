@@ -8,7 +8,7 @@
 #include <stdint-gcc.h>
 #include <stddef.h>
 
-#include "structures.h"
+#include "dynamic_arrays.h"
 #include "utils.h"
 #include "logs.h"
 

@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "structures.h"
+#include "dynamic_arrays.h"
 #include "utils.h"
 
 void init(dyn_array* array)

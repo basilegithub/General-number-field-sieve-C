@@ -9,7 +9,7 @@
 #include <gmp.h>
 
 #include "utils.h"
-#include "structures.h"
+#include "dynamic_arrays.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 
