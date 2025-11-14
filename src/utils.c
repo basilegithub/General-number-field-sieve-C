@@ -17,34 +17,6 @@ void compute_e(mpf_t e)
     mpf_clears(fac, tmp, NULL);
 }
 
-void natural_log(mpf_t res, mpf_t x, mpf_t ln2, mpf_t e)
-{
-    mpz_t tmp;
-
-    mpz_init(tmp);
-    mpz_set_f(tmp, x);
-    mpz_set_ui(tmp, mpz_sizeinbase(tmp, 2));
-
-    mpf_t a, tmpf;
-
-    mpf_inits(a, tmpf, NULL);
-    mpf_set_prec(a, 32);
-    mpf_set_z(a, tmp);
-    mpf_mul(a, a, ln2);
-
-    for (unsigned long i = 0 ; i < 5 ; i++)
-    {
-        myexp(tmpf, a, e);
-        mpf_div(tmpf, x, tmpf);
-        mpf_sub_ui(a, a, 1);
-        mpf_add(a, a, tmpf);
-    }
-    mpf_set(res, a);
-
-    mpz_clear(tmp);
-    mpf_clears(tmpf, a, NULL);
-}
-
 void recursive_exp(mpf_t res, mpz_t pow, mpf_t e)
 {
     if (!mpz_cmp_ui(pow, 0)) mpf_set_ui(res, 1);
@@ -116,6 +88,34 @@ void myexp(mpf_t res, mpf_t x, mpf_t e)
     }
     mpz_clear(tmp);
     mpf_clears(tmpf, tmpf2, rest, tmp_res, tmp_rest, fact, NULL);
+}
+
+void natural_log(mpf_t res, mpf_t x, mpf_t ln2, mpf_t e)
+{
+    mpz_t tmp;
+
+    mpz_init(tmp);
+    mpz_set_f(tmp, x);
+    mpz_set_ui(tmp, mpz_sizeinbase(tmp, 2));
+
+    mpf_t a, tmpf;
+
+    mpf_inits(a, tmpf, NULL);
+    mpf_set_prec(a, 32);
+    mpf_set_z(a, tmp);
+    mpf_mul(a, a, ln2);
+
+    for (unsigned long i = 0 ; i < 5 ; i++)
+    {
+        myexp(tmpf, a, e);
+        mpf_div(tmpf, x, tmpf);
+        mpf_sub_ui(a, a, 1);
+        mpf_add(a, a, tmpf);
+    }
+    mpf_set(res, a);
+
+    mpz_clear(tmp);
+    mpf_clears(tmpf, a, NULL);
 }
 
 void nth_root(mpf_t r, mpf_t x, unsigned long n)

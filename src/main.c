@@ -49,8 +49,6 @@ int main()
 
     // Initialization
 
-    gmp_randstate_t state;
-
     mpf_t ln10, ln2, e;
     mpf_inits(ln2, ln10, e, NULL);
 
