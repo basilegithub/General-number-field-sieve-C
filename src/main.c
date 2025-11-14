@@ -49,6 +49,11 @@ int main()
 
     unsigned long degree = compute_degree(n, ln2, e);
 
+    mpz_t smooth_bound;
+    mpz_init(smooth_bound);
+
+    compute_smooth_bound(n, smooth_bound, ln2, e);
+
     // The GNFS algorithm is split in 4 main steps
 
     // Polynomial selection
