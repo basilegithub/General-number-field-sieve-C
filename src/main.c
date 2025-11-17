@@ -12,6 +12,7 @@
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
+#include "algebraic_base.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"
@@ -190,6 +191,11 @@ int main()
     // Build algebraic factor base and quadratic characters
 
     // Algebraic factor base
+
+    algebraic_base Algebraic_base;
+    algebraic_base_init(&Algebraic_base);
+
+    build_algebraic_base();
 
     // Sieving
 

@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "dynamic_arrays.h"
+#include "polynomial_structures.h"
 #include "algebraic_base.h"
 
 void algebraic_base_init(algebraic_base *b)
@@ -25,4 +26,14 @@ void algebraic_base_clear(algebraic_base *b)
     /* Reset the base */
     b->start = NULL;
     b->end = NULL;
+}
+
+void build_algebraic_base(algebraic_base *b, dyn_array_classic primes, polynomial_mpz g_x, mpz_t n)
+{
+    dyn_array_classic roots;
+    init_classic(&roots);
+
+    unsigned long first_prime = primes.start[0];
+
+    
 }

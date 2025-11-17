@@ -1,9 +1,10 @@
-#ifndef ALGEBRAIC_BASE_H_BASE_H
-#define ALGEBRAIC_BASE_H_BASE_H
+#ifndef ALGEBRAIC_BASE_H
+#define ALGEBRAIC_BASE_H
 
 #include <gmp.h>
 
 #include "dynamic_arrays.h"
+#include "polynomial_structures.h"
 
 typedef struct
 {
@@ -22,5 +23,6 @@ typedef struct
 
 void algebraic_base_init(algebraic_base *b);
 void algebraic_base_clear(algebraic_base *b);
+void build_algebraic_base(algebraic_base *b, dyn_array_classic primes, polynomial_mpz g_x, mpz_t n);
 
 #endif // ALGEBRAIC_BASE_H
