@@ -13,6 +13,7 @@
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 #include "algebraic_base.h"
+#include "polynomial_functions.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"
@@ -75,8 +76,8 @@ int main()
 
     erasthotenes_sieve(&primes, smooth_bound);
 
-    log_msg(logfile, "Factor base of %lu primes generated.", primes.len);
-    log_msg(logfile, "Largest prime = %lu", primes.start[primes.len - 1]);
+    log_msg(logfile, "Rational Factor base of %lu primes generated.", primes.len);
+    log_msg(logfile, "Largest prime = %lu.", primes.start[primes.len - 1]);
 
     // Look for small factors
 
@@ -111,18 +112,6 @@ int main()
         }
     }
 
-    mpz_t large_prime_constant1, large_prime_constant2;
-    mpz_inits(large_prime_constant1, large_prime_constant2, NULL);
-
-    mpz_set_ui(large_prime_constant1, primes.start[primes.len - 1]);
-    mpz_mul_ui(large_prime_constant1, large_prime_constant1, 100);
-
-    mpz_mul_ui(large_prime_constant2, large_prime_constant1, primes.start[primes.len - 1]);
-
-    log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
-    log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
-    log_blank_line(logfile);
-
     // The GNFS algorithm is split in 4 main steps
 
 
@@ -137,10 +126,6 @@ int main()
 
     basic_polynomial_selection(&f_x, n, m0, m1, degree);
 
-    printf("f1(x) =\n");
-    print_polynomial(&f_x);
-    printf("\n");
-
     mpz_t tmp;
     mpz_init(tmp);
 
@@ -153,10 +138,6 @@ int main()
     mpz_set(tmp, m0);
     mpz_neg(tmp, tmp);
     set_coeff(&linear_poly, tmp, 1);
-
-    printf("f2(x) =\n");
-    print_polynomial(&linear_poly);
-    printf("\n");
 
     mpz_t leading_coeff;
     mpz_init(leading_coeff);
@@ -178,15 +159,11 @@ int main()
         set_coeff(&g_x, tmp, i);
     }
 
-    printf("g(x) =\n");
-    print_polynomial(&g_x);
-    printf("\n");
-
     mpz_clear(tmp);
 
     polynomial_mpz g_derivative;
     init_poly_degree(&g_derivative, degree - 1);
-    poly_derivative(&g_derivative, &g_x);
+    poly_derivative(&g_derivative, g_x);
 
     // Build algebraic factor base and quadratic characters
 
@@ -195,7 +172,45 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base();
+    build_algebraic_base(&Algebraic_base, primes, g_x, n);
+
+    size_t nb_Algebraic_pairs = 0;
+
+    algebraic_base_prime *alg_prime = Algebraic_base.start;
+
+    while (alg_prime != NULL)
+    {
+        nb_Algebraic_pairs += alg_prime->roots.len;
+
+        alg_prime = alg_prime->next;
+    }
+
+    log_msg(logfile, "Algebraic base of size %zu generated.", nb_Algebraic_pairs);
+
+    mpz_t large_prime_constant1, large_prime_constant2;
+    mpz_inits(large_prime_constant1, large_prime_constant2, NULL);
+
+    mpz_set_ui(large_prime_constant1, primes.start[primes.len - 1]);
+    mpz_mul_ui(large_prime_constant1, large_prime_constant1, 100);
+
+    mpz_mul_ui(large_prime_constant2, large_prime_constant1, primes.start[primes.len - 1]);
+
+    log_blank_line(logfile);
+    log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
+    log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
+    log_blank_line(logfile);
+
+    printf("f1(x) =\n");
+    print_polynomial(&f_x);
+    printf("\n");
+
+    printf("f2(x) =\n");
+    print_polynomial(&linear_poly);
+    printf("\n");
+
+    printf("g(x) =\n");
+    print_polynomial(&g_x);
+    printf("\n");
 
     // Sieving
 

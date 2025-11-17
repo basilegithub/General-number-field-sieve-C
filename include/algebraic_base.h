@@ -6,7 +6,7 @@
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 
-typedef struct
+typedef struct algebraic_base_prime
 {
     unsigned long prime;
     dyn_array_classic roots;

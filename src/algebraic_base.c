@@ -17,7 +17,7 @@ void algebraic_base_clear(algebraic_base *b)
     while (p != NULL) {
         algebraic_base_prime *next = p->next;
 
-        free_dyn_array(&p->roots);
+        free(&p->roots);
 
         free(p);
 

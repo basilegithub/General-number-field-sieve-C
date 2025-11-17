@@ -40,7 +40,7 @@ unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
         for (size_t i = 0 ; i < f.degree ; i++)
         {
             mpz_addmul(tmp_res, f.coeffs[i], tmp);
-            mpz_divexact(tmp, tmp, x);
+            mpz_divexact_ui(tmp, tmp, x);
             mpz_mod_ui(tmp_res, tmp_res, p);
         }
 
