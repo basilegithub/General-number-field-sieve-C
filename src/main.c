@@ -153,7 +153,7 @@ int main()
     mpz_neg(tmp, tmp);
     set_coeff(&linear_poly, tmp, 1);
 
-    printf("f2(x)=\n");
+    printf("f2(x) =\n");
     print_polynomial(&linear_poly);
     printf("\n");
 
@@ -177,7 +177,7 @@ int main()
         set_coeff(&g_x, tmp, i);
     }
 
-    printf("g(x)=\n");
+    printf("g(x) =\n");
     print_polynomial(&g_x);
     printf("\n");
 
@@ -189,7 +189,13 @@ int main()
 
     // Build rational factor base and quadratic characters
 
+    // How to build rational base ?
 
+    // Store all the pairs in the same array ?
+    // Simple but a lot of redundancy
+
+    // Create a custom structure that stores the prime and all the associated roots ?
+    // More complex to handle, but still easy to traverse and no duplication
 
     // Sieving
 
