@@ -6,7 +6,8 @@
         "generate_primes.h": "c",
         "dynamic_arrays.h": "c",
         "utils.h": "c",
-        "polynomial_structures.h": "c"
+        "polynomial_structures.h": "c",
+        "mono_cpu_sieve.C": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

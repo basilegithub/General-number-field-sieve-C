@@ -122,18 +122,46 @@ int main()
     log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
     log_blank_line(logfile);
 
-    polynomial_mpz polynomial;
-    init_poly(&polynomial);
-
-    basic_polynomial_selection(&polynomial, n, degree);
-
-    print_polynomial(&polynomial);
-
     // The GNFS algorithm is split in 4 main steps
 
-    // Polynomial selection
 
-    // For now, very easy polynomial selection
+    // Polynomial selection
+    // For now, very simple polynomial selection
+
+    mpz_t m0, m1;
+    mpz_inits(m0, m1, NULL);
+
+    polynomial_mpz f_x;
+    init_poly(&f_x);
+
+    basic_polynomial_selection(&f_x, n, m0, m1, degree);
+
+    printf("f(x) =\n");
+    print_polynomial(&f_x);
+    printf("\n");
+
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    polynomial_mpz g_x;
+    init_poly_degree(&g_x, 1);
+
+    mpz_set(tmp, m1);
+    set_coeff(&g_x, tmp, 0);
+
+    mpz_set(tmp, m0);
+    mpz_neg(tmp, tmp);
+    set_coeff(&g_x, tmp, 1);
+
+    mpz_clear(tmp);
+
+    printf("g(x)=\n");
+    print_polynomial(&g_x);
+    printf("\n");
+
+    // Build rational factor base and quadratic characters
+
+
 
     // Sieving
 
@@ -143,5 +171,5 @@ int main()
 
 
 
-    mpz_clear(n);
+    mpz_clears(n, m0, m1, NULL);
 }
