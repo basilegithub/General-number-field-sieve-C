@@ -16,6 +16,7 @@ void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree);
 void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index);
 void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2);
 void poly_derivative(polynomial_mpz *res, polynomial_mpz *f);
+void evaluate_homogeneous(mpz_t res, polynomial_mpz f, mpz_t x, mpz_t y)
 void free_polynomial(polynomial_mpz *polynomial);
 void print_polynomial(polynomial_mpz *polynomial);
 
