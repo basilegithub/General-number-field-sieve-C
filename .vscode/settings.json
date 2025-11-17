@@ -9,7 +9,8 @@
         "polynomial_structures.h": "c",
         "mono_cpu_sieve.C": "cpp",
         "rational_base.h": "c",
-        "algebraic_base.h": "c"
+        "algebraic_base.h": "c",
+        "polynomial_functions.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
