@@ -17,7 +17,9 @@ unsigned int compute_degree(mpz_t n, mpf_t ln2, mpf_t e)
 
     mpf_div(tmpf, tmpf3, tmpf2);
 
-    unsigned long res = (mpf_get_ui(tmpf))^(1/3);
+    nth_root(tmpf2, tmpf, 3);
+
+    unsigned long res = mpf_get_ui(tmpf2);
 
     mpf_clears(tmpf, tmpf2, tmpf3, NULL);
 

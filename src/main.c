@@ -43,6 +43,7 @@ int main()
     char number[100];
     printf("enter the number you wish to factor : ");
     fgets(number, 100, stdin);
+    log_blank_line(logfile);
 
     mpz_t n;
     mpz_init(n);
@@ -59,6 +60,7 @@ int main()
     unsigned long degree = compute_degree(n, ln2, e);
 
     log_msg(logfile, "Degree selected is d = %lu", degree);
+    log_blank_line(logfile);
 
     mpz_t smooth_bound;
     mpz_init(smooth_bound);
@@ -118,6 +120,7 @@ int main()
 
     log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
     log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
+    log_blank_line(logfile);
 
     polynomial_mpz polynomial;
     init_poly(&polynomial);

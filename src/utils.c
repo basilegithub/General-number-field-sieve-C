@@ -142,7 +142,7 @@ void nth_root(mpf_t r, mpf_t x, unsigned long n)
         mpf_pow_ui(tmpf4, tmpf3, n);
     }
 
-    mpf_set(r, tmpf4);
+    mpf_set(r, tmpf3);
 
     mpf_clears(tmpf, tmpf2, tmpf3, tmpf4, NULL);
 }
