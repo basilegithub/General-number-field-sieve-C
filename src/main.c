@@ -136,28 +136,56 @@ int main()
 
     basic_polynomial_selection(&f_x, n, m0, m1, degree);
 
-    printf("f(x) =\n");
+    printf("f1(x) =\n");
     print_polynomial(&f_x);
     printf("\n");
 
     mpz_t tmp;
     mpz_init(tmp);
 
-    polynomial_mpz g_x;
-    init_poly_degree(&g_x, 1);
+    polynomial_mpz linear_poly;
+    init_poly_degree(&linear_poly, 1);
 
     mpz_set(tmp, m1);
-    set_coeff(&g_x, tmp, 0);
+    set_coeff(&linear_poly, tmp, 0);
 
     mpz_set(tmp, m0);
     mpz_neg(tmp, tmp);
-    set_coeff(&g_x, tmp, 1);
+    set_coeff(&linear_poly, tmp, 1);
 
-    mpz_clear(tmp);
+    printf("f2(x)=\n");
+    print_polynomial(&linear_poly);
+    printf("\n");
+
+    mpz_t leading_coeff;
+    mpz_init(leading_coeff);
+
+    mpz_set(leading_coeff, f_x.coeffs[0]);
+
+    polynomial_mpz g_x;
+    init_poly_degree(&g_x, degree);
+
+    mpz_set_ui(tmp, 1);
+    set_coeff(&g_x, tmp, 0);
+
+    set_coeff(&g_x, f_x.coeffs[1], 1);
+
+    for (size_t i = 2 ; i <= f_x.degree ; i++)
+    {
+        mpz_pow_ui(tmp, leading_coeff, i-1);
+        mpz_mul(tmp, tmp, f_x.coeffs[i]);
+        set_coeff(&g_x, tmp, i);
+    }
 
     printf("g(x)=\n");
     print_polynomial(&g_x);
     printf("\n");
+
+    mpz_clear(tmp);
+
+    polynomial_mpz g_derivative;
+    init_poly_degree(&g_derivative, degree - 1);
+    poly_derivative(&g_derivative, &g_x);
 
     // Build rational factor base and quadratic characters
 

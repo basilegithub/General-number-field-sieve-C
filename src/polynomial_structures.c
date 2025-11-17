@@ -77,6 +77,23 @@ void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2) /
     polynomial1->degree = polynomial2->degree;
 }
 
+void poly_derivative(polynomial_mpz *res, polynomial_mpz *f)
+{
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    for (size_t i = 0 ; i < f->degree ; i++)
+    {
+        mpz_set_ui(tmp, f->degree - i);
+        mpz_mul(tmp, tmp, f->coeffs[i]);
+        set_coeff(res, tmp, i);
+    }
+
+    res->degree = f->degree - 1;
+
+    mpz_clear(tmp);
+}
+
 void free_polynomial(polynomial_mpz *polynomial)
 {
     for (size_t i = 0 ; i <= polynomial->degree ; i++)
