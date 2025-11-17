@@ -187,15 +187,9 @@ int main()
     init_poly_degree(&g_derivative, degree - 1);
     poly_derivative(&g_derivative, &g_x);
 
-    // Build rational factor base and quadratic characters
+    // Build algebraic factor base and quadratic characters
 
-    // How to build rational base ?
-
-    // Store all the pairs in the same array ?
-    // Simple but a lot of redundancy
-
-    // Create a custom structure that stores the prime and all the associated roots ?
-    // More complex to handle, but still easy to traverse and no duplication
+    // Algebraic factor base
 
     // Sieving
 

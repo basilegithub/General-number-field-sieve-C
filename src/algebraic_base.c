@@ -1,19 +1,19 @@
 #include <stdlib.h>
 
 #include "dynamic_arrays.h"
-#include "rational_base.h"
+#include "algebraic_base.h"
 
-void rational_base_init(rational_base *b)
+void algebraic_base_init(algebraic_base *b)
 {
     b->start = NULL;
     b->end = NULL;
 }
 
-void rational_base_clear(rational_base *b)
+void algebraic_base_clear(algebraic_base *b)
 {
-    rational_base_prime *p = b->start;
+    algebraic_base_prime *p = b->start;
     while (p != NULL) {
-        rational_base_prime *next = p->next;
+        algebraic_base_prime *next = p->next;
 
         free_dyn_array(&p->roots);
 
