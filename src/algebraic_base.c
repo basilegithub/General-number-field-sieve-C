@@ -24,7 +24,6 @@ void algebraic_base_clear(algebraic_base *b)
         p = next;
     }
 
-    /* Reset the base */
     b->start = NULL;
     b->end = NULL;
 }

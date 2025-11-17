@@ -161,6 +161,10 @@ int main()
 
     mpz_clear(tmp);
 
+    polynomial_mpz f_derivative;
+    init_poly_degree(&f_derivative, degree - 1);
+    poly_derivative(&f_derivative, f_x);
+
     polynomial_mpz g_derivative;
     init_poly_degree(&g_derivative, degree - 1);
     poly_derivative(&g_derivative, g_x);
