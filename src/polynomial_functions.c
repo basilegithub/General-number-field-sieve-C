@@ -101,19 +101,17 @@ void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long 
 
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 {
+    mpz_t tmp;
+    mpz_init_set_ui(tmp, 0);
+
     if ((f.degree == 0 && !mpz_cmp_ui(f.coeffs[0], 0)) || (g.degree == 0 && !mpz_cmp_ui(g.coeffs[0], 0)))
     {
         res->degree = 0;
-        mpz_set_ui(res->coeffs[0], 0);
+        set_coeff(res, tmp, 0);
     }
     else
     {
-        mpz_t tmp;
-        mpz_init(tmp);
-
         res->degree = f.degree + g.degree;
-
-        mpz_set_ui(tmp, 0);
 
         for (size_t i = 0 ; i <= res->degree ; i++)
         {
@@ -127,7 +125,7 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
                 mpz_addmul(res->coeffs[i+j], f.coeffs[i], g.coeffs[j]);
             }
         }
-
-        mpz_clear(tmp);
     }
+
+    mpz_clear(tmp);
 }
