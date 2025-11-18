@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <gmp.h>
 
 #include "dynamic_arrays.h"
@@ -115,7 +116,7 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 
         for (size_t i = 0 ; i <= res->degree ; i++)
         {
-            set_coeff(res, tmp, i);
+            set_coeff(res, tmp, res->degree - i); // Reverse traversal so that we allocate memory once
         }
 
         for (size_t i = 0 ; i <= f.degree ; i++)
@@ -128,4 +129,78 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
     }
 
     mpz_clear(tmp);
+}
+
+void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Returns remainder polynomial only, not quotient
+{
+    if (mpz_cmp_ui(g.coeffs[0], 1))
+    {
+        printf("Polynomial division where the divisor is not a monic polynomial.\n");
+    }
+    else if (f.degree >= g.degree)
+    {
+        if (g.degree) res->degree = g.degree - 1;
+        else res->degree = 0;
+
+        polynomial_mpz tmp_poly;
+        init_poly_degree(&tmp_poly, f.degree);
+
+        for (size_t i = 0 ; i <= f.degree ; i++)
+        {
+            set_coeff(&tmp_poly, f.coeffs[i], f.degree - i); // Same as poly prod, set in reversal order to allocate only once
+        }
+
+        mpz_t tmp, tmp2;
+        mpz_inits(tmp, tmp2, NULL);
+
+        mpz_set_ui(tmp2, 0);
+
+        for (size_t i = 0 ; i <= f.degree - g.degree ; i++)
+        {
+            mpz_set(tmp, tmp_poly.coeffs[i]);
+
+            set_coeff(&tmp_poly, tmp2, f.degree - i);
+
+            for (size_t j = 0 ; j < g.degree ; j++)
+            {
+                mpz_submul(tmp_poly.coeffs[f.degree - i - j], tmp, g.coeffs[g.degree - j]);
+            }
+        }
+
+        mpz_clears(tmp, tmp2, NULL);
+
+        bool is_zero = true;
+        for (size_t i = 0 ; i <= tmp_poly.degree ; i++)
+        {
+            if (mpz_cmp_ui(tmp_poly.coeffs[i], 0))
+            {
+                is_zero = false;
+                break;
+            }
+        }
+
+        if (is_zero)
+        {
+            reset_polynomial(res);
+        }
+        else
+        {
+            reduce_polynomial(&tmp_poly);
+
+            for (size_t i = 0 ; i < g.degree ; i++)
+            {
+                set_coeff(res, tmp_poly.coeffs[i + f.degree - g.degree], g.degree - 1 - i);
+            }
+        }
+
+        free_polynomial(&tmp_poly);
+
+    } else
+    {
+        res->degree = f.degree;
+        for (size_t i = 0 ; i <= f.degree ; i++)
+        {
+            set_coeff(res, f.coeffs[f.degree - i], f.degree - i); // Same as poly prod, set in reversal order to allocate only once
+        }
+    }
 }

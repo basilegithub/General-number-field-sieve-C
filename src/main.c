@@ -134,11 +134,11 @@ int main()
     init_poly_degree(&linear_poly, 1);
 
     mpz_set(tmp, m1);
-    set_coeff(&linear_poly, tmp, 0);
+    set_coeff(&linear_poly, tmp, 1);
 
     mpz_set(tmp, m0);
     mpz_neg(tmp, tmp);
-    set_coeff(&linear_poly, tmp, 1);
+    set_coeff(&linear_poly, tmp, 0);
 
     mpz_t leading_coeff;
     mpz_init(leading_coeff);
@@ -149,15 +149,15 @@ int main()
     init_poly_degree(&g_x, degree);
 
     mpz_set_ui(tmp, 1);
-    set_coeff(&g_x, tmp, 0);
+    set_coeff(&g_x, tmp, degree);
 
-    set_coeff(&g_x, f_x.coeffs[1], 1);
+    set_coeff(&g_x, f_x.coeffs[1], degree - 1);
 
     for (size_t i = 2 ; i <= f_x.degree ; i++)
     {
         mpz_pow_ui(tmp, leading_coeff, i-1);
         mpz_mul(tmp, tmp, f_x.coeffs[i]);
-        set_coeff(&g_x, tmp, i);
+        set_coeff(&g_x, tmp, f_x.degree - i);
     }
 
     mpz_clear(tmp);
@@ -273,8 +273,6 @@ int main()
     // Linear algebra
 
     // Square root extraction
-
-
 
     mpz_clears(n, m0, m1, NULL);
 }

@@ -28,7 +28,7 @@ void basic_polynomial_selection(polynomial_mpz *polynomial, mpz_t n, mpz_t m0, m
 
         mpz_div(tmp3, tmp, tmp2);
 
-        set_coeff(polynomial, tmp3, i);
+        set_coeff(polynomial, tmp3, d-i);
 
         mpz_mod(tmp, tmp, tmp2);
     }
