@@ -183,7 +183,7 @@ int main()
 
     algebraic_base_prime *alg_prime = Algebraic_base.start;
 
-    while (alg_prime != NULL)
+    while (alg_prime != NULL) // Count the number of pairs in the Algebraic factor base
     {
         nb_Algebraic_pairs += alg_prime->roots.len;
 
@@ -209,7 +209,7 @@ int main()
 
     unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
 
-    if (factor)
+    if (factor) // If we have found a factor while building the quadratic characters base
     {
         mpz_t factor1, factor2;
         mpz_inits(factor1, factor2, NULL);
@@ -241,13 +241,15 @@ int main()
 
     quadratic_character *quad_char = quad_char_base.start;
 
-    while (quad_char != NULL)
+    while (quad_char != NULL) // Count the number of quadratic characters
     {
         nb_Quadratic_characters++;
         quad_char = quad_char->next;
     }
 
     log_msg(logfile, "Quadratic characters base of size %zu generated.", nb_Quadratic_characters);
+
+    // Print and log stuff
 
     log_blank_line(logfile);
     log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
