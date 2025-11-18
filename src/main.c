@@ -12,11 +12,12 @@
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
-#include "algebraic_base.h"
 #include "polynomial_functions.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"
+#include "algebraic_base.h"
+#include "quadratic_characters.h"
 
 int main()
 {
@@ -189,6 +190,8 @@ int main()
         alg_prime = alg_prime->next;
     }
 
+    // Large prime constants
+
     log_msg(logfile, "Algebraic base of size %zu generated.", nb_Algebraic_pairs);
 
     mpz_t large_prime_constant1, large_prime_constant2;
@@ -198,6 +201,41 @@ int main()
     mpz_mul_ui(large_prime_constant1, large_prime_constant1, 100);
 
     mpz_mul_ui(large_prime_constant2, large_prime_constant1, primes.start[primes.len - 1]);
+
+    // Quadratic characters base
+
+    quadratic_character_base quad_char_base;
+    quadratic_base_init(&quad_char_base);
+
+    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
+
+    if (factor)
+    {
+        mpz_t factor1, factor2;
+        mpz_inits(factor1, factor2, NULL);
+
+        char primality_factor1, primality_factor2;
+
+        mpz_set_ui(factor1, factor);
+        mpz_divexact(factor2, n, factor1);
+
+        if (mpz_probab_prime_p(factor1, 100) > 0)
+        {
+            primality_factor1 = 'p';
+        } else {primality_factor1 = 'C';}
+
+        if (mpz_probab_prime_p(factor2, 100) > 0)
+        {
+            primality_factor2 = 'p';
+        } else {primality_factor2 = 'C';}
+
+        log_blank_line(logfile);
+        log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
+        if (logfile) fclose(logfile);
+
+        mpz_clears(factor1, factor2);
+        return 1;
+    }
 
     log_blank_line(logfile);
     log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);

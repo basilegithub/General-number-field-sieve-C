@@ -10,7 +10,8 @@
         "mono_cpu_sieve.C": "cpp",
         "rational_base.h": "c",
         "algebraic_base.h": "c",
-        "polynomial_functions.h": "c"
+        "polynomial_functions.h": "c",
+        "quadratic_characters.h": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

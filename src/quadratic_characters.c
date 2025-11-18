@@ -1,16 +1,17 @@
 #include <gmp.h>
+#include <stdlib.h>
 
 #include "dynamic_arrays.h"
 #include "quadratic_characters.h"
 #include "polynomial_functions.h"
 
-void algebraic_base_init(quadratic_character_base *b)
+void quadratic_base_init(quadratic_character_base *b)
 {
     b->start = NULL;
     b->end = NULL;
 }
 
-void algebraic_base_clear(quadratic_character_base *b)
+void quadratic_base_clear(quadratic_character_base *b)
 {
     quadratic_character *p = b->start;
     while (p != NULL) {
@@ -38,7 +39,7 @@ unsigned long create_quadratic_characters_base(quadratic_character_base *q_base,
     while (cpt < required_size)
     {
         mpz_set_ui(tmp, test_number);
-        if (mpz_probab_prime_p(tmp, 100) && mpz_divisible_ui_p(leading_coeff, test_number))
+        if (mpz_probab_prime_p(tmp, 100) && !mpz_divisible_ui_p(leading_coeff, test_number))
         {
             if (mpz_divisible_ui_p(n, test_number)) return test_number;
 
@@ -48,7 +49,7 @@ unsigned long create_quadratic_characters_base(quadratic_character_base *q_base,
             basic_find_roots(f, &roots, test_number);
             for (size_t i = 0 ; i < roots.len ; i++)
             {
-                if (!evaluate_mod_p(f_derivative, roots.start[i], test_number))
+                if (evaluate_mod_p(f_derivative, roots.start[i], test_number))
                 {
                     quadratic_character *quad_char = malloc(sizeof(quadratic_character));
                     quad_char->q = test_number;
