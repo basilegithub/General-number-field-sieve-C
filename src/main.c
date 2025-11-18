@@ -237,6 +237,18 @@ int main()
         return 1;
     }
 
+    size_t nb_Quadratic_characters = 0;
+
+    quadratic_character *quad_char = quad_char_base.start;
+
+    while (quad_char != NULL)
+    {
+        nb_Quadratic_characters++;
+        quad_char = quad_char->next;
+    }
+
+    log_msg(logfile, "Quadratic characters base of size %zu generated.", nb_Quadratic_characters);
+
     log_blank_line(logfile);
     log_gmp_msg(logfile, "Large prime bound 1 = %Zd = %lu*p_max", large_prime_constant1, primes.start[primes.len - 1]);
     log_gmp_msg(logfile, "Large prime bound 2 = %Zd = %lu*p_max^2", large_prime_constant2, primes.start[primes.len - 1]);
