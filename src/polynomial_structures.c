@@ -53,7 +53,7 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
     {
         mpz_set(polynomial->coeffs[polynomial->degree - index], number);
     }
-    else if (mpz_cmp_ui(number, 0))
+    else
     {
         mpz_t *new_array = calloc(index + 1, sizeof(mpz_t));
 
@@ -66,7 +66,7 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
 
         for (size_t i = 0 ; i <= polynomial->degree ; i++)
         {
-            mpz_init_set(new_array[index + i], polynomial->coeffs[i]);
+            mpz_init_set(new_array[index - polynomial->degree + i], polynomial->coeffs[i]);
             mpz_clear(polynomial->coeffs[i]);
         }
 

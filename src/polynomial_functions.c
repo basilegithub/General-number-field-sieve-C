@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <gmp.h>
 
 #include "dynamic_arrays.h"
@@ -112,18 +113,19 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
     }
     else
     {
-        res->degree = f.degree + g.degree;
 
         for (size_t i = 0 ; i <= res->degree ; i++)
         {
-            set_coeff(res, tmp, res->degree - i); // Reverse traversal so that we allocate memory once
+            set_coeff(res, tmp, f.degree + g.degree - i); // Reverse traversal so that we allocate memory once
         }
+
+        res->degree = f.degree + g.degree;
 
         for (size_t i = 0 ; i <= f.degree ; i++)
         {
             for (size_t j = 0 ; j <= g.degree ; j++)
             {
-                mpz_addmul(res->coeffs[i+j], f.coeffs[i], g.coeffs[j]);
+                mpz_addmul(res->coeffs[i + j], f.coeffs[i], g.coeffs[j]);
             }
         }
     }
@@ -139,9 +141,6 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
     }
     else if (f.degree >= g.degree)
     {
-        if (g.degree) res->degree = g.degree - 1;
-        else res->degree = 0;
-
         polynomial_mpz tmp_poly;
         init_poly_degree(&tmp_poly, f.degree);
 
@@ -187,9 +186,9 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
         {
             reduce_polynomial(&tmp_poly);
 
-            for (size_t i = 0 ; i < g.degree ; i++)
+            for (size_t i = 0 ; i <= tmp_poly.degree ; i++)
             {
-                set_coeff(res, tmp_poly.coeffs[i + f.degree - g.degree], g.degree - 1 - i);
+                set_coeff(res, tmp_poly.coeffs[i], tmp_poly.degree - i);
             }
         }
 

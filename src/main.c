@@ -268,6 +268,17 @@ int main()
     print_polynomial(&g_x);
     printf("\n");
 
+    // Compute some useful quantities
+
+    polynomial_mpz tmp_poly, g_derivative_sq;
+    init_poly(&tmp_poly);
+    init_poly(&g_derivative_sq);
+
+    poly_prod(&tmp_poly, g_derivative, g_derivative);
+    poly_div(&g_derivative_sq, tmp_poly, g_x);
+
+    free_polynomial(&tmp_poly);
+
     // Sieving
 
     // Linear algebra
