@@ -296,7 +296,7 @@ int main()
     // set_coeff(&p2, tmp, 1);
     // set_coeff(&p2, tmp, 0);
 
-    // poly_div_mod(&p3, p2, p2, 3);
+    // gcd_poly_mod(&p3, &p1, &p1, 3);
 
     // print_polynomial(&p3);
 

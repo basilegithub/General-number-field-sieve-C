@@ -99,6 +99,49 @@ void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long 
     }
 }
 
+void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, unsigned long p, unsigned long exponent)
+{
+    if (exponent == 1)
+    {
+        copy_polynomial(res, &poly);
+        return;
+    }
+    else if (!exponent)
+    {
+        reset_polynomial(res);
+
+        mpz_t tmp;
+        mpz_init_set_ui(tmp, 1);
+
+        set_coeff(res, tmp, 0);
+
+        mpz_clear(tmp);
+    }
+    else
+    {
+        polynomial_mpz tmp_poly, tmp_poly2;
+        init_poly(&tmp_poly);
+        init_poly(&tmp_poly2);
+
+        power_poly_mod(&tmp_poly, poly, f, p, exponent>>1);
+
+        poly_prod(&tmp_poly2, tmp_poly, tmp_poly);
+
+        poly_div_mod(&tmp_poly2, tmp_poly2, f, p);
+
+        if (exponent&1)
+        {
+            poly_prod(&tmp_poly2, tmp_poly2, poly);
+            poly_div_mod(tmp_poly2, tmp_poly2, f, p);
+        }
+
+        copy_polynomial(res, &tmp_poly2);
+
+        free_polynomial(&tmp_poly);
+        free_polynomial(&tmp_poly2);
+    }
+}
+
 // Operations on two polynomials
 
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
