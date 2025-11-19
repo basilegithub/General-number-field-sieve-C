@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "gmp.h": "c",
+        "select_degree.h": "c",
+        "stdlib.h": "c",
+        "generate_primes.h": "c",
+        "dynamic_arrays.h": "c",
+        "utils.h": "c",
+        "polynomial_structures.h": "c",
+        "mono_cpu_sieve.C": "cpp",
+        "rational_base.h": "c",
+        "algebraic_base.h": "c",
+        "polynomial_functions.h": "c",
+        "quadratic_characters.h": "c",
+        "cmath": "c"
+    },
+    "C_Cpp.errorSquiggles": "disabled"
+}
