@@ -70,7 +70,7 @@ int main()
 
     compute_smooth_bound(n, smooth_bound, ln2, e);
 
-    mpz_set_ui(smooth_bound, 10);
+    mpz_set_ui(smooth_bound, 80);
 
     dyn_array_classic primes;
     init_classic(&primes);
@@ -283,6 +283,31 @@ int main()
     mpz_init(g_derivative_eval);
 
     evaluate_homogeneous(g_derivative_eval, g_derivative, m0, m1);
+
+    // Computing the set of small inert primes
+
+    dyn_array_classic inert_set;
+    init_classic(&inert_set);
+
+    mpz_t tmp2;
+    mpz_init(tmp2);
+
+    for (size_t i = 0 ; i < primes.len ; i++)
+    {
+        mpz_mod_ui(tmp, m1, primes.start[i]);
+
+        mpz_mod_ui(tmp2, leading_coeff, primes.start[i]);
+        
+        if (mpz_cmp_ui(tmp, 0) && mpz_cmp_ui(tmp2, 0) && irreducible(g_x, primes.start[i]))
+        {
+            append_classic(&inert_set, primes.start[i]);
+        }
+    }
+
+    mpz_clear(tmp2);
+
+    log_msg(logfile, "Found %lu inert primes in the factor base.", inert_set.len);
+    log_blank_line(logfile);
 
     // polynomial_mpz p1, p2, p3;
     // init_poly(&p1);
