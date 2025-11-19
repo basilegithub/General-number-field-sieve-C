@@ -4,6 +4,7 @@
 
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
+#include "polynomial_functions.h"
 
 // Operations on one polynomial
 
@@ -132,7 +133,7 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
         if (exponent&1)
         {
             poly_prod(&tmp_poly2, tmp_poly2, poly);
-            poly_div_mod(tmp_poly2, tmp_poly2, f, p);
+            poly_div_mod(&tmp_poly2, tmp_poly2, f, p);
         }
 
         copy_polynomial(res, &tmp_poly2);
@@ -140,6 +141,69 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
         free_polynomial(&tmp_poly);
         free_polynomial(&tmp_poly2);
     }
+}
+
+bool irreducible(polynomial_mpz f, unsigned long p)
+{
+    polynomial_mpz g;
+    init_poly(&g);
+
+    mpz_t tmp;
+    mpz_init_set_ui(tmp, 1);
+
+    set_coeff(&g, tmp, 1);
+
+    mpz_set_ui(tmp, 0);
+    set_coeff(&g, tmp, 0); // Just to be sure that g has all the correct coefficients
+
+    polynomial_mpz tmp_poly, res_gcd;
+    init_poly(&tmp_poly);
+    init_poly(&res_gcd);
+
+    for (size_t i = 0 ; i <= f.degree>>1 ; i++)
+    {
+        reset_polynomial(&tmp_poly);
+
+        power_poly_mod(&tmp_poly, g, g, p, p);
+
+        copy_polynomial(&g, &tmp_poly);
+        if (tmp_poly.degree == 0)
+        {
+            mpz_set_ui(tmp, p - 1);
+            set_coeff(&tmp_poly, tmp, 1);
+        }
+        else
+        {
+            mpz_sub_ui(tmp_poly.coeffs[tmp_poly.degree-1], tmp_poly.coeffs[tmp_poly.degree-1], 1);
+            mpz_mod_ui(tmp_poly.coeffs[tmp_poly.degree-1], tmp_poly.coeffs[tmp_poly.degree-1], p);
+        }
+
+        reset_polynomial(&res_gcd);
+
+        gcd_poly_mod(&res_gcd, &f, &tmp_poly, p);
+
+        if (res_gcd.degree)
+        {
+            free_polynomial(&tmp_poly);
+            free_polynomial(&res_gcd);
+
+            free_polynomial(&g);
+
+            mpz_clear(tmp);
+
+            return false;
+        }
+
+    }
+
+    free_polynomial(&tmp_poly);
+    free_polynomial(&res_gcd);
+
+    free_polynomial(&g);
+
+    mpz_clear(tmp);
+
+    return true;
 }
 
 // Operations on two polynomials
