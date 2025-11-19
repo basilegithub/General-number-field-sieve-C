@@ -310,3 +310,64 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
         mpz_clear(tmp);
     }
 }
+
+void gcd_poly_mod(polynomial_mpz *res, polynomial_mpz *f, polynomial_mpz *g, unsigned long p)
+{
+    polynomial_mpz p1, p2, p3;
+    init_poly_degree(&p1, f->degree);
+    init_poly_degree(&p2, g->degree);
+    init_poly(&p3);
+
+    copy_polynomial(&p1, f);
+    copy_polynomial(&p2, g);
+
+    bool is_zero = true;
+    for (size_t i = 0 ; i <= p2.degree ; i++)
+    {
+        if (mpz_cmp_ui(p2.coeffs[i], 0))
+        {
+            is_zero = false;
+            break;
+        }
+    }
+
+    while (!is_zero)
+    {
+        poly_div_mod(&p3, p1, p2, p);
+        copy_polynomial(&p1, &p2);
+        copy_polynomial(&p2, &p3);
+
+        is_zero = true;
+        for (size_t i = 0 ; i <= p2.degree ; i++)
+        {
+            if (mpz_cmp_ui(p2.coeffs[i], 0))
+            {
+                is_zero = false;
+                break;
+            }
+        }
+    }
+
+    if (mpz_cmp_ui(p1.coeffs[0], 1))
+    {
+        mpz_t tmp, prime;
+        mpz_init(tmp);
+        mpz_init_set_ui(prime, p);
+        
+        mpz_invert(tmp, p1.coeffs[0], prime);
+
+        for (size_t i = 0 ; i <= p1.degree ; i++)
+        {
+            mpz_mul(p1.coeffs[i], p1.coeffs[i], tmp);
+            mpz_mod(p1.coeffs[i], p1.coeffs[i], prime);
+        }
+
+        mpz_clears(tmp, prime, NULL);
+    }
+
+    copy_polynomial(res, &p1);
+
+    free_polynomial(&p1);
+    free_polynomial(&p2);
+    free_polynomial(&p3);
+}
