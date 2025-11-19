@@ -135,7 +135,7 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 
 void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Returns remainder polynomial only, not quotient
 {
-    if (mpz_cmp_ui(g.coeffs[0], 1))
+    if (mpz_cmp_ui(g.coeffs[0], 1)) // If polynomial is non monic, it is unlikely that the division is possible
     {
         printf("Polynomial division where the divisor is not a monic polynomial.\n");
     }
@@ -171,6 +171,8 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
 
         mpz_clears(tmp, tmp2, NULL);
 
+        // Check if remainder is zero
+
         bool is_zero = true;
         for (size_t i = 0 ; i <= remainder.degree ; i++)
         {
@@ -198,7 +200,7 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
         free_polynomial(&remainder);
 
     }
-    else
+    else // Just copy the polynomial, as no operation is needed
     {
         res->degree = f.degree;
         for (size_t i = 0 ; i <= f.degree ; i++)
@@ -263,6 +265,8 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
 
         mpz_clears(tmp, tmp2, tmp3, prime, NULL);
 
+        // Check if remainder is zero
+
         bool is_zero = true;
         for (size_t i = 0 ; i <= remainder.degree ; i++)
         {
@@ -290,7 +294,7 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
         free_polynomial(&remainder);
 
     }
-    else
+    else // Just reduce divided polynomial mod p
     {
         res->degree = f.degree;
 
