@@ -23,7 +23,7 @@ void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree)
     polynomial->degree = degree;
 }
 
-void reduce_polynomial(polynomial_mpz *polynomial)
+void reduce_polynomial(polynomial_mpz *polynomial) // Delete leading zeros
 {
     while (polynomial->degree && !mpz_cmp_ui(polynomial->coeffs[0], 0))
     {

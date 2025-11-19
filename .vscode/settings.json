@@ -11,7 +11,8 @@
         "rational_base.h": "c",
         "algebraic_base.h": "c",
         "polynomial_functions.h": "c",
-        "quadratic_characters.h": "c"
+        "quadratic_characters.h": "c",
+        "cmath": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }

@@ -16,5 +16,6 @@ void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long 
 
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
 void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
+void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p);
 
 #endif // POLYNOMIAL_FUNCTIONS_H

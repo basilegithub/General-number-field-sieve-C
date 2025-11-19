@@ -279,6 +279,27 @@ int main()
 
     free_polynomial(&tmp_poly);
 
+    mpz_t g_derivative_eval;
+    mpz_init(g_derivative_eval);
+
+    evaluate_homogeneous(g_derivative_eval, g_derivative, m0, m1);
+
+    // polynomial_mpz p1, p2, p3;
+    // init_poly(&p1);
+    // init_poly(&p2);
+    // init_poly(&p3);
+
+    // mpz_set_ui(tmp, 1);
+
+    // set_coeff(&p1, tmp, 1);
+
+    // set_coeff(&p2, tmp, 1);
+    // set_coeff(&p2, tmp, 0);
+
+    // poly_div_mod(&p3, p2, p2, 3);
+
+    // print_polynomial(&p3);
+
     // Sieving
 
     // Linear algebra
