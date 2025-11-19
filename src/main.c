@@ -309,22 +309,6 @@ int main()
     log_msg(logfile, "Found %lu inert primes in the factor base.", inert_set.len);
     log_blank_line(logfile);
 
-    // polynomial_mpz p1, p2, p3;
-    // init_poly(&p1);
-    // init_poly(&p2);
-    // init_poly(&p3);
-
-    // mpz_set_ui(tmp, 1);
-
-    // set_coeff(&p1, tmp, 1);
-
-    // set_coeff(&p2, tmp, 1);
-    // set_coeff(&p2, tmp, 0);
-
-    // gcd_poly_mod(&p3, &p1, &p1, 3);
-
-    // print_polynomial(&p3);
-
     // Sieving
 
     // Linear algebra
