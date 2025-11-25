@@ -84,6 +84,11 @@ int main()
     log_msg(logfile, "Rational Factor base of %lu primes generated.", primes.len);
     log_msg(logfile, "Largest prime = %lu.", primes.start[primes.len - 1]);
 
+    dyn_array_classic logs;
+    init_classic(&logs);
+
+    compute_logs(&logs, primes);
+
     // Look for small factors
 
     for (size_t i = 0 ; i < primes.len ; i++)
@@ -313,7 +318,7 @@ int main()
     log_msg(logfile, "Found %lu inert primes in the factor base.", inert_set.len);
     log_blank_line(logfile);
 
-    // Sieving
+    // Collecting relations
 
     // Linear algebra
 

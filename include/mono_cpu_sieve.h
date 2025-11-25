@@ -2,6 +2,7 @@
 #define MONO_CPU_SIEVE_H
 
 #include <gmp.h>
+#include <stdio.h>
 
 #include "dynamic_arrays.h"
 

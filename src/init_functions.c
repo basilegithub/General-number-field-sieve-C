@@ -76,7 +76,7 @@ void compute_logs(dyn_array_classic *logs, dyn_array_classic primes)
     mpz_t tmp;
     mpz_init(tmp);
 
-    for (size_t i = 0 i < primes.len ; i++)
+    for (size_t i = 0 ; i < primes.len ; i++)
     {
         mpz_set_ui(tmp, primes.start[i]);
         append_classic(logs, mpz_sizeinbase(tmp, 2) - 1);

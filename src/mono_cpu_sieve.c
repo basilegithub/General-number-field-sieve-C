@@ -1,10 +1,12 @@
 #include <gmp.h>
+#include <stdio.h>
 
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 #include "algebraic_base.h"
 #include "quadratic_characters.h"
 #include "NFS_relations.h"
+#include "logs.h"
 
 void mono_cpu_sieve(
     nfs_relations *relations,
