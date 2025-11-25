@@ -72,6 +72,10 @@ int main()
 
     mpz_set_ui(smooth_bound, 80);
 
+    mpz_t sieve_len;
+    mpz_init_set(sieve_len, smooth_bound);
+    mpz_mul_ui(sieve_len, sieve_len, 16);
+
     dyn_array_classic primes;
     init_classic(&primes);
 

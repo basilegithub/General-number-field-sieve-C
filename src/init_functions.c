@@ -1,6 +1,7 @@
 #include <gmp.h>
 #include <stdlib.h>
 
+#include "dynamic_arrays.h"
 #include "utils.h"
 
 unsigned int compute_degree(mpz_t n, mpf_t ln2, mpf_t e)
@@ -68,4 +69,18 @@ void compute_smooth_bound(mpz_t n, mpz_t smooth_bound, mpf_t ln2, mpf_t e)
     mpz_set_f(smooth_bound, tmpf4);
 
     mpf_clears(tmpf, tmpf2, tmpf3, tmpf4, NULL);
+}
+
+void compute_logs(dyn_array_classic *logs, dyn_array_classic primes)
+{
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    for (size_t i = 0 i < primes.len ; i++)
+    {
+        mpz_set_ui(tmp, primes.start[i]);
+        append_classic(logs, mpz_sizeinbase(tmp, 2) - 1);
+    }
+
+    mpz_clear(tmp);
 }
