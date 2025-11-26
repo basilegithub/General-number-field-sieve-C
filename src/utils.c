@@ -1,5 +1,6 @@
 #include <gmp.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 void compute_e(mpf_t e)
 {
@@ -155,4 +156,20 @@ unsigned long gcd(unsigned long a, unsigned long b)
         a = t;
     }
     return a;
+}
+
+bool fermat_primality(mpz_t n)
+{
+    mpz_t res, base, exponent;
+    mpz_init_set_ui(base, 2);
+    mpz_inits(res, exponent, NULL);
+
+    mpz_sub_ui(exponent, n, 1);
+
+    mpz_powm(res, base, exponent, n);
+    bool to_return = (bool) !mpz_cmp_ui(res, 1);
+
+    mpz_clears(res, base, exponent, NULL);
+
+    return to_return;
 }

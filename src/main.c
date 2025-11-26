@@ -72,11 +72,13 @@ int main()
 
     compute_smooth_bound(n, smooth_bound, ln2, e);
 
-    mpz_set_ui(smooth_bound, 80);
+    mpz_mul_ui(smooth_bound, smooth_bound, 4);
+
+    // mpz_set_ui(smooth_bound, 256);
 
     mpz_t sieve_len;
     mpz_init_set(sieve_len, smooth_bound);
-    mpz_mul_ui(sieve_len, sieve_len, 16);
+    mpz_mul_ui(sieve_len, sieve_len, 8);
 
     dyn_array_classic primes;
     init_classic(&primes);
@@ -218,6 +220,7 @@ int main()
     quadratic_character_base quad_char_base;
     quadratic_base_init(&quad_char_base);
 
+    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2));
     unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
 
     if (factor) // If we have found a factor while building the quadratic characters base
@@ -387,6 +390,7 @@ int main()
         pow_div,
         len_divide_leading,
         logs,
+        state,
         logfile
     );
 

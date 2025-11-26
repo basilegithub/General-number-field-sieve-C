@@ -26,6 +26,7 @@ void mono_cpu_sieve(
     mpz_t *pow_div,
     size_t len_divide_leading,
     dyn_array_classic logs,
+    gmp_randstate_t state,
     FILE *logfile
 );
 

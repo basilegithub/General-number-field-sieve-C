@@ -10,6 +10,7 @@
 #include "NFS_relations.h"
 #include "logs.h"
 #include "sieve.h"
+#include "smooth_test.h"
 
 void mono_cpu_sieve(
     nfs_relations *relations,
@@ -31,6 +32,7 @@ void mono_cpu_sieve(
     mpz_t *pow_div,
     size_t len_divide_leading,
     dyn_array_classic logs,
+    gmp_randstate_t state,
     FILE *logfile
 )
 {
@@ -51,7 +53,7 @@ void mono_cpu_sieve(
 
     unsigned short *sieve_array = calloc(2*sieve_len, sizeof(unsigned short));
 
-    while (relations->len < required_relations)
+    while (relations->len < required_relations+20)
     {
         // Update contribution of gcd of b and c_d
 
@@ -97,7 +99,17 @@ void mono_cpu_sieve(
 
         // Verify smooth candidates
 
+        naive_smooth(&smooth_candidates, rat_base, const1, const2, state);
+
         // Append true smooths to the collected relations
+
+        for (size_t i = 0 ; i < smooth_candidates.len ; i++)
+        {
+            if (smooth_candidates.rels[i].nb_relations && smooth_candidates.rels[i].rational_large_primes.len == 0 && smooth_candidates.rels[i].algebraic_large_primes.start == NULL)
+            {
+                relations->len++;
+            }
+        }
 
         // Handle partial relations
 
@@ -110,7 +122,17 @@ void mono_cpu_sieve(
         // Cleanup
 
         clear_relations(&smooth_candidates);
+
+        printf("\rb = %lu | %lu/(%lu+20) relations found",
+            b,
+            relations->len,
+            required_relations
+        );
+
+        fflush(stdout);
     }
+
+    printf("\n");
 
     mpz_clear(tmp);
 
