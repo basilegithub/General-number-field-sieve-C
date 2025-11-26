@@ -2,6 +2,7 @@
 
 #include "dynamic_arrays.h"
 #include "single_linked_list.h"
+#include "polynomial_structures.h"
 #include "NFS_relations.h"
 
 void init_relations(nfs_relations *relations)
@@ -19,12 +20,12 @@ void init_new_relation(nfs_relations *relations)
         relations->rels = realloc(relations->rels, relations->size * sizeof(nfs_relation));
     }
 
-    poly_init(&relations->rels[relations->len].poly_g);
-    poly_init(&relations->rels[relations->len].poly_f);
+    init_poly(&relations->rels[relations->len].poly_g);
+    init_poly(&relations->rels[relations->len].poly_f);
     mpz_init(relations->rels[relations->len].rational_norm);
-    dyn_array_init(&relations->rels[relations->len].rational_large_primes);
+    init_classic(&relations->rels[relations->len].rational_large_primes);
     mpz_init(relations->rels[relations->len].algebraic_norm);
-    list_init(relations->rels[relations->len].algebraic_large_primes);
+    list_init(&relations->rels[relations->len].algebraic_large_primes);
     relations->rels[relations->len].nb_relations = 0;
 
     relations->len++;

@@ -19,7 +19,7 @@ void mono_cpu_sieve(
     mpz_t prod_primes,
     mpz_t m0,
     mpz_t m1,
-    mpz_t sieve_len,
+    size_t sieve_len,
     mpz_t const1,
     mpz_t const2,
     unsigned long *divide_leading,

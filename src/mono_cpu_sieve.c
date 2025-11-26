@@ -1,5 +1,7 @@
 #include <gmp.h>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
@@ -21,7 +23,7 @@ void mono_cpu_sieve(
     mpz_t prod_primes,
     mpz_t m0,
     mpz_t m1,
-    mpz_t sieve_len,
+    size_t sieve_len,
     mpz_t const1,
     mpz_t const2,
     unsigned long *divide_leading,
@@ -43,6 +45,11 @@ void mono_cpu_sieve(
     mpz_t gcd_b_cd;
     mpz_init(gcd_b_cd);
 
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    unsigned short *sieve_array = calloc(2*sieve_len, sizeof(unsigned short));
+
     while (relations->len < required_relations)
     {
         // Update contribution of gcd of b and c_d
@@ -51,6 +58,26 @@ void mono_cpu_sieve(
         unsigned long new_offset = offset + mpz_sizeinbase(gcd_b_cd, 2);
 
         // Sieve
+
+        // Setup sieve
+
+        nfs_relations smooth_candidates;
+        init_relations(&smooth_candidates);
+
+        polynomial_mpz new_poly;
+        init_poly_degree(&new_poly, f_x.degree);
+
+        copy_polynomial(&new_poly, &f_x);
+        for (size_t i = 0 ; i <= new_poly.degree ; i++)
+        {
+            mpz_set_ui(tmp, b);
+            mpz_pow_ui(tmp, tmp, i);
+            mpz_mul(new_poly.coeffs[i], new_poly.coeffs[i], tmp);
+        }
+
+        memset(sieve_array, 0, 2*sieve_len*sizeof(unsigned short));
+
+        // Perform sieve
 
         // Verify smooth candidates
 
@@ -61,5 +88,13 @@ void mono_cpu_sieve(
         // Increment b
 
         b++;
+
+        // Cleanup
+
+        clear_relations(&smooth_candidates);
     }
+
+    mpz_clear(tmp);
+
+    free(sieve_array);
 }
