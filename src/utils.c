@@ -146,3 +146,13 @@ void nth_root(mpf_t r, mpf_t x, unsigned long n)
 
     mpf_clears(tmpf, tmpf2, tmpf3, tmpf4, NULL);
 }
+
+unsigned long gcd(unsigned long a, unsigned long b)
+{
+    while (b != 0) {
+        unsigned long t = b;
+        b = a % b;
+        a = t;
+    }
+    return a;
+}

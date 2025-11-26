@@ -9,6 +9,7 @@
 #include "quadratic_characters.h"
 #include "NFS_relations.h"
 #include "logs.h"
+#include "sieve.h"
 
 void mono_cpu_sieve(
     nfs_relations *relations,
@@ -64,20 +65,35 @@ void mono_cpu_sieve(
         nfs_relations smooth_candidates;
         init_relations(&smooth_candidates);
 
-        polynomial_mpz new_poly;
-        init_poly_degree(&new_poly, f_x.degree);
+        polynomial_mpz sieve_poly;
+        init_poly_degree(&sieve_poly, f_x.degree);
 
-        copy_polynomial(&new_poly, &f_x);
-        for (size_t i = 0 ; i <= new_poly.degree ; i++)
+        copy_polynomial(&sieve_poly, &f_x);
+        for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
             mpz_set_ui(tmp, b);
             mpz_pow_ui(tmp, tmp, i);
-            mpz_mul(new_poly.coeffs[i], new_poly.coeffs[i], tmp);
+            mpz_mul(sieve_poly.coeffs[i], sieve_poly.coeffs[i], tmp);
         }
 
         memset(sieve_array, 0, 2*sieve_len*sizeof(unsigned short));
 
         // Perform sieve
+
+        sieve(
+            &smooth_candidates,
+            sieve_poly,
+            rat_base,
+            alg_base,
+            logs,
+            leading_coeff,
+            m0,
+            m1,
+            b,
+            new_offset,
+            sieve_len,
+            sieve_array
+        );
 
         // Verify smooth candidates
 
@@ -88,6 +104,8 @@ void mono_cpu_sieve(
         // Increment b
 
         b++;
+
+        // printf("%lu %lu\n", b, smooth_candidates.len);
 
         // Cleanup
 

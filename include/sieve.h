@@ -13,6 +13,7 @@
 #include "NFS_relations.h"
 
 void sieve(
+    nfs_relations *smooth_candidates,
     polynomial_mpz sieve_poly,
     dyn_array_classic rat_base,
     algebraic_base alg_base,
