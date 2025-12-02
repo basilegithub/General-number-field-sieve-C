@@ -174,12 +174,12 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
     }
 }
 
-void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p)
+void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp_randstate_t state)
 {
     polynomial_mpz reduced_f;
-    init_poly_degree(reduced_f, f.degree);
+    init_poly_degree(&reduced_f, f.degree);
 
-    copy_polynomial(&reduced_f, f);
+    copy_polynomial(&reduced_f, &f);
 
     for (size_t i = 0 ; i <= f.degree ; i++)
     {
@@ -197,7 +197,7 @@ void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p)
 
     set_coeff(&tmp_poly, tmp, 1);
 
-    power_poly_mod(&g, tmp, reduced_f, p, p); // Compute g = x^p (mod p)
+    power_poly_mod(&g, tmp_poly, reduced_f, p, p); // Compute g = x^p (mod p)
 
     if (g.degree == 0)
     {
@@ -217,7 +217,7 @@ void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p)
         reduce_polynomial(&tmp_poly);
     }
 
-    second_step_roots(tmp_poly, roots, p);
+    second_step_roots(tmp_poly, roots, p, state);
 
     mpz_clear(tmp);
 
@@ -314,7 +314,7 @@ void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long
         set_coeff(&tmp_poly, a, 0);
 
         mpz_set_ui(tmp, 1);
-        set_coeff(&tmp_poly; tmp, 1); // tmp = x + a
+        set_coeff(&tmp_poly, tmp, 1); // tmp = x + a
 
         power_poly_mod(&h, tmp_poly, f, p, (p-1)>>1);
 
@@ -322,7 +322,7 @@ void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long
         mpz_sub_ui(h.coeffs[h.degree], h.coeffs[h.degree], 1);
         mpz_mod_ui(h.coeffs[h.degree], h.coeffs[h.degree], p);
 
-        gcd_poly_mod(&tmp_poly, &h, f, p);
+        gcd_poly_mod(&tmp_poly, &h, &f, p);
         copy_polynomial(&h, &tmp_poly);
 
         free_polynomial(&tmp_poly);
