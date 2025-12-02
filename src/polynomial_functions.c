@@ -290,7 +290,47 @@ void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long
         }
 
         mpz_clears(tmp, tmp2, tmp3, NULL);
+
+        return;
     }
+
+    // If degree of f is higher than 2
+
+    polynomial_mpz h;
+    init_poly_degree(&h, 0);
+
+    mpz_t a, tmp;
+    mpz_inits(a, tmp, NULL);
+
+    while (!h.degree || poly_equal(&h, &f))
+    {
+        mpz_set_ui(tmp, p);
+
+        mpz_urandomm(a, state, tmp);
+
+        polynomial_mpz tmp_poly;
+        init_poly_degree(&tmp_poly, 1);
+
+        set_coeff(&tmp_poly, a, 0);
+
+        mpz_set_ui(tmp, 1);
+        set_coeff(&tmp_poly; tmp, 1); // tmp = x + a
+
+        power_poly_mod(&h, tmp_poly, f, p, (p-1)>>1);
+
+        reduce_polynomial(&h);
+        mpz_sub_ui(h.coeffs[h.degree], h.coeffs[h.degree], 1);
+        mpz_mod_ui(h.coeffs[h.degree], h.coeffs[h.degree], p);
+
+        gcd_poly_mod(&tmp_poly, &h, f, p);
+        copy_polynomial(&h, &tmp_poly);
+
+        free_polynomial(&tmp_poly);
+    }
+
+    second_step_roots(h, roots, p, state);
+
+    mpz_clears(a, tmp, NULL);
 }
 
 bool irreducible(polynomial_mpz f, unsigned long p)
@@ -357,6 +397,18 @@ bool irreducible(polynomial_mpz f, unsigned long p)
 }
 
 // Operations on two polynomials
+
+bool poly_equal(polynomial_mpz *f, polynomial_mpz *g)
+{
+    if (f->degree != g->degree) return false;
+
+    for (size_t i = 0 ; i < f->degree ; i++)
+    {
+        if (mpz_cmp(f->coeffs[i], g->coeffs[i])) return false;
+    }
+
+    return true;
+}
 
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 {
