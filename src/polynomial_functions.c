@@ -5,6 +5,7 @@
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 #include "polynomial_functions.h"
+#include "utils.h"
 
 // Operations on one polynomial
 
@@ -170,6 +171,125 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
 
         free_polynomial(&tmp_poly);
         free_polynomial(&tmp_poly2);
+    }
+}
+
+void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p)
+{
+    polynomial_mpz reduced_f;
+    init_poly_degree(reduced_f, f.degree);
+
+    copy_polynomial(&reduced_f, f);
+
+    for (size_t i = 0 ; i <= f.degree ; i++)
+    {
+        mpz_mod_ui(reduced_f.coeffs[i], reduced_f.coeffs[i], p);
+    }
+
+    reduce_polynomial(&reduced_f); // reduced_f is f (mod p)
+
+    polynomial_mpz g, tmp_poly;
+    init_poly(&g);
+    init_poly_degree(&tmp_poly, 1);
+
+    mpz_t tmp;
+    mpz_init_set_ui(tmp, 1);
+
+    set_coeff(&tmp_poly, tmp, 1);
+
+    power_poly_mod(&g, tmp, reduced_f, p, p); // Compute g = x^p (mod p)
+
+    if (g.degree == 0)
+    {
+        set_coeff(&g, tmp, 1);
+        mpz_neg(g.coeffs[0], g.coeffs[0]);
+    }
+    else
+    {
+        mpz_sub_ui(g.coeffs[g.degree-1], g.coeffs[g.degree-1], 1);
+    } // Computes g - x = x^p - x (contains all linear factors)
+
+    gcd_poly_mod(&tmp_poly, &reduced_f, &g, p);
+
+    if (!mpz_cmp_ui(tmp_poly.coeffs[tmp_poly.degree], 0))
+    {
+        append_classic(roots, 0);
+        reduce_polynomial(&tmp_poly);
+    }
+
+    second_step_roots(tmp_poly, roots, p);
+
+    mpz_clear(tmp);
+
+    free_polynomial(&tmp_poly);
+    free_polynomial(&g);
+    free_polynomial(&reduced_f);
+}
+
+void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp_randstate_t state)
+{
+    if (f.degree == 0) return; // f = a -> 0 root
+
+    if (f.degree == 1) // f = ax + b -> 1 root
+    {
+        mpz_t tmp, tmp2;
+        mpz_inits(tmp, tmp2, NULL);
+
+        mpz_set_ui(tmp2, p);
+
+        mpz_invert(tmp, f.coeffs[0], tmp2);
+        mpz_mul(tmp, tmp, f.coeffs[1]);
+        mpz_neg(tmp, tmp);
+        mpz_mod_ui(tmp, tmp, p);
+
+        append_classic(roots, mpz_get_ui(tmp));
+
+        mpz_clears(tmp, tmp2, NULL);
+
+        return;
+    }
+
+    if (f.degree == 2) // f = ax^2 + bx + c -> either 0 or 1 or 2 roots
+    {
+        mpz_t tmp, tmp2, tmp3;
+        mpz_inits(tmp, tmp2, tmp3, NULL);
+
+        mpz_mul(tmp, f.coeffs[1], f.coeffs[1]);
+        mpz_mul(tmp2, f.coeffs[0], f.coeffs[2]);
+        mpz_submul_ui(tmp, tmp2, 4);
+
+        if (!mpz_cmp_ui(tmp, 0))
+        {
+            mpz_set_ui(tmp2, p);
+            mpz_mul_ui(tmp, f.coeffs[0], 2);
+            mpz_invert(tmp, tmp, tmp2);
+            mpz_mul(tmp, tmp, f.coeffs[1]);
+            mpz_neg(tmp, tmp);
+            mpz_mod_ui(tmp, tmp, p);
+
+            append_classic(roots, mpz_get_ui(tmp));
+        }
+        else if (my_legendre(tmp, p) > -1)
+        {
+            sqrt_mod(tmp, p, state);
+
+            mpz_set_ui(tmp3, p);
+            mpz_mul_ui(tmp2, f.coeffs[0], 2); // tmp2 = 2a
+            mpz_invert(tmp2, tmp2, tmp3); // tmp2 = (2a)^(-1) (mod p)
+            mpz_mul(tmp, tmp, tmp2);
+            mpz_mod_ui(tmp, tmp, p);
+
+            mpz_mul(tmp3, tmp2, f.coeffs[1]);
+            mpz_sub(tmp3, tmp, tmp3);
+            mpz_mod_ui(tmp3, tmp3, p);
+            append_classic(roots, mpz_get_ui(tmp3));
+
+            mpz_submul_ui(tmp3, tmp, 2);
+            mpz_mod_ui(tmp3, tmp3, p);
+            append_classic(roots, mpz_get_ui(tmp3));
+        }
+
+        mpz_clears(tmp, tmp2, tmp3, NULL);
     }
 }
 

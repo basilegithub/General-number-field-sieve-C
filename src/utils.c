@@ -173,3 +173,117 @@ bool fermat_primality(mpz_t n)
 
     return to_return;
 }
+
+int my_legendre(mpz_t n, unsigned long p)
+{
+    mpz_t tmp;
+    mpz_init(tmp);
+    mpz_mod_ui(tmp, n, p);
+
+    unsigned long tmpl;
+    tmpl = mpz_get_ui(tmp);
+
+    int t = 1;
+    unsigned long tmps;
+    while (tmpl)
+    {
+        while (!(tmpl&1))
+        {
+            tmpl >>= 1;
+            if (p%8 == 3 || p%8 == 5) t = -t;
+        }
+        tmps = tmpl;
+        tmpl = p;
+        p = tmps;
+        if (tmpl%4 == p%4 && p%4 == 3) t = -t;
+        tmpl %= p;
+    }
+    mpz_clear(tmp);
+    if (p == 1) return t;
+    return 0;
+}
+
+void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state)
+{
+    mpz_t z, tmp, P_value;
+    mpz_inits(z, tmp, NULL);
+
+    unsigned long P;
+    unsigned long tmp3;
+    unsigned long r = 0;
+
+    mpz_mod_ui(n, n, p);
+    P = p-1;
+    mpz_init_set_ui(P_value, P);
+    mpz_set_ui(tmp, p);
+
+    mpz_urandomm(z, state, tmp);
+    if (mpz_cmp_ui(z, 1) != 1) mpz_set_ui(z, 2);
+
+    while (my_legendre(z, p) != -1)
+    {
+        mpz_urandomm(z, state, tmp);
+        if (mpz_cmp_ui(z, 1) != 1) mpz_set_ui(z, 2);
+    }
+
+    while (!(P&1))
+    {
+        P >>= 1;
+        r++;
+    }
+    mpz_t generator, lambda, omega, res, m, two_mpz;
+    mpz_inits(generator, lambda, omega, NULL);
+
+    mpz_powm_ui(generator, z, P, tmp);
+    mpz_powm_ui(lambda, n, P, tmp);
+
+    tmp3 = (P+1)>>1;
+    mpz_powm_ui(omega, n, tmp3, tmp);
+
+    mpz_init_set_ui(res, 0);
+    mpz_init(m);
+    mpz_init_set_ui(two_mpz, 2);
+
+    mpz_t tmp_l, tmp2;
+    mpz_inits(tmp_l, tmp2, NULL);
+
+    while (1)
+    {
+        if (!mpz_cmp_ui(lambda, 0))
+        {
+            mpz_set_ui(n, 0);
+            break;
+        }
+
+        if (!mpz_cmp_ui(lambda, 1))
+        {
+            mpz_set(n, omega);
+            break;
+        }
+
+        mpz_set_ui(m, 1);
+        while (mpz_cmp_ui(m, r) < 0)
+        {
+            mpz_powm(tmp_l, two_mpz, m, P_value);
+            mpz_powm(tmp_l, lambda, tmp_l, tmp);
+
+            if (!mpz_cmp_ui(tmp_l, 1)) break;
+
+            mpz_add_ui(m, m, 1);
+        }
+
+        mpz_ui_sub(tmp2, r-1, m);
+        mpz_powm(tmp_l, two_mpz, tmp2, P_value);
+        mpz_mul_2exp(tmp2, tmp_l, 1);
+
+        mpz_powm(tmp2, generator, tmp2, tmp);
+        mpz_mul(lambda, lambda, tmp2);
+        mpz_mod(lambda, lambda, tmp);
+
+        mpz_powm(tmp2, generator, tmp_l, tmp);
+        mpz_mul(omega, omega, tmp2);
+        mpz_mod(omega, omega, tmp);
+    }
+
+    mpz_clears(z, tmp, tmp2, P_value, generator, lambda, omega, res, m, two_mpz, NULL);
+}

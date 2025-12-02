@@ -14,7 +14,8 @@
         "quadratic_characters.h": "c",
         "cmath": "c",
         "nfs_relations.h": "c",
-        "single_linked_list.h": "c"
+        "single_linked_list.h": "c",
+        "random": "c"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
