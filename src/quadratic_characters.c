@@ -26,7 +26,7 @@ void quadratic_base_clear(quadratic_character_base *b)
     b->end = NULL;
 }
 
-unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime)
+unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime, gmp_randstate_t state)
 {
     size_t cpt = 0;
 
@@ -39,14 +39,15 @@ unsigned long create_quadratic_characters_base(quadratic_character_base *q_base,
     while (cpt < required_size)
     {
         mpz_set_ui(tmp, test_number);
-        if (mpz_probab_prime_p(tmp, 100) && !mpz_divisible_ui_p(leading_coeff, test_number))
+        if (mpz_probab_prime_p(tmp, 10) && !mpz_divisible_ui_p(leading_coeff, test_number))
         {
             if (mpz_divisible_ui_p(n, test_number)) return test_number;
 
             dyn_array_classic roots;
             init_classic(&roots);
 
-            basic_find_roots(f, &roots, test_number);
+            // basic_find_roots(f, &roots, test_number);
+            find_roots(f, &roots, test_number, state);
             for (size_t i = 0 ; i < roots.len ; i++)
             {
                 if (evaluate_mod_p(f_derivative, roots.start[i], test_number))

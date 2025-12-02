@@ -23,6 +23,7 @@ bool poly_equal(polynomial_mpz *f, polynomial_mpz *g);
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
 void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
 void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p);
+void quotient_poly_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p);
 void gcd_poly_mod(polynomial_mpz *res, polynomial_mpz *f, polynomial_mpz *g, unsigned long p);
 
 #endif // POLYNOMIAL_FUNCTIONS_H

@@ -133,12 +133,7 @@ void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long 
 
 void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, unsigned long p, unsigned long exponent)
 {
-    if (exponent == 1)
-    {
-        copy_polynomial(res, &poly);
-        return;
-    }
-    else if (!exponent)
+    if (!exponent)
     {
         reset_polynomial(res);
 
@@ -151,26 +146,57 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
     }
     else
     {
-        polynomial_mpz tmp_poly, tmp_poly2;
-        init_poly(&tmp_poly);
-        init_poly(&tmp_poly2);
+        polynomial_mpz reduced_f;
+        init_poly_degree(&reduced_f, f.degree);
 
-        power_poly_mod(&tmp_poly, poly, f, p, exponent>>1);
-
-        poly_prod(&tmp_poly2, tmp_poly, tmp_poly);
-
-        poly_div_mod(&tmp_poly2, tmp_poly2, f, p);
-
-        if (exponent&1)
+        for (size_t i = 0 ; i <= f.degree ; i++)
         {
-            poly_prod(&tmp_poly2, tmp_poly2, poly);
-            poly_div_mod(&tmp_poly2, tmp_poly2, f, p);
+            mpz_mod_ui(reduced_f.coeffs[i], f.coeffs[i], p);
+        }
+        reduce_polynomial(&reduced_f);
+
+        polynomial_mpz tmp_poly, tmp_poly2, tmp_poly3;
+
+        init_poly_degree(&tmp_poly, 0);
+        init_poly_degree(&tmp_poly2, poly.degree);
+        init_poly(&tmp_poly3);
+
+        mpz_t tmp;
+        mpz_init_set_ui(tmp, 1);
+
+        set_coeff(&tmp_poly, tmp, 0);
+
+        copy_polynomial(&tmp_poly2, &poly);
+
+        unsigned long prime = p;
+
+        while (prime > 1)
+        {
+            if (prime&1)
+            {
+                poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
+                poly_div_mod(&tmp_poly, tmp_poly3, reduced_f, p);
+            }
+
+            poly_prod(&tmp_poly3, tmp_poly2, tmp_poly2);
+            poly_div_mod(&tmp_poly2, tmp_poly3, reduced_f, p);
+
+            prime >>= 1;
         }
 
-        copy_polynomial(res, &tmp_poly2);
+        if (prime)
+        {
+            poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
+            poly_div_mod(&tmp_poly, tmp_poly3, f, p);
+        }
+
+        copy_polynomial(res, &tmp_poly);
 
         free_polynomial(&tmp_poly);
         free_polynomial(&tmp_poly2);
+        free_polynomial(&tmp_poly3);
+
+        mpz_clear(tmp);
     }
 }
 
@@ -207,14 +233,27 @@ void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp
     else
     {
         mpz_sub_ui(g.coeffs[g.degree-1], g.coeffs[g.degree-1], 1);
-    } // Computes g - x = x^p - x (contains all linear factors)
+        mpz_mod_ui(g.coeffs[g.degree-1], g.coeffs[g.degree-1], p);
+    } // Computes g - x (mod p) = x^p - x (mod p) (contains all linear factors)
+
+    reduce_polynomial(&g);
+
+    bool is_zero = true;
+    for (size_t i = 0 ; i <= g.degree ; i++)
+    {
+        if (mpz_cmp_ui(g.coeffs[i], 0))
+        {
+            is_zero = false;
+            break;
+        }
+    }
 
     gcd_poly_mod(&tmp_poly, &reduced_f, &g, p);
 
     if (!mpz_cmp_ui(tmp_poly.coeffs[tmp_poly.degree], 0))
     {
         append_classic(roots, 0);
-        reduce_polynomial(&tmp_poly);
+        reduce_polynomial_last(&tmp_poly);
     }
 
     second_step_roots(tmp_poly, roots, p, state);
@@ -330,6 +369,16 @@ void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long
 
     second_step_roots(h, roots, p, state);
 
+    polynomial_mpz quotient;
+    init_poly(&quotient);
+
+    quotient_poly_mod(&quotient, f, h, p);
+
+    second_step_roots(quotient, roots, p, state);
+
+    free_polynomial(&h);
+    free_polynomial(&quotient);
+
     mpz_clears(a, tmp, NULL);
 }
 
@@ -412,6 +461,8 @@ bool poly_equal(polynomial_mpz *f, polynomial_mpz *g)
 
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 {
+    reset_polynomial(res);
+
     mpz_t tmp;
     mpz_init_set_ui(tmp, 0);
 
@@ -428,8 +479,6 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
             set_coeff(res, tmp, f.degree + g.degree - i); // Reverse traversal so that we allocate memory once
         }
 
-        res->degree = f.degree + g.degree;
-
         for (size_t i = 0 ; i <= f.degree ; i++)
         {
             for (size_t j = 0 ; j <= g.degree ; j++)
@@ -444,6 +493,8 @@ void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g)
 
 void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Returns remainder polynomial only, not quotient
 {
+    reset_polynomial(res);
+
     if (mpz_cmp_ui(g.coeffs[0], 1)) // If polynomial is non monic, it is unlikely that the division is possible
     {
         printf("Polynomial division where the divisor is not a monic polynomial.\n");
@@ -511,7 +562,6 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
     }
     else // Just copy the polynomial, as no operation is needed
     {
-        res->degree = f.degree;
         for (size_t i = 0 ; i <= f.degree ; i++)
         {
             set_coeff(res, f.coeffs[i], f.degree - i); // Same as poly prod, set in reversal order to allocate only once
@@ -521,6 +571,8 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
 
 void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p) // Returns remainder polynomial only, not quotient
 {
+    reset_polynomial(res);
+
     if (f.degree >= g.degree)
     {
         // Copy&reduce f and reduce g mod p
@@ -564,10 +616,10 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
 
                 set_coeff(&remainder, tmp2, f.degree - i);
 
-                for (size_t j = 0 ; j < g.degree ; j++)
+                for (size_t j = 1 ; j <= g.degree ; j++)
                 {
-                    mpz_addmul(remainder.coeffs[f.degree - i - j], tmp, g.coeffs[g.degree - j]);
-                    mpz_mod(remainder.coeffs[f.degree - i - j], remainder.coeffs[f.degree - i - j], prime);
+                    mpz_addmul(remainder.coeffs[i + j], tmp, g.coeffs[j]);
+                    mpz_mod(remainder.coeffs[i + j], remainder.coeffs[i + j], prime);
                 }
             }
         }
@@ -605,7 +657,6 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
     }
     else // Just reduce divided polynomial mod p
     {
-        res->degree = f.degree;
 
         mpz_t tmp;
         mpz_init(tmp);
@@ -616,7 +667,83 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
             set_coeff(res, tmp, f.degree - i); // Same as poly prod, set in reversal order to allocate only once
         }
 
+        reduce_polynomial(res);
+
         mpz_clear(tmp);
+    }
+}
+
+void quotient_poly_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p) // Returns quotient polynomial only, not remainder
+{
+    reset_polynomial(res);
+
+    if (f.degree >= g.degree)
+    {
+        // Copy&reduce f and reduce g mod p
+        polynomial_mpz quotient, remainder, reduced_g;
+        init_poly_degree(&remainder, f.degree);
+        init_poly_degree(&quotient, f.degree - g.degree);
+        init_poly_degree(&reduced_g, g.degree);
+
+        mpz_t tmp, tmp2, tmp3, prime;
+        mpz_inits(tmp, tmp2, tmp3, prime, NULL);
+
+        for (size_t i = 0 ; i <= f.degree ; i++)
+        {
+            mpz_mod_ui(tmp, f.coeffs[i], p);
+            set_coeff(&remainder, tmp, f.degree - i); // Same as poly prod, set in reversal order to allocate only once
+        }
+
+        for (size_t i = 0 ; i <= g.degree ; i++)
+        {
+            mpz_mod_ui(tmp, g.coeffs[i], p);
+            set_coeff(&reduced_g, tmp, g.degree - i);
+        }
+
+        // Delete leading 0 in reduced g
+
+        reduce_polynomial(&reduced_g);
+
+        // Perform long division
+
+        mpz_set_ui(tmp2, 0);
+
+        mpz_set_ui(prime, p);
+        mpz_neg(tmp3, reduced_g.coeffs[0]);
+        mpz_invert(tmp3, tmp3, prime);
+
+        for (size_t i = 0 ; i <= f.degree - g.degree ; i++)
+        {
+            if (mpz_cmp_ui(remainder.coeffs[i], 0))
+            {
+                mpz_mul(tmp, remainder.coeffs[i], tmp3);
+                mpz_mod(tmp, tmp, prime);
+
+                set_coeff(&quotient, tmp, f.degree - g.degree - i);
+
+                set_coeff(&remainder, tmp2, f.degree - i);
+
+                for (size_t j = 1 ; j <= g.degree ; j++)
+                {
+                    mpz_addmul(remainder.coeffs[i + j], tmp, g.coeffs[j]);
+                    mpz_mod(remainder.coeffs[i + j], remainder.coeffs[i + j], prime);
+                }
+            }
+        }
+
+        mpz_clears(tmp, tmp2, tmp3, prime, NULL);
+
+        // Check if remainder is zero
+
+        copy_polynomial(res, &quotient);
+
+        free_polynomial(&quotient);
+        free_polynomial(&remainder);
+
+    }
+    else // Just reduce divided polynomial mod p
+    {
+        reset_polynomial(res);
     }
 }
 

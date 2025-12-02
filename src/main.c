@@ -190,7 +190,7 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base(&Algebraic_base, primes, g_x, n);
+    build_algebraic_base(&Algebraic_base, primes, g_x, n, state);
 
     size_t nb_Algebraic_pairs = 0;
 
@@ -199,6 +199,8 @@ int main()
     while (alg_prime != NULL) // Count the number of pairs in the Algebraic factor base
     {
         nb_Algebraic_pairs += alg_prime->roots.len;
+
+        // printf("%lu %lu\n", alg_prime->prime, alg_prime->roots.len);
 
         alg_prime = alg_prime->next;
     }
@@ -220,8 +222,8 @@ int main()
     quadratic_character_base quad_char_base;
     quadratic_base_init(&quad_char_base);
 
-    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2));
-    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
+    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2), state);
+    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
 
     if (factor) // If we have found a factor while building the quadratic characters base
     {

@@ -47,6 +47,30 @@ void reduce_polynomial(polynomial_mpz *polynomial) // Delete leading zeros
     }
 }
 
+void reduce_polynomial_last(polynomial_mpz *polynomial) // Delete last zeros
+{
+    while (polynomial->degree && !mpz_cmp_ui(polynomial->coeffs[polynomial->degree], 0))
+    {
+        mpz_t *tmp_array = calloc(polynomial->degree, sizeof(mpz_t));
+
+        for (size_t i = 0 ; i < polynomial->degree ; i++)
+        {
+            mpz_init_set(tmp_array[i], polynomial->coeffs[i]);
+        }
+
+        for (size_t i = 0 ; i <= polynomial->degree ; i++)
+        {
+            mpz_clear(polynomial->coeffs[i]);
+        }
+
+        free(polynomial->coeffs);
+
+        polynomial->coeffs = tmp_array;
+
+        polynomial->degree--;
+    }
+}
+
 void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
 {
     if (polynomial->degree >= index)
