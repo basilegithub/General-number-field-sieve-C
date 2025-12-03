@@ -149,7 +149,11 @@ void mono_cpu_sieve(
         fflush(stdout);
     }
 
-    printf("\n");
+    printf("\r");
+    fflush(stdout);
+
+    log_msg(logfile, "b = %lu | %lu/(%lu+20) relations found", b, relations->len, required_relations);
+    log_blank_line(logfile);
 
     mpz_clear(tmp);
 

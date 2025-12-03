@@ -398,13 +398,6 @@ int main()
         logfile
     );
 
-    for (size_t i = 0 ; i < relations.len ; i++)
-    {
-        nfs_relation tmp_rel = relations.rels[i];
-
-        // gmp_printf("rel %zu: %Zd %Zd\n", i, tmp_rel.rational_norm, tmp_rel.algebraic_norm);
-    }
-
     // Linear algebra
 
     dyn_array_classic sparse_matrix;
