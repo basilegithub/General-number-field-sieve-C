@@ -19,8 +19,8 @@ void poly_anul(mpz_t D, mpz_t B, unsigned long m)
 
     while (mpz_sizeinbase(B, 2) > m)
     {
-        div_poly(Q, R, A, B);
-        poly_prod(tmp, Q, D);
+        bin_div_poly(Q, R, A, B);
+        bin_poly_prod(tmp, Q, D);
         mpz_xor(E, C, tmp);
 
         mpz_set(C, D);
@@ -213,11 +213,11 @@ void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_pol
         if (deg) // update the minimal polynomial
         {
             // compute gcd
-            gcd_poly(gcd, anneal_polynomial, minimal_polynomial_estimate);
+            bin_gcd_poly(gcd, anneal_polynomial, minimal_polynomial_estimate);
             // divide new poly by gcd
-            div_poly(q, r, anneal_polynomial, gcd);
+            bin_div_poly(q, r, anneal_polynomial, gcd);
             // multiply estimate by the result
-            poly_prod(minimal_polynomial_estimate, minimal_polynomial_estimate, q);
+            bin_poly_prod(minimal_polynomial_estimate, minimal_polynomial_estimate, q);
         }
     }
 

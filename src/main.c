@@ -21,6 +21,9 @@
 #include "quadratic_characters.h"
 #include "mono_cpu_sieve.h"
 #include "build_matrix.h"
+#include "block_lanczos.h"
+#include "wiedemann.h"
+#include "gaussian_elimination.h"
 
 int main()
 {
@@ -395,8 +398,6 @@ int main()
         logfile
     );
 
-    printf("relations size : %lu\n", relations.len);
-
     for (size_t i = 0 ; i < relations.len ; i++)
     {
         nfs_relation tmp_rel = relations.rels[i];
@@ -418,6 +419,11 @@ int main()
         divide_leading,
         len_divide_leading
     );
+
+    dyn_array kernel_vectors;
+    init(&kernel_vectors);
+
+    block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
 
     // Square root extraction
 
