@@ -34,18 +34,22 @@ void evaluate_poly(mpz_t res, polynomial_mpz f, signed long x)
     }
     else
     {
-        mpz_t tmp, tmp_res;
-        mpz_inits(tmp, tmp_res, NULL);
+        mpz_t tmp, tmp_res, abs;
+        mpz_inits(tmp, tmp_res, abs, NULL);
 
-        mpz_set_ui(tmp, x);
+        mpz_set_si(tmp, x);
         mpz_pow_ui(tmp, tmp, f.degree);
 
         mpz_set_ui(tmp_res, 0);
 
+        mpz_set_si(abs, x);
+        mpz_abs(abs, abs);
+
         for (size_t i = 0 ; i < f.degree ; i++)
         {
             mpz_addmul(tmp_res, f.coeffs[i], tmp);
-            mpz_divexact_ui(tmp, tmp, x);
+            mpz_divexact(tmp, tmp, abs);
+            mpz_neg(tmp, tmp);
         }
 
         mpz_add(tmp_res, tmp_res, f.coeffs[f.degree]);

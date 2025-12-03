@@ -135,6 +135,8 @@ void sieve(
         }
 
         a++;
+
+        mpz_add(rational_eval, rational_eval, m1);
     }
 
     mpz_clears(rational_eval, algebraic_eval, full_eval, tmp, NULL);

@@ -115,6 +115,7 @@ void naive_smooth(nfs_relations *smooth_candidates, dyn_array_classic primes, mp
     for (size_t i = 0 ; i < smooth_candidates->len ; i++)
     {
         mpz_mul(remaining_factor, smooth_candidates->rels[i].rational_norm, smooth_candidates->rels[i].algebraic_norm);
+        mpz_abs(remaining_factor, remaining_factor);
         flag_is_smooth = false;
         
         for (unsigned long j = 0 ; j < primes.len ; j++)

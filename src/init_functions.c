@@ -64,7 +64,7 @@ void compute_smooth_bound(mpz_t n, mpz_t smooth_bound, mpf_t ln2, mpf_t e)
     mpf_mul(tmpf3, tmpf, tmpf2);
 
     myexp(tmpf4, tmpf3, e);
-    mpf_div_ui(tmpf4, tmpf4, 7); // Small division by constant
+    mpf_div_ui(tmpf4, tmpf4, 20); // Small division by constant
 
     mpz_set_f(smooth_bound, tmpf4);
 
