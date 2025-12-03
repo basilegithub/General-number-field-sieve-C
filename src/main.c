@@ -20,6 +20,7 @@
 #include "algebraic_base.h"
 #include "quadratic_characters.h"
 #include "mono_cpu_sieve.h"
+#include "build_matrix.h"
 
 int main()
 {
@@ -404,6 +405,19 @@ int main()
     }
 
     // Linear algebra
+
+    dyn_array_classic sparse_matrix;
+    init_classic(&sparse_matrix);
+
+    build_sparse_matrix(
+        &sparse_matrix,
+        &relations,
+        &primes,
+        &Algebraic_base,
+        &quad_char_base,
+        divide_leading,
+        len_divide_leading
+    );
 
     // Square root extraction
 
