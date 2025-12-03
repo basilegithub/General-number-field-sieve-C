@@ -4,7 +4,7 @@
 #include <string.h>
 
 #include "dynamic_arrays.h"
-#include "utils.h"
+#include "linear_algebra_utils.h"
 
 void poly_anul(mpz_t D, mpz_t B, unsigned long m)
 {

@@ -9,7 +9,7 @@
 #include <stddef.h>
 
 #include "dynamic_arrays.h"
-#include "utils.h"
+#include "linear_algebra_utils.h"
 #include "logs.h"
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
