@@ -21,6 +21,7 @@ void sieve(
     mpz_t leading_coeff,
     mpz_t m0,
     mpz_t m1,
+    size_t len_divide_leading,
     unsigned long b,
     unsigned long offset,
     unsigned long sieve_len,

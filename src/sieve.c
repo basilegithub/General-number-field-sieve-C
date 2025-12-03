@@ -20,6 +20,7 @@ void sieve(
     mpz_t leading_coeff,
     mpz_t m0,
     mpz_t m1,
+    size_t len_divide_leading,
     unsigned long b,
     unsigned long offset,
     unsigned long sieve_len,
@@ -106,7 +107,7 @@ void sieve(
             if (mpz_cmp_ui(full_eval, 0) && sieve_array[i] + offset > mpz_sizeinbase(full_eval, 2)-1)
             {
                 // Add smooth candidate
-                init_new_relation(smooth_candidates);
+                init_new_relation(smooth_candidates, len_divide_leading);
 
                 mpz_set_ui(tmp, b);
                 mpz_neg(tmp, tmp);
@@ -123,6 +124,11 @@ void sieve(
                 mpz_set(smooth_candidates->rels[smooth_candidates->len-1].algebraic_norm, algebraic_eval);
 
                 smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
+
+                for (size_t i = 0 ; i < len_divide_leading ; i++)
+                {
+                    smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                }
 
                 // Large prime array and list are left with no large prime for now
             }

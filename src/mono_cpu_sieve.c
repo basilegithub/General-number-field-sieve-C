@@ -36,12 +36,13 @@ void mono_cpu_sieve(
     FILE *logfile
 )
 {
-    size_t required_relations = 3 + rat_base.len + nb_Algebraic_pairs + nb_Quadratic_characters;
+    size_t required_relations = 3 + rat_base.len + nb_Algebraic_pairs + nb_Quadratic_characters + len_divide_leading;
 
     unsigned long offset = mpz_sizeinbase(const2, 2);
 
     log_msg(logfile, "Sieving started...");
     log_msg(logfile, "Need to collect at least %zu relations.", required_relations);
+    log_blank_line(logfile);
 
     unsigned long b = 1;
 
@@ -91,6 +92,7 @@ void mono_cpu_sieve(
             leading_coeff,
             m0,
             m1,
+            len_divide_leading,
             b,
             new_offset,
             sieve_len,
@@ -107,7 +109,22 @@ void mono_cpu_sieve(
         {
             if (smooth_candidates.rels[i].nb_relations && smooth_candidates.rels[i].rational_large_primes.len == 0 && smooth_candidates.rels[i].algebraic_large_primes.start == NULL)
             {
-                relations->len++;
+                init_new_relation(relations, len_divide_leading);
+
+                copy_polynomial(&relations->rels[relations->len-1].poly_g, &smooth_candidates.rels[i].poly_g);
+                copy_polynomial(&relations->rels[relations->len-1].poly_f, &smooth_candidates.rels[i].poly_f);
+
+                mpz_set(relations->rels[relations->len-1].algebraic_norm, smooth_candidates.rels[i].algebraic_norm);
+                mpz_set(relations->rels[relations->len-1].rational_norm, smooth_candidates.rels[i].rational_norm);
+
+                relations->rels[relations->len-1].nb_relations = 1;
+
+                for (size_t j = 0 ; j < len_divide_leading ; j++)
+                {
+                    relations->rels[relations->len-1].divide_leading[j] = smooth_candidates.rels[i].divide_leading[j];
+                }
+
+                // relations->len++;
             }
         }
 
@@ -117,11 +134,11 @@ void mono_cpu_sieve(
 
         b++;
 
-        // printf("%lu %lu\n", b, smooth_candidates.len);
-
         // Cleanup
 
         clear_relations(&smooth_candidates);
+
+        // Display evolution of relation collection process
 
         printf("\rb = %lu | %lu/(%lu+20) relations found",
             b,

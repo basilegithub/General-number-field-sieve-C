@@ -16,6 +16,7 @@ typedef struct
     mpz_t algebraic_norm;
     single_linked_list algebraic_large_primes;
     unsigned long nb_relations; // For relations obtained from partials
+    bool *divide_leading;
 
 } nfs_relation; // Structure that holds all the required information of a nfs relation
 
@@ -29,7 +30,7 @@ typedef struct
 // Functions declaration
 
 void init_relations(nfs_relations *relations);
-void init_new_relation(nfs_relations *relations);
+void init_new_relation(nfs_relations *relations, size_t len_divide_leading);
 void clear_relations(nfs_relations *relations);
 
 
