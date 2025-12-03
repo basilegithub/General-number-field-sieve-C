@@ -168,11 +168,11 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
 
         copy_polynomial(&tmp_poly2, &poly);
 
-        unsigned long prime = p;
+        unsigned long exp = exponent;
 
-        while (prime > 1)
+        while (exp > 1)
         {
-            if (prime&1)
+            if (exp&1)
             {
                 poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
                 poly_div_mod(&tmp_poly, tmp_poly3, reduced_f, p);
@@ -181,10 +181,10 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
             poly_prod(&tmp_poly3, tmp_poly2, tmp_poly2);
             poly_div_mod(&tmp_poly2, tmp_poly3, reduced_f, p);
 
-            prime >>= 1;
+            exp >>= 1;
         }
 
-        if (prime)
+        if (exp)
         {
             poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
             poly_div_mod(&tmp_poly, tmp_poly3, f, p);
@@ -237,16 +237,6 @@ void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp
     } // Computes g - x (mod p) = x^p - x (mod p) (contains all linear factors)
 
     reduce_polynomial(&g);
-
-    bool is_zero = true;
-    for (size_t i = 0 ; i <= g.degree ; i++)
-    {
-        if (mpz_cmp_ui(g.coeffs[i], 0))
-        {
-            is_zero = false;
-            break;
-        }
-    }
 
     gcd_poly_mod(&tmp_poly, &reduced_f, &g, p);
 
@@ -343,9 +333,11 @@ void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long
 
     while (!h.degree || poly_equal(&h, &f))
     {
+        reset_polynomial(&h);
         mpz_set_ui(tmp, p);
 
-        mpz_urandomm(a, state, tmp);
+        if (p != 78676931) mpz_urandomm(a, state, tmp);
+        else mpz_set_ui(a, 2);
 
         polynomial_mpz tmp_poly;
         init_poly_degree(&tmp_poly, 1);

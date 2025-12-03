@@ -190,7 +190,7 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base(&Algebraic_base, primes, g_x, n, state);
+    build_algebraic_base(&Algebraic_base, primes, f_x, n, state);
 
     size_t nb_Algebraic_pairs = 0;
 
@@ -199,8 +199,6 @@ int main()
     while (alg_prime != NULL) // Count the number of pairs in the Algebraic factor base
     {
         nb_Algebraic_pairs += alg_prime->roots.len;
-
-        // printf("%lu %lu\n", alg_prime->prime, alg_prime->roots.len);
 
         alg_prime = alg_prime->next;
     }

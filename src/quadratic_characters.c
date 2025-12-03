@@ -39,7 +39,7 @@ unsigned long create_quadratic_characters_base(quadratic_character_base *q_base,
     while (cpt < required_size)
     {
         mpz_set_ui(tmp, test_number);
-        if (mpz_probab_prime_p(tmp, 10) && !mpz_divisible_ui_p(leading_coeff, test_number))
+        if (mpz_probab_prime_p(tmp, 100) && !mpz_divisible_ui_p(leading_coeff, test_number))
         {
             if (mpz_divisible_ui_p(n, test_number)) return test_number;
 
