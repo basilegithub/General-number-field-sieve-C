@@ -24,6 +24,6 @@ void extract_algebraic_square_root(
     mpz_t coeff_bound,
     unsigned long inert_prime,
     gmp_randstate_t state
-)
+);
 
 #endif // SQUARE_ROOT_H

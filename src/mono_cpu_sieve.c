@@ -138,6 +138,8 @@ void mono_cpu_sieve(
 
         clear_relations(&smooth_candidates);
 
+        free_polynomial(&sieve_poly);
+
         // Display evolution of relation collection process
 
         printf("\rb = %lu | %lu/(%lu+20) relations found",
@@ -155,7 +157,7 @@ void mono_cpu_sieve(
     log_msg(logfile, "b = %lu | %lu/(%lu+20) relations found", b, relations->len, required_relations);
     log_blank_line(logfile);
 
-    mpz_clear(tmp);
+    mpz_clears(tmp, gcd_b_cd, NULL);
 
     free(sieve_array);
 }

@@ -18,7 +18,7 @@ void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp
 void second_step_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp_randstate_t state);
 bool irreducible(polynomial_mpz f, unsigned long p);
 int quadratic_residue(polynomial_mpz poly, polynomial_mpz f_x, unsigned long p);
-void square_root_poly_mod(polynomial_mpz square, polynomial_mpz f_x, unsigned long p, gmp_randstate_t state);
+void square_root_poly_mod(polynomial_mpz *res, polynomial_mpz square, polynomial_mpz f_x, unsigned long p, gmp_randstate_t state);
 
 // Operations on two polynomials
 

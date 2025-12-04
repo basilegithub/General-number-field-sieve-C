@@ -18,7 +18,7 @@ void poly_derivative(polynomial_mpz *res, polynomial_mpz f)
     {
         mpz_set_ui(tmp, f.degree - i);
         mpz_mul(tmp, tmp, f.coeffs[i]);
-        set_coeff(res, tmp, i);
+        set_coeff(res, tmp, f.degree - i - 1);
     }
 
     res->degree = f.degree - 1;
@@ -34,36 +34,27 @@ void evaluate_poly(mpz_t res, polynomial_mpz f, signed long x)
     }
     else
     {
-        mpz_t tmp, tmp_res, abs;
-        mpz_inits(tmp, tmp_res, abs, NULL);
+        mpz_t tmp_res;
+        mpz_init(tmp_res);
 
-        mpz_set_si(tmp, x);
-        mpz_pow_ui(tmp, tmp, f.degree);
+        mpz_set(tmp_res, f.coeffs[0]);
 
-        mpz_set_ui(tmp_res, 0);
-
-        mpz_set_si(abs, x);
-        mpz_abs(abs, abs);
-
-        for (size_t i = 0 ; i < f.degree ; i++)
+        for (size_t i = 1 ; i <= f.degree ; i++)
         {
-            mpz_addmul(tmp_res, f.coeffs[i], tmp);
-            mpz_divexact(tmp, tmp, abs);
-            mpz_neg(tmp, tmp);
+            mpz_mul_si(tmp_res, tmp_res, x);
+            mpz_add(tmp_res, tmp_res, f.coeffs[i]);
         }
-
-        mpz_add(tmp_res, tmp_res, f.coeffs[f.degree]);
 
         mpz_set(res, tmp_res);
 
-        mpz_clears(tmp, tmp_res, NULL);
+        mpz_clear(tmp_res);
     }
 }
 
 unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
 {
-    mpz_t tmp, tmp_res;
-    mpz_inits(tmp, tmp_res, NULL);
+    mpz_t tmp_res;
+    mpz_init(tmp_res);
 
     if (!x)
     {
@@ -72,25 +63,20 @@ unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
     }
     else
     {
-        mpz_set_ui(tmp, x);
-        mpz_pow_ui(tmp, tmp, f.degree);
+        mpz_set(tmp_res, f.coeffs[0]);
 
-        mpz_set_ui(tmp_res, 0);
-
-        for (size_t i = 0 ; i < f.degree ; i++)
+        for (size_t i = 1 ; i <= f.degree ; i++)
         {
-            mpz_addmul(tmp_res, f.coeffs[i], tmp);
-            mpz_divexact_ui(tmp, tmp, x);
+            mpz_mul_ui(tmp_res, tmp_res, x);
+            mpz_mod_ui(tmp_res, tmp_res, p);
+            mpz_add(tmp_res, tmp_res, f.coeffs[i]);
             mpz_mod_ui(tmp_res, tmp_res, p);
         }
-
-        mpz_add(tmp_res, tmp_res, f.coeffs[f.degree]);
-        mpz_mod_ui(tmp_res, tmp_res, p);
     }
 
     unsigned long res = mpz_get_ui(tmp_res);
 
-    mpz_clears(tmp, tmp_res, NULL);
+    mpz_clear(tmp_res);
 
     return res;
 }
@@ -191,7 +177,7 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
         if (exp)
         {
             poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
-            poly_div_mod(&tmp_poly, tmp_poly3, f, p);
+            poly_div_mod(&tmp_poly, tmp_poly3, reduced_f, p);
         }
 
         copy_polynomial(res, &tmp_poly);
@@ -261,7 +247,7 @@ void power_poly_mod_mpz(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz
         if (mpz_cmp_ui(exp, 0) > 0)
         {
             poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
-            poly_div_mod(&tmp_poly, tmp_poly3, f, p);
+            poly_div_mod(&tmp_poly, tmp_poly3, reduced_f, p);
         }
 
         copy_polynomial(res, &tmp_poly);
@@ -631,14 +617,14 @@ void square_root_poly_mod(polynomial_mpz *res, polynomial_mpz square, polynomial
             break;
         }
 
-        unsigned long k = 0;
+        unsigned long k = r - 1;
 
         for (unsigned long m = 1 ; m < r ; m++)
         {
             mpz_set_ui(tmp_mpz, 1);
             mpz_mul_2exp(tmp_mpz, tmp_mpz, m);
 
-            power_poly_mod(&tmp_poly, lbd, f_x, p, tmp_mpz);
+            power_poly_mod_mpz(&tmp_poly, lbd, f_x, p, tmp_mpz);
 
             if (tmp_poly.degree == 0 && !mpz_cmp_ui(tmp_poly.coeffs[0], 1))
             {
@@ -661,6 +647,10 @@ void square_root_poly_mod(polynomial_mpz *res, polynomial_mpz square, polynomial
         poly_prod(&tmp_poly2, tmp_poly, lbd);
         poly_div_mod(&lbd, tmp_poly2, f_x, p);
     }
+
+    free_polynomial(&lbd);
+    free_polynomial(&omega);
+    free_polynomial(&zeta);
 
     free_polynomial(&tmp_poly);
     free_polynomial(&tmp_poly2);
@@ -746,9 +736,9 @@ void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g) // Return
 
                 set_coeff(&remainder, tmp2, f.degree - i);
 
-                for (size_t j = 0 ; j < g.degree ; j++)
+                for (size_t j = 1 ; j <= g.degree ; j++)
                 {
-                    mpz_submul(remainder.coeffs[f.degree - i - j], tmp, g.coeffs[g.degree - j]);
+                    mpz_submul(remainder.coeffs[i + j], tmp, g.coeffs[j]);
                 }
             }
         }
@@ -831,7 +821,7 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
         mpz_neg(tmp3, reduced_g.coeffs[0]);
         mpz_invert(tmp3, tmp3, prime);
 
-        for (size_t i = 0 ; i <= f.degree - g.degree ; i++)
+        for (size_t i = 0 ; i <= f.degree - reduced_g.degree ; i++)
         {
             if (mpz_cmp_ui(remainder.coeffs[i], 0))
             {
@@ -840,9 +830,9 @@ void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsig
 
                 set_coeff(&remainder, tmp2, f.degree - i);
 
-                for (size_t j = 1 ; j <= g.degree ; j++)
+                for (size_t j = 1 ; j <= reduced_g.degree ; j++)
                 {
-                    mpz_addmul(remainder.coeffs[i + j], tmp, g.coeffs[j]);
+                    mpz_addmul(remainder.coeffs[i + j], tmp, reduced_g.coeffs[j]);
                     mpz_mod(remainder.coeffs[i + j], remainder.coeffs[i + j], prime);
                 }
             }
@@ -936,20 +926,20 @@ void quotient_poly_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, 
         mpz_neg(tmp3, reduced_g.coeffs[0]);
         mpz_invert(tmp3, tmp3, prime);
 
-        for (size_t i = 0 ; i <= f.degree - g.degree ; i++)
+        for (size_t i = 0 ; i <= f.degree - reduced_g.degree ; i++)
         {
             if (mpz_cmp_ui(remainder.coeffs[i], 0))
             {
                 mpz_mul(tmp, remainder.coeffs[i], tmp3);
                 mpz_mod(tmp, tmp, prime);
 
-                set_coeff(&quotient, tmp, f.degree - g.degree - i);
+                set_coeff(&quotient, tmp, f.degree - reduced_g.degree - i);
 
                 set_coeff(&remainder, tmp2, f.degree - i);
 
-                for (size_t j = 1 ; j <= g.degree ; j++)
+                for (size_t j = 1 ; j <= reduced_g.degree ; j++)
                 {
-                    mpz_addmul(remainder.coeffs[i + j], tmp, g.coeffs[j]);
+                    mpz_addmul(remainder.coeffs[i + j], tmp, reduced_g.coeffs[j]);
                     mpz_mod(remainder.coeffs[i + j], remainder.coeffs[i + j], prime);
                 }
             }

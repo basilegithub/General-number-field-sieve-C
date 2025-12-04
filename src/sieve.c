@@ -114,9 +114,9 @@ void sieve(
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 1); // p(x) = -b*x
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 1); // q(x) = -b*x
 
-                mpz_mul_ui(tmp, leading_coeff, a);
+                mpz_mul_si(tmp, leading_coeff, a);
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 0); // p(x) = c_d*a - b*x
-                mpz_set_ui(tmp, a);
+                mpz_set_si(tmp, a);
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 0); // q(x) = a - b*x
 
                 mpz_set(smooth_candidates->rels[smooth_candidates->len-1].rational_norm, rational_eval);

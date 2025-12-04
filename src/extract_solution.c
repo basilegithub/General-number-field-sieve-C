@@ -57,6 +57,8 @@ void extract_solution(
 
     copy_polynomial(&algebraic_square, &f_prime_sq);
 
+    // printf("[");
+
     for (size_t i = 0 ; i < relations->len ; i++)
     {
         if (kernel_vector[i])
@@ -71,7 +73,7 @@ void extract_solution(
     mpz_t tmp_mpz, tmp_mpz2;
     mpz_inits(tmp_mpz, tmp_mpz2, NULL);
 
-    mpz_pow_ui(tmp_mpz, leading, S>>1);
+    mpz_pow_ui(tmp_mpz, leading_coeff, S>>1);
     mpz_mod(tmp_mpz, tmp_mpz, n);
 
     mpz_mul(x, x, tmp_mpz);
@@ -84,7 +86,7 @@ void extract_solution(
     {
         mpz_pow_ui(tmp_mpz, f_norm, f_x.degree - i);
         mpz_mul(tmp_mpz, tmp_mpz, fd);
-        mpz_mul(tmp_mpz2, leading_coeff, max_a_size);
+        mpz_mul_ui(tmp_mpz2, leading_coeff, max_a_size);
         mpz_mul_2exp(tmp_mpz2, tmp_mpz2, 1);
         mpz_mul(tmp_mpz2, tmp_mpz2, f_norm);
         mpz_pow_ui(tmp_mpz2, tmp_mpz2, S>>1);
