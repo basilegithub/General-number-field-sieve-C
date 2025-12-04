@@ -12,12 +12,14 @@
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
+#include "NFS_relations.h"
 #include "polynomial_functions.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"
 #include "algebraic_base.h"
 #include "quadratic_characters.h"
+#include "mono_cpu_sieve.h"
 
 int main()
 {
@@ -70,7 +72,13 @@ int main()
 
     compute_smooth_bound(n, smooth_bound, ln2, e);
 
-    mpz_set_ui(smooth_bound, 80);
+    mpz_mul_ui(smooth_bound, smooth_bound, 4);
+
+    // mpz_set_ui(smooth_bound, 256);
+
+    mpz_t sieve_len;
+    mpz_init_set(sieve_len, smooth_bound);
+    mpz_mul_ui(sieve_len, sieve_len, 8);
 
     dyn_array_classic primes;
     init_classic(&primes);
@@ -79,6 +87,11 @@ int main()
 
     log_msg(logfile, "Rational Factor base of %lu primes generated.", primes.len);
     log_msg(logfile, "Largest prime = %lu.", primes.start[primes.len - 1]);
+
+    dyn_array_classic logs;
+    init_classic(&logs);
+
+    compute_logs(&logs, primes);
 
     // Look for small factors
 
@@ -207,6 +220,7 @@ int main()
     quadratic_character_base quad_char_base;
     quadratic_base_init(&quad_char_base);
 
+    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2));
     unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
 
     if (factor) // If we have found a factor while building the quadratic characters base
@@ -309,7 +323,76 @@ int main()
     log_msg(logfile, "Found %lu inert primes in the factor base.", inert_set.len);
     log_blank_line(logfile);
 
-    // Sieving
+    size_t len_divide_leading = 0;
+
+    for (size_t i = 0 ; i < primes.len ; i++)
+    {
+        if (mpz_cmp_ui(leading_coeff, primes.start[i]) < 0)
+        {
+            break;
+        }
+
+        if (mpz_divisible_ui_p(leading_coeff, primes.start[i])) len_divide_leading++;
+    }
+
+    mpz_t *pow_div = calloc(len_divide_leading, sizeof(mpz_t));
+    unsigned long *divide_leading = calloc(len_divide_leading, sizeof(unsigned long));
+
+    size_t k = 0;
+
+    for (size_t i = 0 ; i < primes.len ; i++)
+    {
+        if (mpz_cmp_ui(leading_coeff, primes.start[i]) < 0)
+        {
+            break;
+        }
+
+        if (mpz_divisible_ui_p(leading_coeff, primes.start[i]))
+        {
+            divide_leading[k] = primes.start[i];
+
+            mpz_set_ui(tmp, primes.start[i]);
+            while (mpz_divisible_p(leading_coeff, tmp)) mpz_mul_ui(tmp, tmp, primes.start[i]);
+
+            mpz_divexact_ui(tmp, tmp, primes.start[i]);
+            mpz_init_set(pow_div[k], tmp);
+
+            k++;
+        }
+    }
+
+    mpz_t prod_primes;
+    mpz_init_set_ui(prod_primes, 1);
+    for (size_t i = 0 ; i < primes.len ; i++) mpz_mul_ui(prod_primes, prod_primes, primes.start[i]);
+
+    // Collecting relations
+
+    nfs_relations relations;
+    init_relations(&relations);
+
+    mono_cpu_sieve(
+        &relations,
+        f_x,
+        g_x,
+        primes,
+        Algebraic_base,
+        nb_Algebraic_pairs,
+        quad_char_base,
+        nb_Quadratic_characters,
+        leading_coeff,
+        prod_primes,
+        m0,
+        m1,
+        mpz_get_ui(sieve_len),
+        large_prime_constant1,
+        large_prime_constant2,
+        divide_leading,
+        pow_div,
+        len_divide_leading,
+        logs,
+        state,
+        logfile
+    );
 
     // Linear algebra
 

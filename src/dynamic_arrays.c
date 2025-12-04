@@ -44,7 +44,7 @@ void init2_len(dyn_array* array, unsigned long length)
 	while (array->size <= length) array->size <<= 1;
 	array->start = calloc(array->size, sizeof(mpz_t));
 	array->len = length;
-	for (unsigned long i = 0 ; i < length ; i++) mpz_init(*(array->start+i));
+	for (unsigned long i = 0 ; i < length ; i++) mpz_init(array->start[i]);
     array->initialized = length;
 }
 
@@ -55,7 +55,7 @@ void append(dyn_array* array, mpz_t element)
         array->size <<= 1;
         array->start = realloc(array->start, sizeof(mpz_t)*(array->size));
     }
-    mpz_init_set(*(array->start+array->len), element);
+    mpz_init_set(array->start[array->len], element);
     array->len++;
     array->initialized++;
 }

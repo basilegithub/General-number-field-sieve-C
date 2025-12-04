@@ -25,6 +25,36 @@ void poly_derivative(polynomial_mpz *res, polynomial_mpz f)
     mpz_clear(tmp);
 }
 
+void evaluate_poly(mpz_t res, polynomial_mpz f, signed long x)
+{
+    if (!x)
+    {
+        mpz_set(res, f.coeffs[f.degree]);
+    }
+    else
+    {
+        mpz_t tmp, tmp_res;
+        mpz_inits(tmp, tmp_res, NULL);
+
+        mpz_set_ui(tmp, x);
+        mpz_pow_ui(tmp, tmp, f.degree);
+
+        mpz_set_ui(tmp_res, 0);
+
+        for (size_t i = 0 ; i < f.degree ; i++)
+        {
+            mpz_addmul(tmp_res, f.coeffs[i], tmp);
+            mpz_divexact_ui(tmp, tmp, x);
+        }
+
+        mpz_add(tmp_res, tmp_res, f.coeffs[f.degree]);
+
+        mpz_set(res, tmp_res);
+
+        mpz_clears(tmp, tmp_res, NULL);
+    }
+}
+
 unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
 {
     mpz_t tmp, tmp_res;
