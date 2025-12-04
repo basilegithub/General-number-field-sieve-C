@@ -431,6 +431,7 @@ int main()
         &primes,
         f_x,
         g_derivative_sq,
+        leading_coeff,
         n,
         m0,
         m1,

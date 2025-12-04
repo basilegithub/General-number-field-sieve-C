@@ -11,6 +11,7 @@ void extract_solution(
     dyn_array_classic *rational_primes,
     polynomial_mpz f_x,
     polynomial_mpz f_prime_sq,
+    mpz_t leading_coeff,
     mpz_t n,
     mpz_t m0,
     mpz_t m1,
