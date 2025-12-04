@@ -66,7 +66,7 @@ void extract_algebraic_square_root(
     gmp_randstate_t state
 )
 {
-    square_root_poly_mod();
+    square_root_poly_mod(algebraic_square, f_x, inert_prime, state);
 
     Newton_lift();
 

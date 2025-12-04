@@ -540,7 +540,7 @@ int quadratic_residue(polynomial_mpz poly, polynomial_mpz f_x, unsigned long p)
     return res;
 }
 
-void square_root_poly_mod(polynomial_mpz square, polynomial_mpz f_x, unsigned long p, gmp_randstate_t state)
+void square_root_poly_mod(polynomial_mpz *res, polynomial_mpz square, polynomial_mpz f_x, unsigned long p, gmp_randstate_t state)
 {
     polynomial_mpz tmp_poly;
     init_poly(&tmp_poly);
@@ -585,10 +585,88 @@ void square_root_poly_mod(polynomial_mpz square, polynomial_mpz f_x, unsigned lo
         }
     }
 
+    polynomial_mpz lbd, omega, zeta;
+    init_poly(&lbd);
+    init_poly(&omega);
+    init_poly(&zeta);
+
+    power_poly_mod_mpz(&lbd, tmp_poly, f_x, p, s);
+
+    mpz_set(tmp_mpz, s);
+    mpz_add_ui(tmp_mpz, tmp_mpz, 1);
+    mpz_div_2exp(tmp_mpz, tmp_mpz, 1);
+
+    power_poly_mod_mpz(&omega, tmp_poly, f_x, p, tmp_mpz);
+
+    power_poly_mod_mpz(&zeta, random_poly, f_x, p, s);
+
+    polynomial_mpz tmp_poly2;
+    init_poly(&tmp_poly2);
+
+    while (true)
+    {
+        bool is_zero = true;
+        for (size_t i = 0 ; i <= lbd.degree ; i++)
+        {
+            if (mpz_cmp_ui(lbd.coeffs[i], 0))
+            {
+                is_zero = false;
+                break;
+            }
+        }
+
+        if (is_zero) // if lbd == [0]
+        {
+            reset_polynomial(res); // res = 0
+            break;
+        }
+
+        if (lbd.degree == 0 && !mpz_cmp_ui(lbd.coeffs[0], 1)) // if lbd == [1]
+        {
+            mpz_pow_ui(tmp_mpz, prime, f_x.degree);
+            mpz_sub_ui(tmp_mpz, tmp_mpz, 2);
+
+            power_poly_mod_mpz(res, omega, f_x, p, tmp_mpz);
+
+            break;
+        }
+
+        unsigned long k = 0;
+
+        for (unsigned long m = 1 ; m < r ; m++)
+        {
+            mpz_set_ui(tmp_mpz, 1);
+            mpz_mul_2exp(tmp_mpz, tmp_mpz, m);
+
+            power_poly_mod(&tmp_poly, lbd, f_x, p, tmp_mpz);
+
+            if (tmp_poly.degree == 0 && !mpz_cmp_ui(tmp_poly.coeffs[0], 1))
+            {
+                k = m;
+                break;
+            }
+        }
+
+        mpz_set_ui(tmp_mpz, 1);
+        mpz_mul_2exp(tmp_mpz, tmp_mpz, r - k - 1);
+
+        power_poly_mod_mpz(&tmp_poly, zeta, f_x, p, tmp_mpz);
+        poly_prod(&tmp_poly2, tmp_poly, omega);
+        poly_div_mod(&omega, tmp_poly2, f_x, p);
+
+        mpz_set_ui(tmp_mpz, 1);
+        mpz_mul_2exp(tmp_mpz, tmp_mpz, r - k);
+
+        power_poly_mod_mpz(&tmp_poly, zeta, f_x, p, tmp_mpz);
+        poly_prod(&tmp_poly2, tmp_poly, lbd);
+        poly_div_mod(&lbd, tmp_poly2, f_x, p);
+    }
+
     free_polynomial(&tmp_poly);
+    free_polynomial(&tmp_poly2);
     free_polynomial(&random_poly);
 
-    mpz_clears(s, prime, tmp_mpz, NULL)
+    mpz_clears(s, prime, tmp_mpz, NULL);
 }
 
 // Operations on two polynomials
