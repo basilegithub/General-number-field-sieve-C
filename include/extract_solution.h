@@ -17,7 +17,8 @@ void extract_solution(
     mpz_t m1,
     mpz_t f_prime_eval,
     unsigned long inert_prime,
-    unsigned long max_a_size
+    unsigned long max_a_size,
+    gmp_randstate_t state
 );
 
 #endif // EXTRACT_SOLUTION_H

@@ -437,7 +437,8 @@ int main()
         m1,
         g_derivative_eval,
         inert_set.start[inert_set.len-1],
-        mpz_get_ui(sieve_len)
+        mpz_get_ui(sieve_len),
+        state
     );
 
     mpz_clears(n, m0, m1, NULL);

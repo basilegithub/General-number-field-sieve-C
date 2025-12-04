@@ -204,6 +204,76 @@ void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, 
     }
 }
 
+void power_poly_mod_mpz(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, unsigned long p, mpz_t exponent)
+{
+    if (!mpz_cmp_ui(exponent, 0))
+    {
+        reset_polynomial(res);
+
+        mpz_t tmp;
+        mpz_init_set_ui(tmp, 1);
+
+        set_coeff(res, tmp, 0);
+
+        mpz_clear(tmp);
+    }
+    else
+    {
+        polynomial_mpz reduced_f;
+        init_poly_degree(&reduced_f, f.degree);
+
+        for (size_t i = 0 ; i <= f.degree ; i++)
+        {
+            mpz_mod_ui(reduced_f.coeffs[i], f.coeffs[i], p);
+        }
+        reduce_polynomial(&reduced_f);
+
+        polynomial_mpz tmp_poly, tmp_poly2, tmp_poly3;
+
+        init_poly_degree(&tmp_poly, 0);
+        init_poly_degree(&tmp_poly2, poly.degree);
+        init_poly(&tmp_poly3);
+
+        mpz_t tmp;
+        mpz_init_set_ui(tmp, 1);
+
+        set_coeff(&tmp_poly, tmp, 0);
+
+        copy_polynomial(&tmp_poly2, &poly);
+
+        mpz_t exp;
+        mpz_init_set(exp, exponent);
+
+        while (mpz_cmp_ui(exp, 1) > 0)
+        {
+            if (mpz_odd_p(exp))
+            {
+                poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
+                poly_div_mod(&tmp_poly, tmp_poly3, reduced_f, p);
+            }
+
+            poly_prod(&tmp_poly3, tmp_poly2, tmp_poly2);
+            poly_div_mod(&tmp_poly2, tmp_poly3, reduced_f, p);
+
+            mpz_div_2exp(exp, exp, 1);
+        }
+
+        if (mpz_cmp_ui(exp, 0) > 0)
+        {
+            poly_prod(&tmp_poly3, tmp_poly, tmp_poly2);
+            poly_div_mod(&tmp_poly, tmp_poly3, f, p);
+        }
+
+        copy_polynomial(res, &tmp_poly);
+
+        free_polynomial(&tmp_poly);
+        free_polynomial(&tmp_poly2);
+        free_polynomial(&tmp_poly3);
+
+        mpz_clears(tmp, exp, NULL);
+    }
+}
+
 void find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p, gmp_randstate_t state)
 {
     polynomial_mpz reduced_f;
@@ -439,6 +509,86 @@ bool irreducible(polynomial_mpz f, unsigned long p)
     mpz_clear(tmp);
 
     return true;
+}
+
+int quadratic_residue(polynomial_mpz poly, polynomial_mpz f_x, unsigned long p)
+{
+    polynomial_mpz tmp_poly;
+    init_poly(&tmp_poly);
+
+    mpz_t exponent;
+    mpz_init_set_ui(exponent, p);
+
+    mpz_pow_ui(exponent, exponent, f_x.degree);
+    mpz_sub_ui(exponent, exponent, 1);
+    mpz_div_2exp(exponent, exponent, 1); // exponent = (p^d - 1)/2
+
+    power_poly_mod_mpz(&tmp_poly, poly, f_x, p, exponent);
+
+    int res;
+
+    if (!mpz_cmp_ui(tmp_poly.coeffs[0], p-1)) res = -1;
+
+    else if (!mpz_cmp_ui(tmp_poly.coeffs[0], 1)) res = 1;
+
+    else res = 0;
+
+    free_polynomial(&tmp_poly);
+
+    mpz_clear(exponent);
+
+    return res;
+}
+
+void square_root_poly_mod(polynomial_mpz square, polynomial_mpz f_x, unsigned long p, gmp_randstate_t state)
+{
+    polynomial_mpz tmp_poly;
+    init_poly(&tmp_poly);
+
+    poly_div_mod(&tmp_poly, square, f_x, p);
+
+    mpz_t s, prime;
+    mpz_init(s);
+    mpz_init_set_ui(prime, p);
+
+    mpz_pow_ui(s, prime, f_x.degree);
+    mpz_sub_ui(s, s, 1);
+
+    unsigned long r = 0;
+
+    while (mpz_even_p(s))
+    {
+        mpz_div_2exp(s, s, 1);
+        r++;
+    }
+
+    polynomial_mpz random_poly;
+    init_poly(&random_poly);
+
+    mpz_t tmp_mpz;
+    mpz_init(tmp_mpz);
+
+    for (size_t i = 0 ; i < f_x.degree ; i++)
+    {
+        mpz_urandomm(tmp_mpz, state, prime);
+        set_coeff(&random_poly, tmp_mpz, f_x.degree - i - 1);
+    }
+
+    while (quadratic_residue(random_poly, f_x, p) != -1)
+    {
+        reset_polynomial(&random_poly);
+
+        for (size_t i = 0 ; i < f_x.degree ; i++)
+        {
+            mpz_urandomm(tmp_mpz, state, prime);
+            set_coeff(&random_poly, tmp_mpz, f_x.degree - i - 1);
+        }
+    }
+
+    free_polynomial(&tmp_poly);
+    free_polynomial(&random_poly);
+
+    mpz_clears(s, prime, tmp_mpz, NULL)
 }
 
 // Operations on two polynomials

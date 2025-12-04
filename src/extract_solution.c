@@ -19,7 +19,8 @@ void extract_solution(
     mpz_t m1,
     mpz_t f_prime_eval,
     unsigned long inert_prime,
-    unsigned long max_a_size
+    unsigned long max_a_size,
+    gmp_randstate_t state
 )
 {
     mpz_t f_norm;
@@ -92,9 +93,14 @@ void extract_solution(
         if (mpz_cmp(tmp_mpz, coeff_bound) > 0) mpz_set(coeff_bound, tmp_mpz);
     }
 
+    mpz_t algebraic_square_root;
+    mpz_init(algebraic_square_root);
+
+    extract_algebraic_square_root(algebraic_square_root, f_x, algebraic_square, m0, m1, leading_coeff, coeff_bound, inert_prime, state);
+
     free_polynomial(&tmp_poly);
     free_polynomial(&tmp_poly2);
     free_polynomial(&algebraic_square);
 
-    mpz_clears(f_norm, fd, tmp_mpz, tmp_mpz2, coeff_bound, NULL);
+    mpz_clears(f_norm, fd, tmp_mpz, tmp_mpz2, coeff_bound, rational_square_root, algebraic_square_root, NULL);
 }
