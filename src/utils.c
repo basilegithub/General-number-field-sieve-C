@@ -291,3 +291,20 @@ void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state)
 
     mpz_clears(z, tmp, tmp2, P_value, generator, lambda, omega, res, m, two_mpz, NULL);
 }
+
+void convert_to_vec(mpz_t embedding, unsigned long relations_len, bool tmp_vec[relations_len])
+{
+    mpz_t tmp, tmp2;
+    mpz_inits(tmp, tmp2, NULL);
+    mpz_set_ui(tmp2, 1);
+
+    for (size_t i = 0 ; i < relations_len ; i++)
+    {
+        mpz_and(tmp, embedding, tmp2);
+        tmp_vec[relations_len-i-1] = (bool) mpz_get_ui(tmp);
+
+        mpz_div_2exp(embedding, embedding, 1);
+    }
+
+    mpz_clears(tmp, tmp2, NULL);
+}

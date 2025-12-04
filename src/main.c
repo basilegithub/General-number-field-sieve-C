@@ -24,6 +24,7 @@
 #include "block_lanczos.h"
 #include "wiedemann.h"
 #include "gaussian_elimination.h"
+#include "extract_solution.h"
 
 int main()
 {
@@ -419,6 +420,24 @@ int main()
     block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
 
     // Square root extraction
+
+    bool *kernel_vector = calloc(relations.len, sizeof(bool));
+
+    convert_to_vec(kernel_vectors.start[0], relations.len, kernel_vector);
+
+    extract_solution(
+        &relations,
+        kernel_vector,
+        &primes,
+        f_x,
+        g_derivative_sq,
+        n,
+        m0,
+        m1,
+        g_derivative_eval,
+        inert_set.start[inert_set.len-1],
+        mpz_get_ui(sieve_len)
+    );
 
     mpz_clears(n, m0, m1, NULL);
 }
