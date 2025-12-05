@@ -252,7 +252,7 @@ int main()
         log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
         if (logfile) fclose(logfile);
 
-        mpz_clears(factor1, factor2);
+        mpz_clears(factor1, factor2, NULL);
         return 1;
     }
 
@@ -449,20 +449,46 @@ int main()
                 g_derivative_eval,
                 inert_set.start[inert_set.len-1],
                 mpz_get_ui(sieve_len),
-                state
+                state,
+                logfile
             );
 
-            mpz_gcd(divisor, n, divisor);
+            mpz_gcd(divisor, divisor, n);
 
-            mpz_divexact(tmp, n, divisor);
+            if (mpz_cmp_ui(divisor, 1) && mpz_cmp(divisor, n))
+            {
+                mpz_t factor1, factor2;
+                mpz_inits(factor1, factor2, NULL);
 
-            gmp_printf("Factors found : %Zd %Zd\n\n", divisor, tmp);
+                char primality_factor1, primality_factor2;
 
-            if (mpz_cmp_ui(divisor, 1) && mpz_cmp_ui(tmp, 1)) return 1;
+                mpz_set(factor1, divisor);
+                mpz_divexact(factor2, n, factor1);
+
+                if (mpz_probab_prime_p(factor1, 100) > 0)
+                {
+                    primality_factor1 = 'p';
+                } else {primality_factor1 = 'C';}
+
+                if (mpz_probab_prime_p(factor2, 100) > 0)
+                {
+                    primality_factor2 = 'p';
+                } else {primality_factor2 = 'C';}
+
+                log_blank_line(logfile);
+                log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
+                if (logfile) fclose(logfile);
+
+                mpz_clears(factor1, factor2, NULL);
+
+                mpz_clears(n, m0, m1, divisor, NULL);
+
+                return 1;
+            }
+
+            log_blank_line(logfile);
         }
 
         free(kernel_vectors.start);
     }
-
-    mpz_clears(n, m0, m1, divisor, NULL);
 }

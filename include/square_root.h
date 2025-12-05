@@ -2,6 +2,7 @@
 #define SQUARE_ROOT_H
 
 #include <gmp.h>
+#include <stdio.h>
 
 #include "dynamic_arrays.h"
 #include "NFS_relations.h"
@@ -23,7 +24,8 @@ void extract_algebraic_square_root(
     mpz_t leading_coeff,
     mpz_t coeff_bound,
     unsigned long inert_prime,
-    gmp_randstate_t state
+    gmp_randstate_t state,
+    FILE *logfile
 );
 
 void Newton_lift(

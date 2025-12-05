@@ -1,6 +1,8 @@
 #include <gmp.h>
 #include <stdlib.h>
+#include <stdio.h>
 
+#include "logs.h"
 #include "dynamic_arrays.h"
 #include "NFS_relations.h"
 #include "polynomial_functions.h"
@@ -64,7 +66,8 @@ void extract_algebraic_square_root(
     mpz_t leading_coeff,
     mpz_t coeff_bound,
     unsigned long inert_prime,
-    gmp_randstate_t state
+    gmp_randstate_t state,
+    FILE *logfile
 )
 {
     polynomial_mpz algebraic_root;
@@ -72,11 +75,11 @@ void extract_algebraic_square_root(
 
     square_root_poly_mod(&algebraic_root, algebraic_square, f_x, inert_prime, state);
 
-    printf("initial root computed\n");
+    log_msg(logfile, "Initial root computed, lifting...");
 
     Newton_lift(&algebraic_root, &algebraic_square, f_x, coeff_bound, inert_prime);
 
-    printf("root lifted\n");
+    log_msg(logfile, "Root lifted.");
 
     mpz_t tmp_mpz;
     mpz_init_set(tmp_mpz, leading_coeff);

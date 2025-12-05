@@ -21,7 +21,8 @@ void extract_solution(
     mpz_t f_prime_eval,
     unsigned long inert_prime,
     unsigned long max_a_size,
-    gmp_randstate_t state
+    gmp_randstate_t state,
+    FILE *logfile
 )
 {
     mpz_t f_norm;
@@ -96,7 +97,7 @@ void extract_solution(
     mpz_t algebraic_square_root;
     mpz_init(algebraic_square_root);
 
-    extract_algebraic_square_root(algebraic_square_root, f_x, algebraic_square, m0, m1, leading_coeff, coeff_bound, inert_prime, state);
+    extract_algebraic_square_root(algebraic_square_root, f_x, algebraic_square, m0, m1, leading_coeff, coeff_bound, inert_prime, state, logfile);
     mpz_mod(algebraic_square_root, algebraic_square_root, n);
 
     mpz_powm_ui(tmp_mpz, m1, S>>1, n);
