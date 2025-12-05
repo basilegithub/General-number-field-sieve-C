@@ -12,7 +12,7 @@ void init_relations(nfs_relations *relations)
     relations->size = 1;
 }
 
-void init_new_relation(nfs_relations *relations)
+void init_new_relation(nfs_relations *relations, size_t len_divide_leading)
 {
     if (relations->len == relations->size)
     {
@@ -27,6 +27,7 @@ void init_new_relation(nfs_relations *relations)
     mpz_init(relations->rels[relations->len].algebraic_norm);
     list_init(&relations->rels[relations->len].algebraic_large_primes);
     relations->rels[relations->len].nb_relations = 0;
+    relations->rels[relations->len].divide_leading = calloc(len_divide_leading, sizeof(bool));
 
     relations->len++;
 }
@@ -49,6 +50,8 @@ void clear_relations(nfs_relations *relations)
         mpz_clear(relations->rels[i].algebraic_norm);
 
         list_clear(&relations->rels[i].algebraic_large_primes);
+
+        free(relations->rels[i].divide_leading);
     }
     
     free(relations->rels);

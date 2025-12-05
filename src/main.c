@@ -20,6 +20,11 @@
 #include "algebraic_base.h"
 #include "quadratic_characters.h"
 #include "mono_cpu_sieve.h"
+#include "build_matrix.h"
+#include "block_lanczos.h"
+#include "wiedemann.h"
+#include "gaussian_elimination.h"
+#include "extract_solution.h"
 
 int main()
 {
@@ -190,7 +195,7 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base(&Algebraic_base, primes, g_x, n);
+    build_algebraic_base(&Algebraic_base, primes, f_x, n, state);
 
     size_t nb_Algebraic_pairs = 0;
 
@@ -220,8 +225,8 @@ int main()
     quadratic_character_base quad_char_base;
     quadratic_base_init(&quad_char_base);
 
-    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2));
-    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2));
+    // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2), state);
+    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
 
     if (factor) // If we have found a factor while building the quadratic characters base
     {
@@ -247,7 +252,7 @@ int main()
         log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
         if (logfile) fclose(logfile);
 
-        mpz_clears(factor1, factor2);
+        mpz_clears(factor1, factor2, NULL);
         return 1;
     }
 
@@ -296,7 +301,10 @@ int main()
     mpz_t g_derivative_eval;
     mpz_init(g_derivative_eval);
 
-    evaluate_homogeneous(g_derivative_eval, g_derivative, m0, m1);
+    mpz_mul(tmp, leading_coeff, m0);
+
+    evaluate_homogeneous(g_derivative_eval, g_derivative, tmp, m1);
+    mpz_mod(g_derivative_eval, g_derivative_eval, n);
 
     // Computing the set of small inert primes
 
@@ -396,7 +404,91 @@ int main()
 
     // Linear algebra
 
+    dyn_array_classic sparse_matrix;
+    init_classic(&sparse_matrix);
+
+    build_sparse_matrix(
+        &sparse_matrix,
+        &relations,
+        &primes,
+        &Algebraic_base,
+        &quad_char_base,
+        divide_leading,
+        len_divide_leading
+    );
+
     // Square root extraction
 
-    mpz_clears(n, m0, m1, NULL);
+    bool *kernel_vector = calloc(relations.len, sizeof(bool));
+
+    mpz_t divisor;
+    mpz_init(divisor);
+
+    while (true)
+    {
+        dyn_array kernel_vectors;
+        init(&kernel_vectors);
+
+        block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
+
+        for (size_t i = 0 ; i < kernel_vectors.len ; i++)
+        {
+            convert_to_vec(kernel_vectors.start[i], relations.len, kernel_vector);
+
+            extract_solution(
+                divisor,
+                &relations,
+                kernel_vector,
+                &primes,
+                g_x,
+                g_derivative_sq,
+                leading_coeff,
+                n,
+                m0,
+                m1,
+                g_derivative_eval,
+                inert_set.start[inert_set.len-1],
+                mpz_get_ui(sieve_len),
+                state,
+                logfile
+            );
+
+            mpz_gcd(divisor, divisor, n);
+
+            if (mpz_cmp_ui(divisor, 1) && mpz_cmp(divisor, n))
+            {
+                mpz_t factor1, factor2;
+                mpz_inits(factor1, factor2, NULL);
+
+                char primality_factor1, primality_factor2;
+
+                mpz_set(factor1, divisor);
+                mpz_divexact(factor2, n, factor1);
+
+                if (mpz_probab_prime_p(factor1, 100) > 0)
+                {
+                    primality_factor1 = 'p';
+                } else {primality_factor1 = 'C';}
+
+                if (mpz_probab_prime_p(factor2, 100) > 0)
+                {
+                    primality_factor2 = 'p';
+                } else {primality_factor2 = 'C';}
+
+                log_blank_line(logfile);
+                log_gmp_msg(logfile, "%Zd = %Zd (%c) x %Zd (%c)", n, factor1, primality_factor1, factor2, primality_factor2);
+                if (logfile) fclose(logfile);
+
+                mpz_clears(factor1, factor2, NULL);
+
+                mpz_clears(n, m0, m1, divisor, NULL);
+
+                return 1;
+            }
+
+            log_blank_line(logfile);
+        }
+
+        free(kernel_vectors.start);
+    }
 }

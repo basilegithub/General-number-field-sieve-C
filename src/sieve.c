@@ -20,6 +20,7 @@ void sieve(
     mpz_t leading_coeff,
     mpz_t m0,
     mpz_t m1,
+    size_t len_divide_leading,
     unsigned long b,
     unsigned long offset,
     unsigned long sieve_len,
@@ -93,29 +94,30 @@ void sieve(
     signed long a = -sieve_len;
 
     mpz_mul_ui(rational_eval, m0, b);
+    mpz_neg(rational_eval, rational_eval);
     mpz_submul_ui(rational_eval, m1, sieve_len);
 
     for (size_t i = 0 ; i < 2*sieve_len ; i++)
     {
         evaluate_poly(algebraic_eval, sieve_poly, a);
 
-        if (a && !(gcd(a, b) - 1) && mpz_cmp_ui(rational_eval, 0))
+        if (a && !(gcd(abs(a), b) - 1) && mpz_cmp_ui(rational_eval, 0))
         {
             mpz_mul(full_eval, rational_eval, algebraic_eval);
 
             if (mpz_cmp_ui(full_eval, 0) && sieve_array[i] + offset > mpz_sizeinbase(full_eval, 2)-1)
             {
                 // Add smooth candidate
-                init_new_relation(smooth_candidates);
+                init_new_relation(smooth_candidates, len_divide_leading);
 
                 mpz_set_ui(tmp, b);
                 mpz_neg(tmp, tmp);
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 1); // p(x) = -b*x
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 1); // q(x) = -b*x
 
-                mpz_mul_ui(tmp, leading_coeff, a);
+                mpz_mul_si(tmp, leading_coeff, a);
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 0); // p(x) = c_d*a - b*x
-                mpz_set_ui(tmp, a);
+                mpz_set_si(tmp, a);
                 set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 0); // q(x) = a - b*x
 
                 mpz_set(smooth_candidates->rels[smooth_candidates->len-1].rational_norm, rational_eval);
@@ -124,11 +126,18 @@ void sieve(
 
                 smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
 
+                for (size_t i = 0 ; i < len_divide_leading ; i++)
+                {
+                    smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                }
+
                 // Large prime array and list are left with no large prime for now
             }
         }
 
         a++;
+
+        mpz_add(rational_eval, rational_eval, m1);
     }
 
     mpz_clears(rational_eval, algebraic_eval, full_eval, tmp, NULL);

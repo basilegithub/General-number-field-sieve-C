@@ -9,7 +9,7 @@
 #include <stddef.h>
 
 #include "dynamic_arrays.h"
-#include "utils.h"
+#include "linear_algebra_utils.h"
 #include "logs.h"
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
@@ -340,6 +340,7 @@ void block_lanczos(dyn_array *output, dyn_array_classic sparse_matrix, size_t nb
     free(tmp_matrix);
 
     log_msg(logfile, "Kernel size: %lu", output->len);
+    log_blank_line(logfile);
 
     if (output->len == 0)
     {

@@ -23,6 +23,6 @@ typedef struct
 
 void quadratic_base_init(quadratic_character_base *b);
 void quadratic_base_clear(quadratic_character_base *b);
-unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime);
+unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime, gmp_randstate_t state);
 
 #endif // QUADRATIC_CHARACTERS_H
