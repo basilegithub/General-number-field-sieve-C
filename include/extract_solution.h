@@ -6,6 +6,7 @@
 #include "NFS_relations.h"
 
 void extract_solution(
+    mpz_t factor,
     nfs_relations *relations,
     bool *kernel_vector,
     dyn_array_classic *rational_primes,

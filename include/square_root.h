@@ -26,4 +26,12 @@ void extract_algebraic_square_root(
     gmp_randstate_t state
 );
 
+void Newton_lift(
+    polynomial_mpz *algebraic_root,
+    polynomial_mpz *algebraic_square,
+    polynomial_mpz f,
+    mpz_t bound,
+    unsigned long p
+);
+
 #endif // SQUARE_ROOT_H

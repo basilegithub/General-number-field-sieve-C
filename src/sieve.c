@@ -94,13 +94,14 @@ void sieve(
     signed long a = -sieve_len;
 
     mpz_mul_ui(rational_eval, m0, b);
+    mpz_neg(rational_eval, rational_eval);
     mpz_submul_ui(rational_eval, m1, sieve_len);
 
     for (size_t i = 0 ; i < 2*sieve_len ; i++)
     {
         evaluate_poly(algebraic_eval, sieve_poly, a);
 
-        if (a && !(gcd(a, b) - 1) && mpz_cmp_ui(rational_eval, 0))
+        if (a && !(gcd(abs(a), b) - 1) && mpz_cmp_ui(rational_eval, 0))
         {
             mpz_mul(full_eval, rational_eval, algebraic_eval);
 

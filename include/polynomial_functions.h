@@ -26,6 +26,7 @@ bool poly_equal(polynomial_mpz *f, polynomial_mpz *g);
 void poly_prod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
 void poly_div(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g);
 void poly_div_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p);
+void poly_div_mod_mpz(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, mpz_t p);
 void quotient_poly_mod(polynomial_mpz *res, polynomial_mpz f, polynomial_mpz g, unsigned long p);
 void gcd_poly_mod(polynomial_mpz *res, polynomial_mpz *f, polynomial_mpz *g, unsigned long p);
 

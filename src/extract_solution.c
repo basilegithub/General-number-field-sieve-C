@@ -8,6 +8,7 @@
 #include "square_root.h"
 
 void extract_solution(
+    mpz_t factor,
     nfs_relations *relations,
     bool *kernel_vector,
     dyn_array_classic *rational_primes,
@@ -45,8 +46,6 @@ void extract_solution(
 
     mpz_mul(x, x, rational_square_root);
     mpz_mod(x, x, n);
-    
-    gmp_printf("x = %Zd\n", rational_square_root);
 
     unsigned long S = 0;
 
@@ -56,8 +55,6 @@ void extract_solution(
     init_poly(&tmp_poly2);
 
     copy_polynomial(&algebraic_square, &f_prime_sq);
-
-    // printf("[");
 
     for (size_t i = 0 ; i < relations->len ; i++)
     {
@@ -73,11 +70,12 @@ void extract_solution(
     mpz_t tmp_mpz, tmp_mpz2;
     mpz_inits(tmp_mpz, tmp_mpz2, NULL);
 
-    mpz_pow_ui(tmp_mpz, leading_coeff, S>>1);
-    mpz_mod(tmp_mpz, tmp_mpz, n);
+    mpz_powm_ui(tmp_mpz, leading_coeff, S>>1, n);
 
     mpz_mul(x, x, tmp_mpz);
     mpz_mod(x, x, n);
+
+    // gmp_printf("x = %Zd\n", x);
 
     mpz_t coeff_bound;
     mpz_init_set_ui(coeff_bound, 1);
@@ -99,10 +97,20 @@ void extract_solution(
     mpz_init(algebraic_square_root);
 
     extract_algebraic_square_root(algebraic_square_root, f_x, algebraic_square, m0, m1, leading_coeff, coeff_bound, inert_prime, state);
+    mpz_mod(algebraic_square_root, algebraic_square_root, n);
+
+    mpz_powm_ui(tmp_mpz, m1, S>>1, n);
+
+    mpz_mul(algebraic_square_root, algebraic_square_root, tmp_mpz);
+    mpz_mod(algebraic_square_root, algebraic_square_root, n);
+
+    // gmp_printf("y = %Zd\n", algebraic_square_root);
+
+    mpz_add(factor, x, algebraic_square_root);
 
     free_polynomial(&tmp_poly);
     free_polynomial(&tmp_poly2);
     free_polynomial(&algebraic_square);
 
-    mpz_clears(f_norm, fd, tmp_mpz, tmp_mpz2, coeff_bound, rational_square_root, algebraic_square_root, NULL);
+    mpz_clears(f_norm, fd, tmp_mpz, tmp_mpz2, coeff_bound, rational_square_root, x, algebraic_square_root, NULL);
 }

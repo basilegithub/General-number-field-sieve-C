@@ -301,7 +301,10 @@ int main()
     mpz_t g_derivative_eval;
     mpz_init(g_derivative_eval);
 
-    evaluate_homogeneous(g_derivative_eval, g_derivative, m0, m1);
+    mpz_mul(tmp, leading_coeff, m0);
+
+    evaluate_homogeneous(g_derivative_eval, g_derivative, tmp, m1);
+    mpz_mod(g_derivative_eval, g_derivative_eval, n);
 
     // Computing the set of small inert primes
 
@@ -414,32 +417,52 @@ int main()
         len_divide_leading
     );
 
-    dyn_array kernel_vectors;
-    init(&kernel_vectors);
-
-    block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
-
     // Square root extraction
 
     bool *kernel_vector = calloc(relations.len, sizeof(bool));
 
-    convert_to_vec(kernel_vectors.start[0], relations.len, kernel_vector);
+    mpz_t divisor;
+    mpz_init(divisor);
 
-    extract_solution(
-        &relations,
-        kernel_vector,
-        &primes,
-        f_x,
-        g_derivative_sq,
-        leading_coeff,
-        n,
-        m0,
-        m1,
-        g_derivative_eval,
-        inert_set.start[inert_set.len-1],
-        mpz_get_ui(sieve_len),
-        state
-    );
+    while (true)
+    {
+        dyn_array kernel_vectors;
+        init(&kernel_vectors);
 
-    mpz_clears(n, m0, m1, NULL);
+        block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
+
+        for (size_t i = 0 ; i < kernel_vectors.len ; i++)
+        {
+            convert_to_vec(kernel_vectors.start[i], relations.len, kernel_vector);
+
+            extract_solution(
+                divisor,
+                &relations,
+                kernel_vector,
+                &primes,
+                g_x,
+                g_derivative_sq,
+                leading_coeff,
+                n,
+                m0,
+                m1,
+                g_derivative_eval,
+                inert_set.start[inert_set.len-1],
+                mpz_get_ui(sieve_len),
+                state
+            );
+
+            mpz_gcd(divisor, n, divisor);
+
+            mpz_divexact(tmp, n, divisor);
+
+            gmp_printf("Factors found : %Zd %Zd\n\n", divisor, tmp);
+
+            if (mpz_cmp_ui(divisor, 1) && mpz_cmp_ui(tmp, 1)) return 1;
+        }
+
+        free(kernel_vectors.start);
+    }
+
+    mpz_clears(n, m0, m1, divisor, NULL);
 }
