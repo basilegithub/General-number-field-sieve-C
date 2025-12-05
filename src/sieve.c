@@ -96,47 +96,151 @@ void sieve(
     mpz_neg(rational_eval, rational_eval);
     mpz_submul_ui(rational_eval, m1, sieve_len);
 
-    for (size_t i = 0 ; i < 2*sieve_len ; i++)
+    if (b&1)
     {
-        evaluate_poly(algebraic_eval, sieve_poly, a);
-
-        if (a && !(gcd(abs(a), b) - 1) && mpz_cmp_ui(rational_eval, 0))
+        mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
+        for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
-            mpz_mul(full_eval, rational_eval, algebraic_eval);
-
-            if (mpz_cmp_ui(full_eval, 0) && sieve_array[i] + offset > mpz_sizeinbase(full_eval, 2)-1)
+            evaluate_poly(tmp, sieve_poly, a+i);
+            mpz_init_set(algebraic_difs[i], tmp);
+        }
+        
+        for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
+        {
+            for (size_t k = sieve_poly.degree ; k > q-1 ; k--)
             {
-                // Add smooth candidate
-                init_new_relation(smooth_candidates, len_divide_leading);
-
-                mpz_set_ui(tmp, b);
-                mpz_neg(tmp, tmp);
-                set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 1); // p(x) = -b*x
-                set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 1); // q(x) = -b*x
-
-                mpz_mul_si(tmp, leading_coeff, a);
-                set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 0); // p(x) = c_d*a - b*x
-                mpz_set_si(tmp, a);
-                set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 0); // q(x) = a - b*x
-
-                mpz_set(smooth_candidates->rels[smooth_candidates->len-1].rational_norm, rational_eval);
-
-                mpz_set(smooth_candidates->rels[smooth_candidates->len-1].algebraic_norm, algebraic_eval);
-
-                smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
-
-                for (size_t i = 0 ; i < len_divide_leading ; i++)
-                {
-                    smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
-                }
-
-                // Large prime array and list are left with no large prime for now
+                mpz_sub(algebraic_difs[k], algebraic_difs[k], algebraic_difs[k-1]);
             }
         }
 
-        a++;
+        mpz_set(algebraic_eval, algebraic_difs[0]);
 
-        mpz_add(rational_eval, rational_eval, m1);
+        for (size_t i = 0 ; i < 2*sieve_len ; i++)
+        {
+            if (a && !(gcd(abs(a), b) - 1) && mpz_cmp_ui(rational_eval, 0))
+            {
+                mpz_mul(full_eval, rational_eval, algebraic_eval);
+
+                if (mpz_cmp_ui(full_eval, 0) && sieve_array[i] + offset > mpz_sizeinbase(full_eval, 2)-1)
+                {
+                    // Add smooth candidate
+                    init_new_relation(smooth_candidates, len_divide_leading);
+
+                    mpz_set_ui(tmp, b);
+                    mpz_neg(tmp, tmp);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 1); // p(x) = -b*x
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 1); // q(x) = -b*x
+
+                    mpz_mul_si(tmp, leading_coeff, a);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 0); // p(x) = c_d*a - b*x
+                    mpz_set_si(tmp, a);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 0); // q(x) = a - b*x
+
+                    mpz_set(smooth_candidates->rels[smooth_candidates->len-1].rational_norm, rational_eval);
+
+                    mpz_set(smooth_candidates->rels[smooth_candidates->len-1].algebraic_norm, algebraic_eval);
+
+                    smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
+
+                    for (size_t i = 0 ; i < len_divide_leading ; i++)
+                    {
+                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                    }
+
+                    // Large prime array and list are left with no large prime for now
+                }
+            }
+
+            a++;
+
+            mpz_add(algebraic_eval, algebraic_eval, algebraic_difs[1]);
+
+            for (size_t q = 1 ; q < sieve_poly.degree ; q++)
+            {
+                mpz_add(algebraic_difs[q], algebraic_difs[q], algebraic_difs[q+1]);
+            }
+
+            mpz_add(rational_eval, rational_eval, m1);
+        }
+
+        for (size_t i = 0 ; i <= sieve_poly.degree ; i++) mpz_clear(algebraic_difs[i]);
+        free(algebraic_difs);
+    }
+    else
+    {
+        size_t init = 0;
+
+        if (!(a&1))
+        {
+            a++;
+            init = 1;
+            mpz_add(rational_eval, rational_eval, m1);
+        }
+
+        mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
+        for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
+        {
+            evaluate_poly(tmp, sieve_poly, a+2*i);
+            mpz_init_set(algebraic_difs[i], tmp);
+        }
+        
+        for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
+        {
+            for (size_t k = sieve_poly.degree ; k > q-1 ; k--)
+            {
+                mpz_sub(algebraic_difs[k], algebraic_difs[k], algebraic_difs[k-1]);
+            }
+        }
+
+        mpz_set(algebraic_eval, algebraic_difs[0]);
+
+        for (size_t i = init ; i < 2*sieve_len ; i += 2)
+        {
+            if (a && !(gcd(abs(a), b) - 1) && mpz_cmp_ui(rational_eval, 0))
+            {
+                mpz_mul(full_eval, rational_eval, algebraic_eval);
+
+                if (mpz_cmp_ui(full_eval, 0) && sieve_array[i] + offset > mpz_sizeinbase(full_eval, 2)-1)
+                {
+                    // Add smooth candidate
+                    init_new_relation(smooth_candidates, len_divide_leading);
+
+                    mpz_set_ui(tmp, b);
+                    mpz_neg(tmp, tmp);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 1); // p(x) = -b*x
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 1); // q(x) = -b*x
+
+                    mpz_mul_si(tmp, leading_coeff, a);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_g, tmp, 0); // p(x) = c_d*a - b*x
+                    mpz_set_si(tmp, a);
+                    set_coeff(&smooth_candidates->rels[smooth_candidates->len-1].poly_f, tmp, 0); // q(x) = a - b*x
+
+                    mpz_set(smooth_candidates->rels[smooth_candidates->len-1].rational_norm, rational_eval);
+
+                    mpz_set(smooth_candidates->rels[smooth_candidates->len-1].algebraic_norm, algebraic_eval);
+
+                    smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
+
+                    for (size_t i = 0 ; i < len_divide_leading ; i++)
+                    {
+                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                    }
+
+                    // Large prime array and list are left with no large prime for now
+                }
+            }
+
+            a += 2;
+
+            mpz_add(algebraic_eval, algebraic_eval, algebraic_difs[1]);
+
+            for (size_t q = 1 ; q < sieve_poly.degree ; q++)
+            {
+                mpz_add(algebraic_difs[q], algebraic_difs[q], algebraic_difs[q+1]);
+            }
+
+            mpz_addmul_ui(rational_eval, m1, 2);
+        }
     }
 
     mpz_clears(rational_eval, algebraic_eval, full_eval, tmp, NULL);
