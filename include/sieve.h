@@ -15,9 +15,8 @@
 void sieve(
     nfs_relations *smooth_candidates,
     polynomial_mpz sieve_poly,
-    dyn_array_classic rat_base,
-    algebraic_base alg_base,
-    dyn_array_classic logs,
+    algebraic_base *alg_base,
+    dyn_array_classic *logs,
     mpz_t leading_coeff,
     mpz_t m0,
     mpz_t m1,

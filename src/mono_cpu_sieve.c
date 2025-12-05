@@ -86,9 +86,8 @@ void mono_cpu_sieve(
         sieve(
             &smooth_candidates,
             sieve_poly,
-            rat_base,
-            alg_base,
-            logs,
+            &alg_base,
+            &logs,
             leading_coeff,
             m0,
             m1,
@@ -101,7 +100,7 @@ void mono_cpu_sieve(
 
         // Verify smooth candidates
 
-        naive_smooth(&smooth_candidates, rat_base, const1, const2, state);
+        naive_smooth(&smooth_candidates, &rat_base, const1, const2, state);
 
         // Append true smooths to the collected relations
 
@@ -130,10 +129,6 @@ void mono_cpu_sieve(
 
         // Handle partial relations
 
-        // Increment b
-
-        b++;
-
         // Cleanup
 
         clear_relations(&smooth_candidates);
@@ -149,6 +144,10 @@ void mono_cpu_sieve(
         );
 
         fflush(stdout);
+
+        // Increment b
+
+        b++;
     }
 
     printf("\r");

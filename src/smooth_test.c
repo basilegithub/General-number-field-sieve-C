@@ -103,13 +103,13 @@ void pollard_rho(const mpz_t m, mpz_t p1, mpz_t p2, gmp_randstate_t state)
     }
 }
 
-void naive_smooth(nfs_relations *smooth_candidates, dyn_array_classic primes, mpz_t limit, mpz_t limit_2, gmp_randstate_t state)
+void naive_smooth(nfs_relations *smooth_candidates, dyn_array_classic *primes, mpz_t limit, mpz_t limit_2, gmp_randstate_t state)
 {
     mpz_t remaining_factor, prime_divisor_1, prime_divisor_2;
     mpz_inits(remaining_factor, prime_divisor_1, prime_divisor_2, NULL);
 
     unsigned long div_count;
-    unsigned long max_prime = primes.start[primes.len-1];
+    unsigned long max_prime = primes->start[primes->len-1];
     bool flag_is_smooth;
 
     for (size_t i = 0 ; i < smooth_candidates->len ; i++)
@@ -118,9 +118,9 @@ void naive_smooth(nfs_relations *smooth_candidates, dyn_array_classic primes, mp
         mpz_abs(remaining_factor, remaining_factor);
         flag_is_smooth = false;
         
-        for (unsigned long j = 0 ; j < primes.len ; j++)
+        for (unsigned long j = 0 ; j < primes->len ; j++)
         {
-            mpz_set_ui(prime_divisor_1, primes.start[j]);
+            mpz_set_ui(prime_divisor_1, primes->start[j]);
             div_count = mpz_remove(remaining_factor, remaining_factor, prime_divisor_1);
 
             if (div_count > 0 && mpz_cmp_ui(remaining_factor, max_prime) < 1)

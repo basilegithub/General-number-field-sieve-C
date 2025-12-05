@@ -14,9 +14,8 @@
 void sieve(
     nfs_relations *smooth_candidates,
     polynomial_mpz sieve_poly,
-    dyn_array_classic rat_base,
-    algebraic_base alg_base,
-    dyn_array_classic logs,
+    algebraic_base *alg_base,
+    dyn_array_classic *logs,
     mpz_t leading_coeff,
     mpz_t m0,
     mpz_t m1,
@@ -28,7 +27,7 @@ void sieve(
 )
 {
     algebraic_base_prime *sieve_prime;
-    sieve_prime = alg_base.start;
+    sieve_prime = alg_base->start;
 
     unsigned long p, r;
 
@@ -45,7 +44,7 @@ void sieve(
 
         shift = sieve_len%p;
 
-        log = logs.start[i];
+        log = logs->start[i];
 
         mpz_set(tmp, m1);
         mpz_mod_ui(tmp, tmp, p);
