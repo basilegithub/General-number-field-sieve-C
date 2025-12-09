@@ -205,12 +205,14 @@ int main()
     {
         nb_Algebraic_pairs += alg_prime->roots.len;
 
+        // printf("%lu: %lu\n", alg_prime->prime, alg_prime->roots.len);
+
         alg_prime = alg_prime->next;
     }
 
-    // Large prime constants
-
     log_msg(logfile, "Algebraic base of size %zu generated.", nb_Algebraic_pairs);
+
+    // Large prime constants
 
     mpz_t large_prime_constant1, large_prime_constant2;
     mpz_inits(large_prime_constant1, large_prime_constant2, NULL);
@@ -382,10 +384,9 @@ int main()
         &relations,
         f_x,
         g_x,
-        primes,
-        Algebraic_base,
+        &primes,
+        &Algebraic_base,
         nb_Algebraic_pairs,
-        quad_char_base,
         nb_Quadratic_characters,
         leading_coeff,
         prod_primes,
@@ -397,7 +398,7 @@ int main()
         divide_leading,
         pow_div,
         len_divide_leading,
-        logs,
+        &logs,
         state,
         logfile
     );

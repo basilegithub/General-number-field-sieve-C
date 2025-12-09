@@ -57,7 +57,7 @@ void sieve(
             mpz_mod_ui(tmp, tmp, p);
             rat_root = (shift + (mpz_get_ui(tmp)*b)%p)%p;
 
-            for (size_t j = rat_root ; j < 2*sieve_len ; j++)
+            for (size_t j = rat_root ; j < 2*sieve_len ; j += p)
             {
                 sieve_array[j] += log;
             }
@@ -70,7 +70,7 @@ void sieve(
             r = sieve_prime->roots.start[i];
             alg_root = (shift + (b*r)%p)%p;
 
-            for (size_t k = alg_root ; k < 2*sieve_len ; k++)
+            for (size_t k = alg_root ; k < 2*sieve_len ; k += p)
             {
                 sieve_array[k] += log;
             }
