@@ -16,10 +16,9 @@ void mono_cpu_sieve(
     nfs_relations *relations,
     polynomial_mpz f_x,
     polynomial_mpz g_x,
-    dyn_array_classic rat_base,
-    algebraic_base alg_base,
+    dyn_array_classic *rat_base,
+    algebraic_base *alg_base,
     size_t nb_Algebraic_pairs,
-    quadratic_character_base quad_base,
     size_t nb_Quadratic_characters,
     mpz_t leading_coeff,
     mpz_t prod_primes,
@@ -31,14 +30,15 @@ void mono_cpu_sieve(
     unsigned long *divide_leading,
     mpz_t *pow_div,
     size_t len_divide_leading,
-    dyn_array_classic logs,
+    dyn_array_classic *logs,
     gmp_randstate_t state,
     FILE *logfile
 )
 {
-    size_t required_relations = 3 + rat_base.len + nb_Algebraic_pairs + nb_Quadratic_characters + len_divide_leading;
+    size_t required_relations = 3 + rat_base->len + nb_Algebraic_pairs + nb_Quadratic_characters + len_divide_leading;
 
     unsigned long offset = mpz_sizeinbase(const2, 2);
+    // unsigned long offset = 0;
 
     log_msg(logfile, "Sieving started...");
     log_msg(logfile, "Need to collect at least %zu relations.", required_relations);
@@ -86,7 +86,6 @@ void mono_cpu_sieve(
         sieve(
             &smooth_candidates,
             sieve_poly,
-            rat_base,
             alg_base,
             logs,
             leading_coeff,
@@ -130,10 +129,6 @@ void mono_cpu_sieve(
 
         // Handle partial relations
 
-        // Increment b
-
-        b++;
-
         // Cleanup
 
         clear_relations(&smooth_candidates);
@@ -149,6 +144,10 @@ void mono_cpu_sieve(
         );
 
         fflush(stdout);
+
+        // Increment b
+
+        b++;
     }
 
     printf("\r");

@@ -34,20 +34,13 @@ void evaluate_poly(mpz_t res, polynomial_mpz f, signed long x)
     }
     else
     {
-        mpz_t tmp_res;
-        mpz_init(tmp_res);
-
-        mpz_set(tmp_res, f.coeffs[0]);
+        mpz_set(res, f.coeffs[0]);
 
         for (size_t i = 1 ; i <= f.degree ; i++)
         {
-            mpz_mul_si(tmp_res, tmp_res, x);
-            mpz_add(tmp_res, tmp_res, f.coeffs[i]);
+            mpz_mul_si(res, res, x);
+            mpz_add(res, res, f.coeffs[i]);
         }
-
-        mpz_set(res, tmp_res);
-
-        mpz_clear(tmp_res);
     }
 }
 
@@ -83,27 +76,22 @@ unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
 
 void evaluate_homogeneous(mpz_t res, polynomial_mpz f, mpz_t x, mpz_t y)
 {
-    mpz_set_ui(res, 0);
+    mpz_set(res, f.coeffs[0]);
 
-    mpz_t tmp, tmp2, tmp3;
-    mpz_inits(tmp, tmp2, tmp3, NULL);
+    mpz_t tmp;
+    mpz_init(tmp);
 
-    mpz_pow_ui(tmp, x, f.degree);
-    mpz_set_ui(tmp2, 1);
+    mpz_set_ui(tmp, 1);
 
-    for (size_t i = 0 ; i < f.degree ; i++)
+    for (size_t i = 1 ; i <= f.degree ; i++)
     {
-        mpz_mul(tmp3, tmp, tmp2);
-        mpz_addmul(res, tmp3, f.coeffs[i]);
+        mpz_mul(tmp, tmp, y);
 
-        mpz_divexact(tmp, tmp, x);
-        mpz_mul(tmp2, tmp2, y);
+        mpz_mul(res, res, x);
+        mpz_addmul(res, tmp, f.coeffs[i]);
     }
 
-    mpz_mul(tmp3, tmp, tmp2);
-    mpz_addmul(res, tmp3, f.coeffs[f.degree]);
-
-    mpz_clears(tmp, tmp2, tmp3, NULL);
+    mpz_clear(tmp);
 }
 
 void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p)
