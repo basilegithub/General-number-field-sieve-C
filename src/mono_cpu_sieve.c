@@ -32,7 +32,8 @@ void mono_cpu_sieve(
     size_t len_divide_leading,
     dyn_array_classic *logs,
     gmp_randstate_t state,
-    FILE *logfile
+    FILE *logfile,
+    int flag_batch_smooth
 )
 {
     size_t required_relations = 3 + rat_base->len + nb_Algebraic_pairs + nb_Quadratic_characters + len_divide_leading;
@@ -112,35 +113,38 @@ void mono_cpu_sieve(
 
         // Verify smooth candidates
         
-
-        // Naive smoothness test
-
-        // naive_smooth(&smooth_candidates, rat_base, const1, const2, 0, state);
-
-
-        // Batch smoothness test
-
-        size_t index;
-        index = 0;
-
-        while (index + batch_smooth_size < smooth_candidates.len)
+        if (flag_batch_smooth)
         {
-            batch_smooth(
-                &smooth_candidates,
-                &reported,
-                &tree_array,
-                prod_primes,
-                prod_primes_p1,
-                const1,
-                const2,
-                index,
-                state
-            );
+            // Batch smoothness test
 
-            index += batch_smooth_size;
+            size_t index;
+            index = 0;
+
+            while (index + batch_smooth_size < smooth_candidates.len)
+            {
+                batch_smooth(
+                    &smooth_candidates,
+                    &reported,
+                    &tree_array,
+                    prod_primes,
+                    prod_primes_p1,
+                    const1,
+                    const2,
+                    index,
+                    state
+                );
+
+                index += batch_smooth_size;
+            }
+
+            naive_smooth(&smooth_candidates, rat_base, const1, const2, index, state);
         }
+        else
+        {
+            // Naive smoothness test
 
-        naive_smooth(&smooth_candidates, rat_base, const1, const2, index, state);
+            naive_smooth(&smooth_candidates, rat_base, const1, const2, 0, state);
+        }
 
         // Append true smooths to the collected relations
 
