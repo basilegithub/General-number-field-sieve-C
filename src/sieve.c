@@ -57,6 +57,9 @@ void sieve(
             mpz_mod_ui(tmp, tmp, p);
             rat_root = (shift + (mpz_get_ui(tmp)*b)%p)%p;
 
+            // gmp_printf("%lu: %lu, %lu %Zd\n", p, rat_root, b, m0);
+
+            // #pragma omp simd
             for (size_t j = rat_root ; j < 2*sieve_len ; j += p)
             {
                 sieve_array[j] += log;
@@ -67,9 +70,10 @@ void sieve(
 
         for (size_t j = 0 ; j < sieve_prime->roots.len ; j++)
         {
-            r = sieve_prime->roots.start[i];
+            r = sieve_prime->roots.start[j];
             alg_root = (shift + (b*r)%p)%p;
 
+            // #pragma omp simd
             for (size_t k = alg_root ; k < 2*sieve_len ; k += p)
             {
                 sieve_array[k] += log;
@@ -85,7 +89,7 @@ void sieve(
 
     // Check for smooth candidates
 
-    // For now use naive polynomial evaluation
+    // Use finite differences for polynomial evaluation
 
     mpz_t rational_eval, algebraic_eval, full_eval;
     mpz_inits(rational_eval, algebraic_eval, full_eval, NULL);
@@ -101,8 +105,8 @@ void sieve(
         mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
-            evaluate_poly(tmp, sieve_poly, a+i);
-            mpz_init_set(algebraic_difs[i], tmp);
+            mpz_init(algebraic_difs[i]);
+            evaluate_poly(algebraic_difs[i], sieve_poly, a+i);
         }
         
         for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
@@ -166,7 +170,7 @@ void sieve(
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++) mpz_clear(algebraic_difs[i]);
         free(algebraic_difs);
     }
-    else
+    else // If b is even, then a cannot be even -> skip them
     {
         size_t init = 0;
 
@@ -180,8 +184,8 @@ void sieve(
         mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
-            evaluate_poly(tmp, sieve_poly, a+2*i);
-            mpz_init_set(algebraic_difs[i], tmp);
+            mpz_init(algebraic_difs[i]);
+            evaluate_poly(algebraic_difs[i], sieve_poly, a + 2*i);
         }
         
         for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
