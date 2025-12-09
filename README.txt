@@ -7,7 +7,13 @@ This is a new project aiming at concluding my work on factoring algorithms.
 
 This project is a C implementation of the General number field sieve to factor integers.
 
-No feature is working yet, but I aim at implementing the same one that are present in the Python implementation
+This a first working version, which contains the following features:
+- Basic polynomial selection (d-th root) ;
+- Naive sieving ;
+- Naive smoothness test ;
+- No large primes allowed ;
+- Block Lanczos used for the linear algebra step (Gaussian elimination and Wiedemann algorithm implemented, but not available to choose for now) ;
+- Lifting method to extract the algebraic square root.
 
 ##### Sources #####
 
@@ -43,9 +49,7 @@ Square root algorithms
 
 ##### running the algortihm #####
 
-When running the main.py file, the required argument is --n the number you want to factor.
-
-A suitable command looks like "python main.py --n [your_number]"
+You can run the GNFS.exe in the build folder, it will ask you for the number you want to factor.
 
 ##### config parameters #####
 
@@ -53,4 +57,20 @@ None for now.
 
 ##### General discussion #####
 
-Everything is to be done in this project.
+Here are the next steps :
+
+- Implement large primes handling ;
+
+- Implement Kleinjung polynomial search algorithm ;
+
+- Implement parallel polynomial search ;
+
+- Implement parallel sieving ;
+
+- Implement batch smoothness test ;
+
+- Implement Couveignes algorithm for square root extraction ;
+
+- Setup the config file ;
+
+- Optimize heavily the code.

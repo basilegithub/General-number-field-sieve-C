@@ -16,7 +16,7 @@ void pollard_rho(const mpz_t m, mpz_t p1, mpz_t p2, gmp_randstate_t state)
     mpz_t a, b, d, e, x, y, X, Y, tmp;
     mpz_inits(a, b, d, e, x, y, X, Y, tmp, NULL);
 
-    while (1)
+    while (true)
     {
         mpz_sub_ui(tmp, m, 4);
         mpz_urandomm(a, state, tmp);
@@ -115,7 +115,7 @@ void naive_smooth(
     mpz_inits(remaining_factor, prime_divisor_1, prime_divisor_2, NULL);
 
     unsigned long div_count;
-    unsigned long max_prime = primes->start[primes->len-1];
+    const unsigned long max_prime = primes->start[primes->len-1];
     bool flag_is_smooth;
 
     for (size_t i = 0 ; i < smooth_candidates->len ; i++)
