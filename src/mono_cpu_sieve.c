@@ -52,6 +52,18 @@ void mono_cpu_sieve(
     mpz_t tmp;
     mpz_init(tmp);
 
+    mpz_t prod_primes_p1;
+    mpz_init(prod_primes_p1);
+    mpz_add_ui(prod_primes_p1, prod_primes, 1);
+
+    size_t batch_smooth_size = 512;
+
+    dyn_array reported;
+    init2_len(&reported, batch_smooth_size);
+
+    dyn_array tree_array;
+    init2_len(&tree_array, 2*reported.len - 1);
+
     unsigned short *sieve_array = calloc(2*sieve_len, sizeof(unsigned short));
 
     while (relations->len < required_relations+20)
@@ -99,8 +111,36 @@ void mono_cpu_sieve(
         );
 
         // Verify smooth candidates
+        
 
-        naive_smooth(&smooth_candidates, rat_base, const1, const2, state);
+        // Naive smoothness test
+
+        // naive_smooth(&smooth_candidates, rat_base, const1, const2, 0, state);
+
+
+        // Batch smoothness test
+
+        size_t index;
+        index = 0;
+
+        while (index + batch_smooth_size < smooth_candidates.len)
+        {
+            batch_smooth(
+                &smooth_candidates,
+                &reported,
+                &tree_array,
+                prod_primes,
+                prod_primes_p1,
+                const1,
+                const2,
+                index,
+                state
+            );
+
+            index += batch_smooth_size;
+        }
+
+        naive_smooth(&smooth_candidates, rat_base, const1, const2, index, state);
 
         // Append true smooths to the collected relations
 
@@ -156,7 +196,10 @@ void mono_cpu_sieve(
     log_msg(logfile, "b = %lu | %lu/(%lu+20) relations found", b, relations->len, required_relations);
     log_blank_line(logfile);
 
-    mpz_clears(tmp, gcd_b_cd, NULL);
+    mpz_clears(tmp, gcd_b_cd, prod_primes_p1, NULL);
 
     free(sieve_array);
+
+    free_dyn_array(&reported);
+    free_dyn_array(&tree_array);
 }
