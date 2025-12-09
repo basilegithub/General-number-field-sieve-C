@@ -373,7 +373,7 @@ int main()
 
     mpz_t prod_primes;
     mpz_init_set_ui(prod_primes, 1);
-    for (size_t i = 0 ; i < primes.len ; i++) mpz_mul_ui(prod_primes, prod_primes, primes.start[i]);
+    for (size_t i = 1 ; i < primes.len ; i++) mpz_mul_ui(prod_primes, prod_primes, primes.start[i]);
 
     // Collecting relations
 
