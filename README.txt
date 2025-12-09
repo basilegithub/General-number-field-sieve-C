@@ -10,7 +10,7 @@ This project is a C implementation of the General number field sieve to factor i
 This a first working version, which contains the following features:
 - Basic polynomial selection (d-th root) ;
 - Naive sieving ;
-- Naive smoothness test ;
+- Naive and Batch smoothness test ;
 - No large primes allowed ;
 - Block Lanczos used for the linear algebra step (Gaussian elimination and Wiedemann algorithm implemented, but not available to choose for now) ;
 - Lifting method to extract the algebraic square root.
@@ -66,8 +66,6 @@ Here are the next steps :
 - Implement parallel polynomial search ;
 
 - Implement parallel sieving ;
-
-- Implement batch smoothness test ;
 
 - Implement Couveignes algorithm for square root extraction ;
 
