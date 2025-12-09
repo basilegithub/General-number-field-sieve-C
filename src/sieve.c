@@ -57,12 +57,10 @@ void sieve(
             mpz_mod_ui(tmp, tmp, p);
             rat_root = (shift + (mpz_get_ui(tmp)*b)%p)%p;
 
-            // gmp_printf("%lu: %lu, %lu %Zd\n", p, rat_root, b, m0);
-
-            // #pragma omp simd
-            for (size_t j = rat_root ; j < 2*sieve_len ; j += p)
+            #pragma omp simd
+            for (unsigned short* ptr = sieve_array + rat_root ; ptr < sieve_array + 2*sieve_len ; ptr += p)
             {
-                sieve_array[j] += log;
+                *ptr += log;
             }
         }
 
@@ -73,10 +71,10 @@ void sieve(
             r = sieve_prime->roots.start[j];
             alg_root = (shift + (b*r)%p)%p;
 
-            // #pragma omp simd
-            for (size_t k = alg_root ; k < 2*sieve_len ; k += p)
+            #pragma omp simd
+            for (unsigned short* ptr = sieve_array + alg_root ; ptr < sieve_array + 2*sieve_len ; ptr += p)
             {
-                sieve_array[k] += log;
+                *ptr += log;
             }
         }
 
