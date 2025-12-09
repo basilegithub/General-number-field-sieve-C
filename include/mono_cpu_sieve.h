@@ -26,7 +26,8 @@ void mono_cpu_sieve(
     size_t len_divide_leading,
     dyn_array_classic *logs,
     gmp_randstate_t state,
-    FILE *logfile
+    FILE *logfile,
+    int flag_batch_smooth
 );
 
 #endif // MONO_CPU_SIEVE_H

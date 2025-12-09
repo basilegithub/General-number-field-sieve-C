@@ -53,7 +53,7 @@ You can run the GNFS.exe in the build folder, it will ask you for the number you
 
 ##### config parameters #####
 
-None for now.
+- flag_batch_smooth : If 0, naive smoothness test is used. Otherwise, batch smoothness test is used.
 
 ##### General discussion #####
 
@@ -68,7 +68,5 @@ Here are the next steps :
 - Implement parallel sieving ;
 
 - Implement Couveignes algorithm for square root extraction ;
-
-- Setup the config file ;
 
 - Optimize heavily the code.

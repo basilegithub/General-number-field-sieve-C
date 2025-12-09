@@ -9,6 +9,7 @@
 #include <gmp.h>
 
 #include "logs.h"
+#include "config.h"
 #include "utils.h"
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
@@ -35,6 +36,14 @@ int main()
     FILE *logfile = NULL;
 
     init_log(&logfile);
+
+    // Read config file
+
+    char* config_path = "./config/config.txt";
+
+    int flag_batch_smooth;
+
+    parse_config(config_path, &flag_batch_smooth);
 
     // Initialize random seed
 
@@ -400,7 +409,8 @@ int main()
         len_divide_leading,
         &logs,
         state,
-        logfile
+        logfile,
+        flag_batch_smooth
     );
 
     // Linear algebra
