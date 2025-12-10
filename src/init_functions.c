@@ -129,6 +129,11 @@ void compute_free_relations(
             mpz_set_ui(tmp, alg_prime->prime);
             mpz_mul(tmp, tmp, m1);
             mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = m_1 * p
+
+            for (size_t i = 0 ; i < len_divide_leading ; i++)
+            {
+                smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = true;
+            }
         }
 
         alg_prime = alg_prime->next;
