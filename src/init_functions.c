@@ -104,36 +104,29 @@ void compute_free_relations(
 
     while (alg_prime != NULL)
     {
-        if (alg_prime->roots.len == d)
+        if (alg_prime->roots.len == degree)
         {
             init_new_relation(relations, len_divide_leading);
 
-            mpz_set_ui(tmp, alg_prime->prime);
-            set_coeff(&relations->rels[relations->len - 1].poly_f, tmp, 0); // f(x) = p
+            mpz_set_ui(tmp, 1);
+            set_coeff(&relations->rels[relations->len - 1].poly_f, tmp, 0); // f(x) = 1
 
+            set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = 1
+
+            mpz_set_ui(tmp, alg_prime->prime);
+            mpz_pow_ui(tmp, tmp, degree);
             mpz_mul(tmp, tmp, leading_coeff);
-            set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = c_d * p
+            mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
 
-            if (!(degree&1))
-            {
-                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
-            }
-            else
-            {
-                mpz_set_ui(tmp, alg_prime->prime);
-                mpz_pow_ui(tmp, tmp, degree);
-                mpz_mul(tmp, tmp, leading_coeff);
-                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
-            }
-
-            mpz_set_ui(tmp, alg_prime->prime);
-            mpz_mul(tmp, tmp, m1);
-            mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = m_1 * p
+            mpz_set_ui(tmp, 1);
+            mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = 1
 
             for (size_t i = 0 ; i < len_divide_leading ; i++)
             {
-                smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = true;
+                relations->rels[relations->len - 1].divide_leading[i] = true;
             }
+
+            relations->rels[relations->len - 1].nb_relations = 1;
         }
 
         alg_prime = alg_prime->next;

@@ -384,10 +384,25 @@ int main()
     mpz_init_set_ui(prod_primes, 1);
     for (size_t i = 1 ; i < primes.len ; i++) mpz_mul_ui(prod_primes, prod_primes, primes.start[i]);
 
-    // Collecting relations
+    // Compute free relations
 
     nfs_relations relations;
     init_relations(&relations);
+
+    compute_free_relations(
+        &relations,
+        &Algebraic_base,
+        divide_leading,
+        leading_coeff,
+        m1,
+        len_divide_leading,
+        degree
+    );
+
+    log_msg(logfile, "Starting with %lu free relations.", relations.len);
+    log_blank_line(logfile);
+
+    // Collecting relations
 
     mono_cpu_sieve(
         &relations,
