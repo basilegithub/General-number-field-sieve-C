@@ -2,6 +2,8 @@
 #include <stdlib.h>
 
 #include "dynamic_arrays.h"
+#include "algebraic_base.h"
+#include "NFS_relations.h"
 #include "utils.h"
 
 unsigned int compute_degree(mpz_t n, mpf_t ln2, mpf_t e)
@@ -80,6 +82,54 @@ void compute_logs(dyn_array_classic *logs, dyn_array_classic primes)
     {
         mpz_set_ui(tmp, primes.start[i]);
         append_classic(logs, mpz_sizeinbase(tmp, 2) - 1);
+    }
+
+    mpz_clear(tmp);
+}
+
+void compute_free_relations(
+    nfs_relations * restrict relations,
+    const algebraic_base * restrict alg_base,
+    const unsigned long * restrict divide_leading,
+    mpz_t leading_coeff,
+    mpz_t m1,
+    const size_t len_divide_leading,
+    const unsigned long degree
+)
+{
+    algebraic_base_prime *alg_prime = alg_base->start;
+
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    while (alg_prime != NULL)
+    {
+        if (alg_prime->roots.len == degree)
+        {
+            init_new_relation(relations, len_divide_leading);
+
+            mpz_set_ui(tmp, 1);
+            set_coeff(&relations->rels[relations->len - 1].poly_f, tmp, 0); // f(x) = 1
+
+            set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = 1
+
+            mpz_set_ui(tmp, alg_prime->prime);
+            mpz_pow_ui(tmp, tmp, degree);
+            mpz_mul(tmp, tmp, leading_coeff);
+            mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
+
+            mpz_set_ui(tmp, 1);
+            mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = 1
+
+            for (size_t i = 0 ; i < len_divide_leading ; i++)
+            {
+                relations->rels[relations->len - 1].divide_leading[i] = true;
+            }
+
+            relations->rels[relations->len - 1].nb_relations = 1;
+        }
+
+        alg_prime = alg_prime->next;
     }
 
     mpz_clear(tmp);
