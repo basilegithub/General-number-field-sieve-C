@@ -16,7 +16,7 @@ void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree);
 void reduce_polynomial(polynomial_mpz *polynomial);
 void reduce_polynomial_last(polynomial_mpz *polynomial);
 void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index);
-void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2);
+void copy_polynomial(polynomial_mpz *polynomial1, const polynomial_mpz *polynomial2);
 void reset_polynomial(polynomial_mpz *polynomial);
 void free_polynomial(polynomial_mpz *polynomial);
 void print_polynomial(polynomial_mpz *polynomial);

@@ -101,7 +101,7 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
     }
 }
 
-void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2) // Copy polynomial2 into polynomial1
+void copy_polynomial(polynomial_mpz *polynomial1, const polynomial_mpz *polynomial2) // Copy polynomial2 into polynomial1
 {
     for (size_t i = 0 ; i <= polynomial1->degree ; i++)
     {

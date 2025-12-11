@@ -10,7 +10,7 @@
 void poly_derivative(polynomial_mpz *res, polynomial_mpz f);
 void evaluate_poly(mpz_t res, polynomial_mpz f, signed long x);
 unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p);
-void evaluate_homogeneous(mpz_t res, polynomial_mpz f, mpz_t x, mpz_t y);
+void evaluate_homogeneous(mpz_t res, const polynomial_mpz f, const mpz_t x, const mpz_t y);
 void basic_find_roots(polynomial_mpz f, dyn_array_classic *roots, unsigned long p);
 void power_poly_mod(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, unsigned long p, unsigned long exponent);
 void power_poly_mod_mpz(polynomial_mpz *res, polynomial_mpz poly, polynomial_mpz f, unsigned long p, mpz_t exponent);

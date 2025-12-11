@@ -74,7 +74,7 @@ unsigned long evaluate_mod_p(polynomial_mpz f, unsigned long x, unsigned long p)
     return res;
 }
 
-void evaluate_homogeneous(mpz_t res, polynomial_mpz f, mpz_t x, mpz_t y)
+void evaluate_homogeneous(mpz_t res, const polynomial_mpz f, const mpz_t x, const mpz_t y)
 {
     mpz_set(res, f.coeffs[0]);
 

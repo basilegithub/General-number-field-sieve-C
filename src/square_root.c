@@ -11,10 +11,10 @@
 
 void extract_rational_square_root(
     mpz_t rational_square_root,
-    nfs_relations *relations,
-    bool *kernel_vector,
-    mpz_t n,
-    dyn_array_classic *rational_primes
+    const nfs_relations * restrict relations,
+    const bool * restrict kernel_vector,
+    const mpz_t n,
+    const dyn_array_classic * restrict rational_primes
 )
 {
     unsigned long *prime_factors = calloc(rational_primes->len + 1, sizeof(unsigned long));
@@ -59,13 +59,13 @@ void extract_rational_square_root(
 
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
-    polynomial_mpz f_x,
+    const polynomial_mpz f_x,
     polynomial_mpz algebraic_square,
-    mpz_t m0,
-    mpz_t m1,
-    mpz_t leading_coeff,
-    mpz_t coeff_bound,
-    unsigned long inert_prime,
+    const mpz_t m0,
+    const mpz_t m1,
+    const mpz_t leading_coeff,
+    const mpz_t coeff_bound,
+    const unsigned long inert_prime,
     gmp_randstate_t state,
     FILE *logfile
 )
@@ -93,9 +93,9 @@ void extract_algebraic_square_root(
 void Newton_lift(
     polynomial_mpz *algebraic_root,
     polynomial_mpz *algebraic_square,
-    polynomial_mpz f,
-    mpz_t bound,
-    unsigned long p
+    const polynomial_mpz f,
+    const mpz_t bound,
+    const unsigned long p
 )
 {
     polynomial_mpz root;
