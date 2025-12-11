@@ -455,7 +455,7 @@ int main()
         dyn_array kernel_vectors;
         init(&kernel_vectors);
 
-        block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
+        block_lanczos(&kernel_vectors, &sparse_matrix, relations.len, 8, relations.len, logfile);
 
         for (size_t i = 0 ; i < kernel_vectors.len ; i++)
         {

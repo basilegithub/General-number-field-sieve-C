@@ -35,17 +35,17 @@ void multiply_size_t(const dyn_array_classic A, const unsigned long n, const uns
     free(tmp);
 }
 
-void multiply_sparse(const dyn_array_classic A, const unsigned long dim_out, const unsigned long index, const size_t *b, size_t *res)
+void multiply_sparse(const dyn_array_classic *A, const unsigned long dim_out, const unsigned long index, const size_t *b, size_t *res)
 {
     size_t * restrict tmp = calloc(dim_out, sizeof(size_t));
     unsigned long i = 0;
     size_t tmp2 = 0;
 
-    const unsigned long * restrict A_start = A.start;
+    const unsigned long * restrict A_start = A->start;
     const size_t * restrict B = b;
     size_t * restrict RES = res;
 
-    for (unsigned long k = 0 ; k < A.len ; k++)
+    for (unsigned long k = 0 ; k < A->len ; k++)
     {
         if (A_start[k] == index)
         {
@@ -115,18 +115,18 @@ void dense_multiply(size_t *output, const size_t *matrix_A, const size_t *matrix
     }
 }
 
-void sparse_multiply_transpose(const dyn_array_classic sparse_matrix, const size_t *vector, size_t *output, const unsigned long limit, const unsigned long dim)
+void sparse_multiply_transpose(const dyn_array_classic *sparse_matrix, const size_t *vector, size_t *output, const unsigned long limit, const unsigned long dim)
 {
     memset(output, 0, dim * sizeof(size_t));
 
     size_t row_index = 0;
 
-    for (size_t i = 0 ; i < sparse_matrix.len ; i++)
+    for (size_t i = 0 ; i < sparse_matrix->len ; i++)
     {
-        if (sparse_matrix.start[i] == limit) row_index++;
+        if (sparse_matrix->start[i] == limit) row_index++;
         else
         {
-            output[sparse_matrix.start[i]] ^= vector[row_index];
+            output[sparse_matrix->start[i]] ^= vector[row_index];
         }
     }
 }
