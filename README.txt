@@ -9,6 +9,7 @@ This project is a C implementation of the General number field sieve to factor i
 
 This a first working version, which contains the following features:
 - Basic polynomial selection (d-th root) ;
+- Uses free relations ;
 - Naive sieving ;
 - Naive and Batch smoothness test ;
 - No large primes allowed ;
