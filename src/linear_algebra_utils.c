@@ -6,19 +6,15 @@
 #include "dynamic_arrays.h"
 #include "linear_algebra_utils.h"
 
-void multiply_size_t(const dyn_array_classic A, const unsigned long n, const unsigned long index, size_t *b, size_t *res)
+void multiply_size_t(const dyn_array_classic * restrict A, const unsigned long n, const unsigned long index, const size_t * restrict b, size_t * restrict res)
 {
     size_t * tmp = calloc(n, sizeof(size_t));
     unsigned long i = 0;
     size_t tmp2 = 0;
 
-    const unsigned long * restrict A_start = A.start;
-    size_t *B = b;
-    size_t *RES = res;
-
-    for (unsigned long k = 0 ; k < A.len ; k++)
+    for (unsigned long k = 0 ; k < A->len ; k++)
     {
-        if (A_start[k] == index)
+        if (A->start[k] == index)
         {
             tmp[i] = tmp2;
             i++;
@@ -26,55 +22,48 @@ void multiply_size_t(const dyn_array_classic A, const unsigned long n, const uns
         }
         else
         {
-            tmp2 ^= B[A_start[k]];
+            tmp2 ^= b[A->start[k]];
         }
     }
-    for (unsigned long j = 0 ; j < i ; j++) RES[j] = tmp[j];
-    for (unsigned long j = i ; j < n ; j++) RES[j] = 0;
+    for (unsigned long j = 0 ; j < i ; j++) res[j] = tmp[j];
+    for (unsigned long j = i ; j < n ; j++) res[j] = 0;
 
     free(tmp);
 }
 
-void multiply_sparse(const dyn_array_classic *A, const unsigned long dim_out, const unsigned long index, const size_t *b, size_t *res)
+void multiply_sparse(const dyn_array_classic * restrict A, const unsigned long dim_out, const unsigned long index, const size_t * restrict b, size_t * restrict res)
 {
     size_t * restrict tmp = calloc(dim_out, sizeof(size_t));
     unsigned long i = 0;
     size_t tmp2 = 0;
 
-    const unsigned long * restrict A_start = A->start;
-    const size_t * restrict B = b;
-    size_t * restrict RES = res;
-
     for (unsigned long k = 0 ; k < A->len ; k++)
     {
-        if (A_start[k] == index)
+        if (A->start[k] == index)
         {
             tmp[i] = tmp2;
             i++;
             tmp2 = 0;
         }
-        else tmp2 ^= B[A_start[k]];
+        else tmp2 ^= b[A->start[k]];
     }
-    for (unsigned long j = 0 ; j < i ; j++) RES[j] = tmp[j];
-    for (unsigned long j = i ; j < dim_out ; j++) RES[j] = 0;
+    for (unsigned long j = 0 ; j < i ; j++) res[j] = tmp[j];
+    for (unsigned long j = i ; j < dim_out ; j++) res[j] = 0;
 
     free(tmp);
 }
 
-size_t dot_prod(const unsigned long n, const bool *lbd, const size_t *x)
+size_t dot_prod(const unsigned long n, const bool * restrict lbd, const size_t * restrict x)
 {
-    const bool * LBD = lbd;
-    const size_t * X = x;
-
     size_t tmp = 0;
     for (unsigned long i = 0 ; i < n ; i++)
     {
-        if (LBD[i]) tmp ^= X[i];
+        if (lbd[i]) tmp ^= x[i];
     }
     return tmp;
 }
 
-void add_vectors(size_t *output, const size_t * restrict vec_a, const size_t *restrict vec_b, const size_t N)
+void add_vectors(size_t * restrict output, const size_t * restrict vec_a, const size_t *restrict vec_b, const size_t N)
 {
     for (size_t i = 0 ; i < N ; i++)
     {
@@ -82,7 +71,7 @@ void add_vectors(size_t *output, const size_t * restrict vec_a, const size_t *re
     }
 }
 
-void identity(size_t *output, const size_t N)
+void identity(size_t * restrict output, const size_t N)
 {
     for (size_t i = 0 ; i < N ; i++)
     {
@@ -90,7 +79,7 @@ void identity(size_t *output, const size_t N)
     }
 }
 
-void concatenate(size_t *output, const size_t * restrict matrix_A, const size_t *restrict matrix_B, const size_t N, const size_t dim_out)
+void concatenate(size_t * restrict output, const size_t * restrict matrix_A, const size_t *restrict matrix_B, const size_t N, const size_t dim_out)
 {
     for (size_t i = 0 ; i < dim_out ; i++)
     {
@@ -98,7 +87,7 @@ void concatenate(size_t *output, const size_t * restrict matrix_A, const size_t 
     }
 }
 
-void dense_multiply(size_t *output, const size_t *matrix_A, const size_t *matrix_B, const size_t len_A, const size_t len_B)
+void dense_multiply(size_t * restrict output, const size_t * restrict matrix_A, const size_t * restrict matrix_B, const size_t len_A, const size_t len_B)
 {
     memset(output, 0, len_A*sizeof(size_t));
 
@@ -115,7 +104,7 @@ void dense_multiply(size_t *output, const size_t *matrix_A, const size_t *matrix
     }
 }
 
-void sparse_multiply_transpose(const dyn_array_classic *sparse_matrix, const size_t *vector, size_t *output, const unsigned long limit, const unsigned long dim)
+void sparse_multiply_transpose(const dyn_array_classic * restrict sparse_matrix, const size_t * restrict vector, size_t * restrict output, const unsigned long limit, const unsigned long dim)
 {
     memset(output, 0, dim * sizeof(size_t));
 
@@ -131,7 +120,7 @@ void sparse_multiply_transpose(const dyn_array_classic *sparse_matrix, const siz
     }
 }
 
-void dense_multiply_transpose(size_t *output, size_t *matrix, size_t *vector, size_t dim1, size_t dim2) // computes transpose(matrix) * vector
+void dense_multiply_transpose(size_t * restrict output, size_t * restrict matrix, size_t * restrict vector, const size_t dim1, const size_t dim2) // computes transpose(matrix) * vector
 {
     memset(output, 0, dim2 * sizeof(size_t));
 
@@ -144,7 +133,7 @@ void dense_multiply_transpose(size_t *output, size_t *matrix, size_t *vector, si
     }
 }
 
-void transpose_dense(mpz_t *output, size_t *matrix, size_t dim1, size_t dim2) // computes transpose(matrix)
+void transpose_dense(mpz_t * restrict output, size_t * restrict matrix, const size_t dim1, const size_t dim2) // computes transpose(matrix)
 {
 
     for (size_t i = 0 ; i < dim2 ; i++)
@@ -214,7 +203,7 @@ void bin_div_poly(mpz_t quotient, mpz_t remainder, const mpz_t poly_a, const mpz
     mpz_clears(A, B, tmp, NULL);
 }
 
-void bin_gcd_poly(mpz_t res, mpz_t poly_a, mpz_t poly_b)
+void bin_gcd_poly(mpz_t res, const mpz_t poly_a, const mpz_t poly_b)
 {
     mpz_t a, b, q, r;
     mpz_inits(a, b, q, r, NULL);

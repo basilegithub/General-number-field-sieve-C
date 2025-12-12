@@ -59,7 +59,7 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
                 res[j] ^= block[j];
             }
         }
-        multiply_size_t(A, n, limit, res, tmp_array);
+        multiply_size_t(&A, n, limit, res, tmp_array);
         memcpy(res, tmp_array, n*sizeof(size_t));
     }
 
@@ -70,9 +70,6 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
             res[j] ^= block[j];
         }
     }
-
-    // size_t *image = calloc(n, sizeof(size_t));
-    // multiply_size_t(A, n, limit, res, image); // image = A.res
 
     size_t *indexes = calloc(block_size, sizeof(size_t));
     for (size_t i = 0 ; i < block_size ; i++)
@@ -87,7 +84,7 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
 
     for (size_t i = 0 ; i < cpt ; i++)
     {
-        multiply_size_t(A, n, limit, res, tmp_array);
+        multiply_size_t(&A, n, limit, res, tmp_array);
 
         for (size_t j = 0 ; j < indexes_size ; j++)
         {
@@ -154,8 +151,6 @@ void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_pol
 
     // compute the sequences
 
-    // multiply_size_t(A, n, limit, block, tmp_block);
-
     memcpy(tmp_block, block, n*sizeof(size_t));
 
     mpz_t *sequences = malloc(block_size*sizeof(mpz_t));
@@ -185,7 +180,7 @@ void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_pol
             mpz_mul_2exp(sequences[j], sequences[j], 1);
         }
 
-        multiply_size_t(A, n, limit, tmp_block, tmp_block2);
+        multiply_size_t(&A, n, limit, tmp_block, tmp_block2);
         memcpy(tmp_block, tmp_block2, n*sizeof(size_t));
     }
 
