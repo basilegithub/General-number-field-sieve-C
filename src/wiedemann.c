@@ -6,7 +6,7 @@
 #include "dynamic_arrays.h"
 #include "linear_algebra_utils.h"
 
-void poly_anul(mpz_t D, mpz_t B, unsigned long m)
+void poly_anul(mpz_t D, mpz_t B, const unsigned long m)
 {
     mpz_t A, C, E, Q, R, tmp;
 
@@ -31,7 +31,15 @@ void poly_anul(mpz_t D, mpz_t B, unsigned long m)
     mpz_clears(A, C, E, Q, R, tmp, NULL);
 }
 
-void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_polynomial_estimate, size_t *block, size_t block_size, unsigned long n, unsigned long limit)
+void find_kernel_vectors(
+    dyn_array * restrict kernel_vectors,
+    dyn_array_classic * restrict A,
+    mpz_t minimal_polynomial_estimate,
+    size_t * restrict block,
+    const size_t block_size,
+    const unsigned long n,
+    const unsigned long limit
+)
 {
     mpz_t tmp_poly;
     mpz_init_set(tmp_poly, minimal_polynomial_estimate);
@@ -59,7 +67,7 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
                 res[j] ^= block[j];
             }
         }
-        multiply_size_t(&A, n, limit, res, tmp_array);
+        multiply_size_t(A, n, limit, res, tmp_array);
         memcpy(res, tmp_array, n*sizeof(size_t));
     }
 
@@ -84,7 +92,7 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
 
     for (size_t i = 0 ; i < cpt ; i++)
     {
-        multiply_size_t(&A, n, limit, res, tmp_array);
+        multiply_size_t(A, n, limit, res, tmp_array);
 
         for (size_t j = 0 ; j < indexes_size ; j++)
         {
@@ -122,7 +130,14 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
     free(indexes);
 }
 
-void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_polynomial_estimate, size_t block_size, unsigned long n, unsigned long limit)
+void wiedemann(
+    dyn_array * restrict kernel_vectors,
+    dyn_array_classic * restrict A,
+    mpz_t minimal_polynomial_estimate,
+    const size_t block_size,
+    const unsigned long n,
+    const unsigned long limit
+)
 {
     // create a new block
     size_t *block = calloc(n, sizeof(size_t));
@@ -180,7 +195,7 @@ void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_pol
             mpz_mul_2exp(sequences[j], sequences[j], 1);
         }
 
-        multiply_size_t(&A, n, limit, tmp_block, tmp_block2);
+        multiply_size_t(A, n, limit, tmp_block, tmp_block2);
         memcpy(tmp_block, tmp_block2, n*sizeof(size_t));
     }
 
