@@ -5,6 +5,6 @@
 
 #include "dynamic_arrays.h"
 
-void erasthotenes_sieve(dyn_array_classic* primes, mpz_t bound);
+void erasthotenes_sieve(dyn_array_classic * restrict primes, const mpz_t bound);
 
 #endif // GENERATE_PRIMES_H
