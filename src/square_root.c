@@ -59,7 +59,7 @@ void extract_rational_square_root(
 
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
-    const polynomial_mpz f_x,
+    const polynomial_mpz * restrict f_x,
     polynomial_mpz algebraic_square,
     const mpz_t m0,
     const mpz_t m1,
@@ -73,7 +73,7 @@ void extract_algebraic_square_root(
     polynomial_mpz algebraic_root;
     init_poly(&algebraic_root);
 
-    square_root_poly_mod(&algebraic_root, &algebraic_square, &f_x, inert_prime, state);
+    square_root_poly_mod(&algebraic_root, &algebraic_square, f_x, inert_prime, state);
 
     log_msg(logfile, "Initial root computed, lifting...");
 
@@ -93,7 +93,7 @@ void extract_algebraic_square_root(
 void Newton_lift(
     polynomial_mpz *algebraic_root,
     polynomial_mpz *algebraic_square,
-    const polynomial_mpz f,
+    const polynomial_mpz * restrict f,
     const mpz_t bound,
     const unsigned long p
 )
@@ -120,10 +120,10 @@ void Newton_lift(
         mpz_mul(modulo, modulo, modulo);
 
         poly_prod(&tmp_poly, &root, &root);
-        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
         poly_prod(&tmp_poly, &tmp_poly2, algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
         for (size_t i = 0 ; i <= tmp_poly2.degree ; i++)
         {
@@ -135,7 +135,7 @@ void Newton_lift(
         mpz_mod(tmp_poly2.coeffs[tmp_poly2.degree], tmp_poly2.coeffs[tmp_poly2.degree], modulo);
 
         poly_prod(&tmp_poly, &tmp_poly2, &root);
-        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
         mpz_set_ui(tmp_mpz2, 2);
         mpz_invert(tmp_mpz2, tmp_mpz2, modulo);
@@ -149,7 +149,7 @@ void Newton_lift(
         }
 
         poly_prod(&tmp_poly, &root, algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
         
 
         mpz_div_2exp(tmp_mpz2, modulo, 1);

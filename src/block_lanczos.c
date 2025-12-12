@@ -160,7 +160,14 @@ void solve(mpz_t * restrict matrix, mpz_t * restrict kernel, const size_t nb_row
     }
 }
 
-void block_lanczos(dyn_array * restrict output, dyn_array_classic * sparse_matrix, const size_t nb_relations, const size_t block_size, const unsigned long index, FILE *logfile)
+void block_lanczos(
+    dyn_array * restrict output,
+    dyn_array_classic * sparse_matrix,
+    const size_t nb_relations,
+    const size_t block_size,
+    const unsigned long index,
+    FILE *logfile
+)
 {
     size_t nb_rows = 0;
     for (size_t i = 0 ; i < sparse_matrix->len ; i++)

@@ -12,8 +12,8 @@ void extract_solution(
     const nfs_relations * restrict relations,
     const bool * restrict kernel_vector,
     const dyn_array_classic * restrict rational_primes,
-    const polynomial_mpz f_x,
-    const polynomial_mpz f_prime_sq,
+    const polynomial_mpz *f_x,
+    const polynomial_mpz *f_prime_sq,
     const mpz_t leading_coeff,
     const mpz_t n,
     const mpz_t m0,
@@ -28,14 +28,14 @@ void extract_solution(
     mpz_t f_norm;
     mpz_init(f_norm);
 
-    for (size_t i = 0 ; i <= f_x.degree ; i++)
+    for (size_t i = 0 ; i <= f_x->degree ; i++)
     {
-        mpz_addmul(f_norm, f_x.coeffs[i], f_x.coeffs[i]);
+        mpz_addmul(f_norm, f_x->coeffs[i], f_x->coeffs[i]);
     }
     mpz_sqrt(f_norm, f_norm);
 
     mpz_t fd;
-    mpz_init_set_ui(fd, f_x.degree);
+    mpz_init_set_ui(fd, f_x->degree);
     mpz_pow_ui(fd, fd, 3);
     mpz_sqrt(fd, fd);
 
@@ -55,14 +55,14 @@ void extract_solution(
     init_poly(&tmp_poly);
     init_poly(&tmp_poly2);
 
-    copy_polynomial(&algebraic_square, &f_prime_sq);
+    copy_polynomial(&algebraic_square, f_prime_sq);
 
     for (size_t i = 0 ; i < relations->len ; i++)
     {
         if (kernel_vector[i])
         {
             poly_prod(&tmp_poly, &algebraic_square, &relations->rels[i].poly_g);
-            poly_div(&algebraic_square, &tmp_poly, &f_x);
+            poly_div(&algebraic_square, &tmp_poly, f_x);
 
             S += relations->rels[i].nb_relations;
         }
@@ -81,9 +81,9 @@ void extract_solution(
     mpz_t coeff_bound;
     mpz_init_set_ui(coeff_bound, 1);
 
-    for (size_t i = 0 ; i < f_x.degree ; i++)
+    for (size_t i = 0 ; i < f_x->degree ; i++)
     {
-        mpz_pow_ui(tmp_mpz, f_norm, f_x.degree - i);
+        mpz_pow_ui(tmp_mpz, f_norm, f_x->degree - i);
         mpz_mul(tmp_mpz, tmp_mpz, fd);
         mpz_mul_ui(tmp_mpz2, leading_coeff, max_a_size);
         mpz_mul_2exp(tmp_mpz2, tmp_mpz2, 1);

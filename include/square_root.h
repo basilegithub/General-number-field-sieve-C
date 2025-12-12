@@ -17,7 +17,7 @@ void extract_rational_square_root(
 
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
-    const polynomial_mpz f_x,
+    const polynomial_mpz * restrict f_x,
     polynomial_mpz algebraic_square,
     const mpz_t m0,
     const mpz_t m1,
@@ -31,7 +31,7 @@ void extract_algebraic_square_root(
 void Newton_lift(
     polynomial_mpz *algebraic_root,
     polynomial_mpz *algebraic_square,
-    const polynomial_mpz f,
+    const polynomial_mpz * restrict f,
     const mpz_t bound,
     const unsigned long p
 );
