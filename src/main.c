@@ -406,8 +406,7 @@ int main()
 
     mono_cpu_sieve(
         &relations,
-        f_x,
-        g_x,
+        &f_x,
         &primes,
         &Algebraic_base,
         nb_Algebraic_pairs,

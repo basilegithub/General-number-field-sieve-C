@@ -14,8 +14,7 @@
 
 void mono_cpu_sieve(
     nfs_relations * restrict relations,
-    polynomial_mpz f_x,
-    polynomial_mpz g_x,
+    polynomial_mpz *f_x,
     const dyn_array_classic * restrict rat_base,
     const algebraic_base * restrict alg_base,
     size_t nb_Algebraic_pairs,
@@ -82,9 +81,9 @@ void mono_cpu_sieve(
         init_relations(&smooth_candidates);
 
         polynomial_mpz sieve_poly;
-        init_poly_degree(&sieve_poly, f_x.degree);
+        init_poly_degree(&sieve_poly, f_x->degree);
 
-        copy_polynomial(&sieve_poly, &f_x);
+        copy_polynomial(&sieve_poly, f_x);
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
             mpz_set_ui(tmp, b);
@@ -98,7 +97,7 @@ void mono_cpu_sieve(
 
         sieve(
             &smooth_candidates,
-            sieve_poly,
+            &sieve_poly,
             alg_base,
             logs,
             leading_coeff,

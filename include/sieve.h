@@ -14,7 +14,7 @@
 
 void sieve(
     nfs_relations * restrict smooth_candidates,
-    const polynomial_mpz sieve_poly,
+    const polynomial_mpz * restrict sieve_poly,
     const algebraic_base * restrict alg_base,
     const dyn_array_classic * restrict logs,
     const mpz_t leading_coeff,

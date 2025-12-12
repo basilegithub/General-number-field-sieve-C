@@ -8,8 +8,7 @@
 
 void mono_cpu_sieve(
     nfs_relations * restrict relations,
-    polynomial_mpz f_x,
-    polynomial_mpz g_x,
+    polynomial_mpz *f_x,
     const dyn_array_classic * restrict rat_base,
     const algebraic_base * restrict alg_base,
     size_t nb_Algebraic_pairs,
