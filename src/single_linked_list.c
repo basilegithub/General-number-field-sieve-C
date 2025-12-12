@@ -3,13 +3,13 @@
 #include "dynamic_arrays.h"
 #include "single_linked_list.h"
 
-void list_init(single_linked_list *list)
+void list_init(single_linked_list * restrict list)
 {
     list->start = NULL;
     list->end = NULL;
 }
 
-void list_append(single_linked_list *list, unsigned long p, unsigned long r)
+void list_append(single_linked_list * restrict list, const unsigned long p, const unsigned long r)
 {
     list_node *next_node = malloc(sizeof(list_node));
     next_node->p = p;
@@ -28,7 +28,7 @@ void list_append(single_linked_list *list, unsigned long p, unsigned long r)
     }
 }
 
-void list_clear(single_linked_list *list)
+void list_clear(single_linked_list * restrict list)
 {
     list_node *p = list->start;
     while (p != NULL) {
