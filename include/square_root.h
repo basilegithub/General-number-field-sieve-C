@@ -18,7 +18,7 @@ void extract_rational_square_root(
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
     const polynomial_mpz * restrict f_x,
-    polynomial_mpz algebraic_square,
+    polynomial_mpz * restrict algebraic_square,
     const mpz_t m0,
     const mpz_t m1,
     const mpz_t leading_coeff,

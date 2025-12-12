@@ -60,7 +60,7 @@ void extract_rational_square_root(
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
     const polynomial_mpz * restrict f_x,
-    polynomial_mpz algebraic_square,
+    polynomial_mpz * restrict algebraic_square,
     const mpz_t m0,
     const mpz_t m1,
     const mpz_t leading_coeff,
@@ -73,11 +73,11 @@ void extract_algebraic_square_root(
     polynomial_mpz algebraic_root;
     init_poly(&algebraic_root);
 
-    square_root_poly_mod(&algebraic_root, &algebraic_square, f_x, inert_prime, state);
+    square_root_poly_mod(&algebraic_root, algebraic_square, f_x, inert_prime, state);
 
     log_msg(logfile, "Initial root computed, lifting...");
 
-    Newton_lift(&algebraic_root, &algebraic_square, f_x, coeff_bound, inert_prime);
+    Newton_lift(&algebraic_root, algebraic_square, f_x, coeff_bound, inert_prime);
 
     log_msg(logfile, "Root lifted.");
 
