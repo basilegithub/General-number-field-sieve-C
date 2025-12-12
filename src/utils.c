@@ -129,10 +129,15 @@ void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
     mpf_inits(tmpf, tmpf2, tmpf3, tmpf4, NULL);
 
     mpf_set_ui(tmpf, 1);
+
+    mpf_set_prec(tmpf2, 2048);
+    mpf_set_prec(tmpf3, 2048);
+    mpf_set_prec(tmpf4, 2048);
+
     mpf_set(tmpf2, x);
 
     mpf_add(tmpf3, tmpf, tmpf2);
-    mpf_div_2exp(tmpf3, tmpf3, 1);
+    mpf_div_2exp(tmpf3, tmpf3, n);
 
     mpf_pow_ui(tmpf4, tmpf3, n);
 

@@ -10,7 +10,11 @@ void basic_polynomial_selection(polynomial_mpz * restrict polynomial, const mpz_
 
     mpf_t tmpf;
     mpf_init(tmpf);
+
+    mpf_set_prec(tmpf, 2048);
+
     mpf_set_z(tmpf, n);
+    
     nth_root(tmpf, tmpf, d);
 
     mpz_set_f(d_root, tmpf);
