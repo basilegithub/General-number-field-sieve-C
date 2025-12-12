@@ -105,7 +105,7 @@ int main()
     dyn_array_classic logs;
     init_classic(&logs);
 
-    compute_logs(&logs, primes);
+    compute_logs(&logs, &primes);
 
     // Look for small factors
 

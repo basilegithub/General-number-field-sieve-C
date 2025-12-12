@@ -7,10 +7,13 @@
 #include "algebraic_base.h"
 #include "NFS_relations.h"
 
-unsigned int compute_degree(mpz_t n, mpf_t ln2, mpf_t e);
+unsigned int compute_degree(const mpz_t n, const mpf_t ln2, const mpf_t e);
+
 void initialize_params(gmp_randstate_t state, mpf_t ln10, mpf_t ln2, mpf_t e);
-void compute_smooth_bound(mpz_t n, mpz_t smooth_bound, mpf_t ln2, mpf_t e);
-void compute_logs(dyn_array_classic *logs, dyn_array_classic primes);
+
+void compute_smooth_bound(const mpz_t n, mpz_t smooth_bound, const mpf_t ln2, const mpf_t e);
+
+void compute_logs(dyn_array_classic * restrict logs, const dyn_array_classic * restrict primes);
 
 void compute_free_relations(
     nfs_relations * restrict relations,
