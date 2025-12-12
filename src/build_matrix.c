@@ -76,7 +76,7 @@ void build_sparse_matrix(
 
                 if (parity_bit)
                 {
-                    if (!evaluate_mod_p(relations->rels[j].poly_f, root, alg_prime->prime)) append_classic(sparse_matrix, j);
+                    if (!evaluate_mod_p(&relations->rels[j].poly_f, root, alg_prime->prime)) append_classic(sparse_matrix, j);
                 }
             }
 
@@ -98,7 +98,7 @@ void build_sparse_matrix(
 
         for (size_t i = 0 ; i < relations->len ; i++)
         {
-            unsigned long res = evaluate_mod_p(relations->rels[i].poly_f, root, current_prime_ui);
+            unsigned long res = evaluate_mod_p(&relations->rels[i].poly_f, root, current_prime_ui);
             mpz_set_ui(tmp_mpz, res);
 
             if (mpz_legendre(tmp_mpz, current_prime) == -1)

@@ -61,8 +61,8 @@ void extract_solution(
     {
         if (kernel_vector[i])
         {
-            poly_prod(&tmp_poly, algebraic_square, relations->rels[i].poly_g);
-            poly_div(&algebraic_square, tmp_poly, f_x);
+            poly_prod(&tmp_poly, &algebraic_square, &relations->rels[i].poly_g);
+            poly_div(&algebraic_square, &tmp_poly, &f_x);
 
             S += relations->rels[i].nb_relations;
         }

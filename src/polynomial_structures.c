@@ -148,7 +148,7 @@ void free_polynomial(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
-void print_polynomial(polynomial_mpz *polynomial)
+void print_polynomial(const polynomial_mpz *polynomial)
 {
     printf("[");
 

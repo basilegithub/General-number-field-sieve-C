@@ -47,10 +47,10 @@ unsigned long create_quadratic_characters_base(quadratic_character_base *q_base,
             init_classic(&roots);
 
             // basic_find_roots(f, &roots, test_number);
-            find_roots(f, &roots, test_number, state);
+            find_roots(&f, &roots, test_number, state);
             for (size_t i = 0 ; i < roots.len ; i++)
             {
-                if (evaluate_mod_p(f_derivative, roots.start[i], test_number))
+                if (evaluate_mod_p(&f_derivative, roots.start[i], test_number))
                 {
                     quadratic_character *quad_char = malloc(sizeof(quadratic_character));
                     quad_char->q = test_number;

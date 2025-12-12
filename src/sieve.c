@@ -104,7 +104,7 @@ void sieve(
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
             mpz_init(algebraic_difs[i]);
-            evaluate_poly(algebraic_difs[i], sieve_poly, a+i);
+            evaluate_poly(algebraic_difs[i], &sieve_poly, a+i);
         }
         
         for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
@@ -183,7 +183,7 @@ void sieve(
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
             mpz_init(algebraic_difs[i]);
-            evaluate_poly(algebraic_difs[i], sieve_poly, a + 2*i);
+            evaluate_poly(algebraic_difs[i], &sieve_poly, a + 2*i);
         }
         
         for (size_t q = 1 ; q <= sieve_poly.degree ; q++)

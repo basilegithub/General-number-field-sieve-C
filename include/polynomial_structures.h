@@ -19,6 +19,6 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index);
 void copy_polynomial(polynomial_mpz *polynomial1, const polynomial_mpz *polynomial2);
 void reset_polynomial(polynomial_mpz *polynomial);
 void free_polynomial(polynomial_mpz *polynomial);
-void print_polynomial(polynomial_mpz *polynomial);
+void print_polynomial(const polynomial_mpz *polynomial);
 
 #endif // POLYNOMIAL_STRUCTURES_H

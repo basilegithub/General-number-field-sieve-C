@@ -191,11 +191,11 @@ int main()
 
     polynomial_mpz f_derivative;
     init_poly_degree(&f_derivative, degree - 1);
-    poly_derivative(&f_derivative, f_x);
+    poly_derivative(&f_derivative, &f_x);
 
     polynomial_mpz g_derivative;
     init_poly_degree(&g_derivative, degree - 1);
-    poly_derivative(&g_derivative, g_x);
+    poly_derivative(&g_derivative, &g_x);
 
     // Build algebraic factor base and quadratic characters
 
@@ -304,8 +304,8 @@ int main()
     init_poly(&tmp_poly);
     init_poly(&g_derivative_sq);
 
-    poly_prod(&tmp_poly, g_derivative, g_derivative);
-    poly_div(&g_derivative_sq, tmp_poly, g_x);
+    poly_prod(&tmp_poly, &g_derivative, &g_derivative);
+    poly_div(&g_derivative_sq, &tmp_poly, &g_x);
 
     free_polynomial(&tmp_poly);
 
@@ -314,7 +314,7 @@ int main()
 
     mpz_mul(tmp, leading_coeff, m0);
 
-    evaluate_homogeneous(g_derivative_eval, g_derivative, tmp, m1);
+    evaluate_homogeneous(g_derivative_eval, &g_derivative, tmp, m1);
     mpz_mod(g_derivative_eval, g_derivative_eval, n);
 
     // Computing the set of small inert primes
@@ -331,7 +331,7 @@ int main()
 
         mpz_mod_ui(tmp2, leading_coeff, primes.start[i]);
         
-        if (mpz_cmp_ui(tmp, 0) && mpz_cmp_ui(tmp2, 0) && irreducible(g_x, primes.start[i]))
+        if (mpz_cmp_ui(tmp, 0) && mpz_cmp_ui(tmp2, 0) && irreducible(&g_x, primes.start[i]))
         {
             append_classic(&inert_set, primes.start[i]);
         }

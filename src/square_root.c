@@ -73,7 +73,7 @@ void extract_algebraic_square_root(
     polynomial_mpz algebraic_root;
     init_poly(&algebraic_root);
 
-    square_root_poly_mod(&algebraic_root, algebraic_square, f_x, inert_prime, state);
+    square_root_poly_mod(&algebraic_root, &algebraic_square, &f_x, inert_prime, state);
 
     log_msg(logfile, "Initial root computed, lifting...");
 
@@ -85,7 +85,7 @@ void extract_algebraic_square_root(
     mpz_init_set(tmp_mpz, leading_coeff);
     mpz_mul(tmp_mpz, tmp_mpz, m0);
 
-    evaluate_homogeneous(algebraic_square_root, algebraic_root, tmp_mpz, m1);
+    evaluate_homogeneous(algebraic_square_root, &algebraic_root, tmp_mpz, m1);
 
     mpz_clear(tmp_mpz);
 }
@@ -119,11 +119,11 @@ void Newton_lift(
     {
         mpz_mul(modulo, modulo, modulo);
 
-        poly_prod(&tmp_poly, root, root);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &root, &root);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
 
-        poly_prod(&tmp_poly, tmp_poly2, *algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &tmp_poly2, algebraic_square);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
 
         for (size_t i = 0 ; i <= tmp_poly2.degree ; i++)
         {
@@ -134,8 +134,8 @@ void Newton_lift(
         mpz_add_ui(tmp_poly2.coeffs[tmp_poly2.degree], tmp_poly2.coeffs[tmp_poly2.degree], 3);
         mpz_mod(tmp_poly2.coeffs[tmp_poly2.degree], tmp_poly2.coeffs[tmp_poly2.degree], modulo);
 
-        poly_prod(&tmp_poly, tmp_poly2, root);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &tmp_poly2, &root);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
 
         mpz_set_ui(tmp_mpz2, 2);
         mpz_invert(tmp_mpz2, tmp_mpz2, modulo);
@@ -148,8 +148,8 @@ void Newton_lift(
             mpz_mod(root.coeffs[i], root.coeffs[i], modulo);
         }
 
-        poly_prod(&tmp_poly, root, *algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &root, algebraic_square);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, &f, modulo);
         
 
         mpz_div_2exp(tmp_mpz2, modulo, 1);

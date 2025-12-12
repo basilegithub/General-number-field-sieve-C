@@ -36,7 +36,7 @@ void build_algebraic_base(algebraic_base *b, const dyn_array_classic * restrict 
     unsigned long first_prime = primes->start[0];
 
     // basic_find_roots(g_x, &alg_prime->roots, first_prime);
-    find_roots(g_x, &alg_prime->roots, first_prime, state);
+    find_roots(&g_x, &alg_prime->roots, first_prime, state);
 
     alg_prime->prime = first_prime;
     alg_prime->next = NULL;
@@ -52,7 +52,7 @@ void build_algebraic_base(algebraic_base *b, const dyn_array_classic * restrict 
         unsigned long next_prime = primes->start[i];
 
         // basic_find_roots(g_x, &next->roots, next_prime);
-        find_roots(g_x, &next->roots, next_prime, state);
+        find_roots(&g_x, &next->roots, next_prime, state);
 
         next->prime = next_prime;
         next->next = NULL;
