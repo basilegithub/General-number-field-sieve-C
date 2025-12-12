@@ -445,7 +445,7 @@ int main()
 
     // Square root extraction
 
-    bool *kernel_vector = calloc(relations.len, sizeof(bool));
+    bool * restrict kernel_vector = calloc(relations.len, sizeof(bool));
 
     mpz_t divisor;
     mpz_init(divisor);
