@@ -25,6 +25,6 @@ void algebraic_base_init(algebraic_base *b);
 
 void algebraic_base_clear(algebraic_base *b);
 
-void build_algebraic_base(algebraic_base *b, const dyn_array_classic * restrict primes, const polynomial_mpz g_x, gmp_randstate_t state);
+void build_algebraic_base(algebraic_base *b, const dyn_array_classic * restrict primes, const polynomial_mpz * restrict g_x, gmp_randstate_t state);
 
 #endif // ALGEBRAIC_BASE_H

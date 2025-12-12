@@ -204,7 +204,7 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base(&Algebraic_base, &primes, f_x, state);
+    build_algebraic_base(&Algebraic_base, &primes, &f_x, state);
 
     size_t nb_Algebraic_pairs = 0;
 
