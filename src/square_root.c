@@ -11,10 +11,10 @@
 
 void extract_rational_square_root(
     mpz_t rational_square_root,
-    nfs_relations *relations,
-    bool *kernel_vector,
-    mpz_t n,
-    dyn_array_classic *rational_primes
+    const nfs_relations * restrict relations,
+    const bool * restrict kernel_vector,
+    const mpz_t n,
+    const dyn_array_classic * restrict rational_primes
 )
 {
     unsigned long *prime_factors = calloc(rational_primes->len + 1, sizeof(unsigned long));
@@ -59,13 +59,13 @@ void extract_rational_square_root(
 
 void extract_algebraic_square_root(
     mpz_t algebraic_square_root,
-    polynomial_mpz f_x,
-    polynomial_mpz algebraic_square,
-    mpz_t m0,
-    mpz_t m1,
-    mpz_t leading_coeff,
-    mpz_t coeff_bound,
-    unsigned long inert_prime,
+    const polynomial_mpz * restrict f_x,
+    polynomial_mpz * restrict algebraic_square,
+    const mpz_t m0,
+    const mpz_t m1,
+    const mpz_t leading_coeff,
+    const mpz_t coeff_bound,
+    const unsigned long inert_prime,
     gmp_randstate_t state,
     FILE *logfile
 )
@@ -77,7 +77,7 @@ void extract_algebraic_square_root(
 
     log_msg(logfile, "Initial root computed, lifting...");
 
-    Newton_lift(&algebraic_root, &algebraic_square, f_x, coeff_bound, inert_prime);
+    Newton_lift(&algebraic_root, algebraic_square, f_x, coeff_bound, inert_prime);
 
     log_msg(logfile, "Root lifted.");
 
@@ -85,7 +85,7 @@ void extract_algebraic_square_root(
     mpz_init_set(tmp_mpz, leading_coeff);
     mpz_mul(tmp_mpz, tmp_mpz, m0);
 
-    evaluate_homogeneous(algebraic_square_root, algebraic_root, tmp_mpz, m1);
+    evaluate_homogeneous(algebraic_square_root, &algebraic_root, tmp_mpz, m1);
 
     mpz_clear(tmp_mpz);
 }
@@ -93,9 +93,9 @@ void extract_algebraic_square_root(
 void Newton_lift(
     polynomial_mpz *algebraic_root,
     polynomial_mpz *algebraic_square,
-    polynomial_mpz f,
-    mpz_t bound,
-    unsigned long p
+    const polynomial_mpz * restrict f,
+    const mpz_t bound,
+    const unsigned long p
 )
 {
     polynomial_mpz root;
@@ -119,11 +119,11 @@ void Newton_lift(
     {
         mpz_mul(modulo, modulo, modulo);
 
-        poly_prod(&tmp_poly, root, root);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &root, &root);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
-        poly_prod(&tmp_poly, tmp_poly2, *algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &tmp_poly2, algebraic_square);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
         for (size_t i = 0 ; i <= tmp_poly2.degree ; i++)
         {
@@ -134,8 +134,8 @@ void Newton_lift(
         mpz_add_ui(tmp_poly2.coeffs[tmp_poly2.degree], tmp_poly2.coeffs[tmp_poly2.degree], 3);
         mpz_mod(tmp_poly2.coeffs[tmp_poly2.degree], tmp_poly2.coeffs[tmp_poly2.degree], modulo);
 
-        poly_prod(&tmp_poly, tmp_poly2, root);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &tmp_poly2, &root);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
 
         mpz_set_ui(tmp_mpz2, 2);
         mpz_invert(tmp_mpz2, tmp_mpz2, modulo);
@@ -148,8 +148,8 @@ void Newton_lift(
             mpz_mod(root.coeffs[i], root.coeffs[i], modulo);
         }
 
-        poly_prod(&tmp_poly, root, *algebraic_square);
-        poly_div_mod_mpz(&tmp_poly2, tmp_poly, f, modulo);
+        poly_prod(&tmp_poly, &root, algebraic_square);
+        poly_div_mod_mpz(&tmp_poly2, &tmp_poly, f, modulo);
         
 
         mpz_div_2exp(tmp_mpz2, modulo, 1);

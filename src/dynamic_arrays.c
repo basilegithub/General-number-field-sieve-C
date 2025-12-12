@@ -6,7 +6,7 @@
 #include "dynamic_arrays.h"
 #include "utils.h"
 
-void init(dyn_array* array)
+void init(dyn_array * restrict array)
 {
 	array->start = calloc(1, sizeof(mpz_t));
 	array->len = 0;
@@ -14,14 +14,14 @@ void init(dyn_array* array)
     array->initialized = 0;
 }
 
-void init_classic(dyn_array_classic* array)
+void init_classic(dyn_array_classic * restrict array)
 {
 	array->start = calloc(1, sizeof(unsigned long));
 	array->len = 0;
 	array->size = 1;
 }
 
-void init_len(dyn_array* array, unsigned long length)
+void init_len(dyn_array * restrict array, const unsigned long length)
 {
     array->size = 1;
 	while (array->size <= length) array->size <<= 1;
@@ -30,7 +30,7 @@ void init_len(dyn_array* array, unsigned long length)
     array->initialized = 0;
 }
 
-void init_len_classic(dyn_array_classic* array, unsigned long length)
+void init_len_classic(dyn_array_classic * restrict array, const unsigned long length)
 {
     array->size = 1;
 	while (array->size <= length) array->size <<= 1;
@@ -38,7 +38,7 @@ void init_len_classic(dyn_array_classic* array, unsigned long length)
 	array->len = length;
 }
 
-void init2_len(dyn_array* array, unsigned long length)
+void init2_len(dyn_array * restrict array, const unsigned long length)
 {
     array->size = 1;
 	while (array->size <= length) array->size <<= 1;
@@ -48,7 +48,7 @@ void init2_len(dyn_array* array, unsigned long length)
     array->initialized = length;
 }
 
-void append(dyn_array* array, mpz_t element)
+void append(dyn_array * restrict array, const mpz_t element)
 {
     if (array->size <= array->len)
     {
@@ -60,7 +60,7 @@ void append(dyn_array* array, mpz_t element)
     array->initialized++;
 }
 
-void append_eco(dyn_array* array, mpz_t element)
+void append_eco(dyn_array * restrict array, const mpz_t element)
 {
     if (array->size <= array->len)
     {
@@ -80,19 +80,19 @@ void append_eco(dyn_array* array, mpz_t element)
     array->len++;
 }
 
-void append_only(dyn_array* array, mpz_t element)
+void append_only(dyn_array * restrict array, const mpz_t element)
 {
     mpz_set(array->start[array->len], element);
     array->len++;
 }
 
-void append_only_si(dyn_array* array, signed long element)
+void append_only_si(dyn_array * restrict array, const signed long element)
 {
     mpz_set_si(array->start[array->len], element);
     array->len++;
 }
 
-void append_classic(dyn_array_classic* array, unsigned long element)
+void append_classic(dyn_array_classic * restrict array, const unsigned long element)
 {
     if (array->size <= array->len)
     {
@@ -103,13 +103,13 @@ void append_classic(dyn_array_classic* array, unsigned long element)
     array->len++;
 }
 
-void delete_classic(dyn_array_classic* array, unsigned long index)
+void delete_classic(dyn_array_classic * restrict array, const unsigned long index)
 {
     for (unsigned long i = index ; i < array->len-1 ; i++) array->start[i] = array->start[i+1];
     array->len--;
 }
 
-void delete_dyn(dyn_array* array, unsigned long index)
+void delete_dyn(dyn_array * restrict array, const unsigned long index)
 {
     for (unsigned long i = index ; i < array->len-1 ; i++) mpz_set(array->start[i], array->start[i+1]);
     array->len--;
@@ -117,13 +117,13 @@ void delete_dyn(dyn_array* array, unsigned long index)
     array->initialized--;
 }
 
-void delete_dyn_eco(dyn_array* array, unsigned long index)
+void delete_dyn_eco(dyn_array * restrict array, const unsigned long index)
 {
     for (unsigned long i = index ; i < array->len-1 ; i++) mpz_set(array->start[i], array->start[i+1]);
     array->len--;
 }
 
-void delete_dyn_unsorted(dyn_array* array, unsigned long index)
+void delete_dyn_unsorted(dyn_array * restrict array, const unsigned long index)
 {
     array->len--;
     mpz_set(array->start[index], array->start[array->len]);
@@ -131,7 +131,7 @@ void delete_dyn_unsorted(dyn_array* array, unsigned long index)
     array->initialized--;
 }
 
-void insert_classic(dyn_array_classic* array, unsigned long element, unsigned long index)
+void insert_classic(dyn_array_classic * restrict array, const unsigned long element, const unsigned long index)
 {
     if (array->size <= array->len)
     {
@@ -146,12 +146,12 @@ void insert_classic(dyn_array_classic* array, unsigned long element, unsigned lo
     array->len++;
 }
 
-void reset(dyn_array* array)
+void reset(dyn_array * restrict array)
 {
     array->len = 0;
 }
 
-void free_dyn_array(dyn_array* array) {
+void free_dyn_array(dyn_array * restrict array) {
     if (!array || !array->start) return;  // safety check
 
     // Clear each GMP integer

@@ -12,7 +12,7 @@ void trim(char *str)
         *end-- = '\0';
 }
 
-void parse_config(char* config_path, int* flag_batch_smooth)
+void parse_config(const char * restrict config_path, int * restrict flag_batch_smooth)
 {
     FILE *file = fopen(config_path, "r");
     if (!file) {

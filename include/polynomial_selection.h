@@ -3,6 +3,6 @@
 
 #include <gmp.h>
 
-void basic_polynomial_selection(polynomial_mpz *polynomial, mpz_t n, mpz_t m0, mpz_t m1, unsigned long d);
+void basic_polynomial_selection(polynomial_mpz * restrict polynomial, const mpz_t n, mpz_t m0, mpz_t m1, const unsigned long d);
 
 #endif // POLYNOMIAL_SELECTION_H

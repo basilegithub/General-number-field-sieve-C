@@ -6,7 +6,7 @@
 #include "dynamic_arrays.h"
 #include "linear_algebra_utils.h"
 
-void poly_anul(mpz_t D, mpz_t B, unsigned long m)
+void poly_anul(mpz_t D, mpz_t B, const unsigned long m)
 {
     mpz_t A, C, E, Q, R, tmp;
 
@@ -31,7 +31,15 @@ void poly_anul(mpz_t D, mpz_t B, unsigned long m)
     mpz_clears(A, C, E, Q, R, tmp, NULL);
 }
 
-void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_polynomial_estimate, size_t *block, size_t block_size, unsigned long n, unsigned long limit)
+void find_kernel_vectors(
+    dyn_array * restrict kernel_vectors,
+    dyn_array_classic * restrict A,
+    mpz_t minimal_polynomial_estimate,
+    size_t * restrict block,
+    const size_t block_size,
+    const unsigned long n,
+    const unsigned long limit
+)
 {
     mpz_t tmp_poly;
     mpz_init_set(tmp_poly, minimal_polynomial_estimate);
@@ -70,9 +78,6 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
             res[j] ^= block[j];
         }
     }
-
-    // size_t *image = calloc(n, sizeof(size_t));
-    // multiply_size_t(A, n, limit, res, image); // image = A.res
 
     size_t *indexes = calloc(block_size, sizeof(size_t));
     for (size_t i = 0 ; i < block_size ; i++)
@@ -125,7 +130,14 @@ void find_kernel_vectors(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t m
     free(indexes);
 }
 
-void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_polynomial_estimate, size_t block_size, unsigned long n, unsigned long limit)
+void wiedemann(
+    dyn_array * restrict kernel_vectors,
+    dyn_array_classic * restrict A,
+    mpz_t minimal_polynomial_estimate,
+    const size_t block_size,
+    const unsigned long n,
+    const unsigned long limit
+)
 {
     // create a new block
     size_t *block = calloc(n, sizeof(size_t));
@@ -153,8 +165,6 @@ void wiedemann(dyn_array *kernel_vectors, dyn_array_classic A, mpz_t minimal_pol
     }
 
     // compute the sequences
-
-    // multiply_size_t(A, n, limit, block, tmp_block);
 
     memcpy(tmp_block, block, n*sizeof(size_t));
 

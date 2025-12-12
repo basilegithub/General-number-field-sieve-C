@@ -29,9 +29,9 @@ typedef struct
 
 // Functions declaration
 
-void init_relations(nfs_relations *relations);
-void init_new_relation(nfs_relations *relations, size_t len_divide_leading);
-void clear_relations(nfs_relations *relations);
+void init_relations(nfs_relations * restrict relations);
+void init_new_relation(nfs_relations * restrict relations, const size_t len_divide_leading);
+void clear_relations(nfs_relations * restrict relations);
 
 
 #endif // NFS_RELATIONS_H

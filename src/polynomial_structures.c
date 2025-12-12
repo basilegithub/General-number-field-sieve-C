@@ -4,7 +4,7 @@
 
 #include "polynomial_structures.h"
 
-void init_poly(polynomial_mpz *polynomial)
+void init_poly(polynomial_mpz * restrict polynomial)
 {
     polynomial->coeffs = calloc(1, sizeof(mpz_t));
     mpz_init_set_ui(polynomial->coeffs[0], 0);
@@ -12,7 +12,7 @@ void init_poly(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
-void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree)
+void init_poly_degree(polynomial_mpz * restrict polynomial, const unsigned long degree)
 {
     polynomial->coeffs = calloc(degree + 1, sizeof(mpz_t));
     for (size_t i = 0 ; i <= degree ; i++)
@@ -23,7 +23,7 @@ void init_poly_degree(polynomial_mpz *polynomial, unsigned long degree)
     polynomial->degree = degree;
 }
 
-void reduce_polynomial(polynomial_mpz *polynomial) // Delete leading zeros
+void reduce_polynomial(polynomial_mpz * restrict polynomial) // Delete leading zeros
 {
     while (polynomial->degree && !mpz_cmp_ui(polynomial->coeffs[0], 0))
     {
@@ -47,7 +47,7 @@ void reduce_polynomial(polynomial_mpz *polynomial) // Delete leading zeros
     }
 }
 
-void reduce_polynomial_last(polynomial_mpz *polynomial) // Delete last zeros
+void reduce_polynomial_last(polynomial_mpz * restrict polynomial) // Delete last zeros
 {
     while (polynomial->degree && !mpz_cmp_ui(polynomial->coeffs[polynomial->degree], 0))
     {
@@ -71,7 +71,7 @@ void reduce_polynomial_last(polynomial_mpz *polynomial) // Delete last zeros
     }
 }
 
-void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
+void set_coeff(polynomial_mpz * restrict polynomial, const mpz_t number, const unsigned long index)
 {
     if (polynomial->degree >= index)
     {
@@ -101,7 +101,7 @@ void set_coeff(polynomial_mpz *polynomial, mpz_t number, unsigned long index)
     }
 }
 
-void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2) // Copy polynomial2 into polynomial1
+void copy_polynomial(polynomial_mpz *polynomial1, const polynomial_mpz *polynomial2) // Copy polynomial2 into polynomial1
 {
     for (size_t i = 0 ; i <= polynomial1->degree ; i++)
     {
@@ -120,7 +120,7 @@ void copy_polynomial(polynomial_mpz *polynomial1, polynomial_mpz *polynomial2) /
     polynomial1->degree = polynomial2->degree;
 }
 
-void reset_polynomial(polynomial_mpz *polynomial)
+void reset_polynomial(polynomial_mpz * restrict polynomial)
 {
     for (size_t i = 0 ; i <= polynomial->degree ; i++)
     {
@@ -135,7 +135,7 @@ void reset_polynomial(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
-void free_polynomial(polynomial_mpz *polynomial)
+void free_polynomial(polynomial_mpz * restrict polynomial)
 {
     for (size_t i = 0 ; i <= polynomial->degree ; i++)
     {
@@ -148,7 +148,7 @@ void free_polynomial(polynomial_mpz *polynomial)
     polynomial->degree = 0;
 }
 
-void print_polynomial(polynomial_mpz *polynomial)
+void print_polynomial(const polynomial_mpz * restrict polynomial)
 {
     printf("[");
 

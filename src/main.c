@@ -105,7 +105,7 @@ int main()
     dyn_array_classic logs;
     init_classic(&logs);
 
-    compute_logs(&logs, primes);
+    compute_logs(&logs, &primes);
 
     // Look for small factors
 
@@ -191,11 +191,11 @@ int main()
 
     polynomial_mpz f_derivative;
     init_poly_degree(&f_derivative, degree - 1);
-    poly_derivative(&f_derivative, f_x);
+    poly_derivative(&f_derivative, &f_x);
 
     polynomial_mpz g_derivative;
     init_poly_degree(&g_derivative, degree - 1);
-    poly_derivative(&g_derivative, g_x);
+    poly_derivative(&g_derivative, &g_x);
 
     // Build algebraic factor base and quadratic characters
 
@@ -204,7 +204,7 @@ int main()
     algebraic_base Algebraic_base;
     algebraic_base_init(&Algebraic_base);
 
-    build_algebraic_base(&Algebraic_base, primes, f_x, n, state);
+    build_algebraic_base(&Algebraic_base, &primes, &f_x, state);
 
     size_t nb_Algebraic_pairs = 0;
 
@@ -237,7 +237,7 @@ int main()
     quadratic_base_init(&quad_char_base);
 
     // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2), state);
-    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
+    unsigned long factor = create_quadratic_characters_base(&quad_char_base, &f_x, &f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
 
     if (factor) // If we have found a factor while building the quadratic characters base
     {
@@ -304,8 +304,8 @@ int main()
     init_poly(&tmp_poly);
     init_poly(&g_derivative_sq);
 
-    poly_prod(&tmp_poly, g_derivative, g_derivative);
-    poly_div(&g_derivative_sq, tmp_poly, g_x);
+    poly_prod(&tmp_poly, &g_derivative, &g_derivative);
+    poly_div(&g_derivative_sq, &tmp_poly, &g_x);
 
     free_polynomial(&tmp_poly);
 
@@ -314,7 +314,7 @@ int main()
 
     mpz_mul(tmp, leading_coeff, m0);
 
-    evaluate_homogeneous(g_derivative_eval, g_derivative, tmp, m1);
+    evaluate_homogeneous(g_derivative_eval, &g_derivative, tmp, m1);
     mpz_mod(g_derivative_eval, g_derivative_eval, n);
 
     // Computing the set of small inert primes
@@ -331,7 +331,7 @@ int main()
 
         mpz_mod_ui(tmp2, leading_coeff, primes.start[i]);
         
-        if (mpz_cmp_ui(tmp, 0) && mpz_cmp_ui(tmp2, 0) && irreducible(g_x, primes.start[i]))
+        if (mpz_cmp_ui(tmp, 0) && mpz_cmp_ui(tmp2, 0) && irreducible(&g_x, primes.start[i]))
         {
             append_classic(&inert_set, primes.start[i]);
         }
@@ -406,8 +406,7 @@ int main()
 
     mono_cpu_sieve(
         &relations,
-        f_x,
-        g_x,
+        &f_x,
         &primes,
         &Algebraic_base,
         nb_Algebraic_pairs,
@@ -455,7 +454,7 @@ int main()
         dyn_array kernel_vectors;
         init(&kernel_vectors);
 
-        block_lanczos(&kernel_vectors, sparse_matrix, relations.len, 8, relations.len, logfile);
+        block_lanczos(&kernel_vectors, &sparse_matrix, relations.len, 8, relations.len, logfile);
 
         for (size_t i = 0 ; i < kernel_vectors.len ; i++)
         {
@@ -466,8 +465,8 @@ int main()
                 &relations,
                 kernel_vector,
                 &primes,
-                g_x,
-                g_derivative_sq,
+                &g_x,
+                &g_derivative_sq,
                 leading_coeff,
                 n,
                 m0,

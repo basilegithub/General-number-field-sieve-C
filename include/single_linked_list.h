@@ -16,8 +16,10 @@ typedef struct
 
 // Functions declaration
 
-void list_init(single_linked_list *list);
-void list_append(single_linked_list *list, unsigned long p, unsigned long r);
-void list_clear(single_linked_list *list);
+void list_init(single_linked_list * restrict list);
+
+void list_append(single_linked_list * restrict list, const unsigned long p, const unsigned long r);
+
+void list_clear(single_linked_list * restrict list);
 
 #endif // SINGLE_LINKED_LIST_H

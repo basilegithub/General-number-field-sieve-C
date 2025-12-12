@@ -3,7 +3,7 @@
 
 #include "dynamic_arrays.h"
 
-void erasthotenes_sieve(dyn_array_classic* primes, mpz_t bound)
+void erasthotenes_sieve(dyn_array_classic * restrict primes, const mpz_t bound)
 {
     mpz_t sqrtB;
     mpz_init(sqrtB);
@@ -14,7 +14,7 @@ void erasthotenes_sieve(dyn_array_classic* primes, mpz_t bound)
     unsigned long bound_ui = mpz_get_ui(bound);
     unsigned long sqrtB_ui = mpz_get_ui(sqrtB);
 
-    bool *array = calloc(bound_ui, sizeof(bool));
+    bool * restrict array = calloc(bound_ui, sizeof(bool));
 
     for (size_t i = 0 ; i < bound_ui ; i += 2) array[i] = true;
 

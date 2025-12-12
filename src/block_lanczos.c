@@ -14,12 +14,12 @@
 
 #define MIN(x, y) ((x) < (y) ? (x) : (y))
 
-unsigned int switch_indices(size_t d, size_t mask)
+unsigned int switch_indices(const size_t d, const size_t mask)
 {
     return (~d) & mask;
 }
 
-void multiply_d(size_t *restrict output, const size_t *restrict dense_matrix, const size_t d, const size_t N)
+void multiply_d(size_t * restrict output, const size_t *restrict dense_matrix, const size_t d, const size_t N)
 {
     for (size_t i = 0 ; i < N ; i++)
     {
@@ -27,7 +27,7 @@ void multiply_d(size_t *restrict output, const size_t *restrict dense_matrix, co
     }
 }
 
-void multiply_d_inplace(size_t *dense_matrix, const size_t d, const size_t N)
+void multiply_d_inplace(size_t * restrict dense_matrix, const size_t d, const size_t N)
 {
     for (size_t i = 0 ; i < N ; i++)
     {
@@ -35,7 +35,7 @@ void multiply_d_inplace(size_t *dense_matrix, const size_t d, const size_t N)
     }
 }
 
-void extract_columns(size_t *W_inv, size_t *d, size_t *T, size_t N)
+void extract_columns(size_t * restrict W_inv, size_t * restrict d, size_t *T, size_t N)
 {
     size_t *M = calloc(N<<1, sizeof(size_t));
 
@@ -125,7 +125,7 @@ void extract_columns(size_t *W_inv, size_t *d, size_t *T, size_t N)
     free(S);
 }
 
-void solve(mpz_t *matrix, mpz_t *kernel, size_t nb_rows, size_t matrix_len)
+void solve(mpz_t * restrict matrix, mpz_t * restrict kernel, const size_t nb_rows, const size_t matrix_len)
 {
     size_t k = 0;
 
@@ -160,12 +160,19 @@ void solve(mpz_t *matrix, mpz_t *kernel, size_t nb_rows, size_t matrix_len)
     }
 }
 
-void block_lanczos(dyn_array *output, dyn_array_classic sparse_matrix, size_t nb_relations, size_t block_size, unsigned long index, FILE *logfile)
+void block_lanczos(
+    dyn_array * restrict output,
+    dyn_array_classic * sparse_matrix,
+    const size_t nb_relations,
+    const size_t block_size,
+    const unsigned long index,
+    FILE *logfile
+)
 {
     size_t nb_rows = 0;
-    for (size_t i = 0 ; i < sparse_matrix.len ; i++)
+    for (size_t i = 0 ; i < sparse_matrix->len ; i++)
     {
-        if (sparse_matrix.start[i] == index) nb_rows++;
+        if (sparse_matrix->start[i] == index) nb_rows++;
     }
 
     size_t *Y = calloc(nb_relations, sizeof(size_t));

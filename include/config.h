@@ -2,6 +2,7 @@
 #define CONFIG_H
 
 void trim(char *str);
-void parse_config(char* config_path, int* flag_batch_smooth);
+
+void parse_config(const char * restrict config_path, int * restrict flag_batch_smooth);
 
 #endif // CONFIG_H

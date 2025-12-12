@@ -5,13 +5,13 @@
 #include "quadratic_characters.h"
 #include "polynomial_functions.h"
 
-void quadratic_base_init(quadratic_character_base *b)
+void quadratic_base_init(quadratic_character_base *restrict b)
 {
     b->start = NULL;
     b->end = NULL;
 }
 
-void quadratic_base_clear(quadratic_character_base *b)
+void quadratic_base_clear(quadratic_character_base * restrict b)
 {
     quadratic_character *p = b->start;
     while (p != NULL) {
@@ -26,7 +26,16 @@ void quadratic_base_clear(quadratic_character_base *b)
     b->end = NULL;
 }
 
-unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime, gmp_randstate_t state)
+unsigned long create_quadratic_characters_base(
+    quadratic_character_base * restrict q_base,
+    const polynomial_mpz * restrict f,
+    const polynomial_mpz * restrict f_derivative,
+    const mpz_t n,
+    const mpz_t leading_coeff,
+    const unsigned long required_size,
+    const unsigned long start_prime, 
+    gmp_randstate_t state
+)
 {
     size_t cpt = 0;
 

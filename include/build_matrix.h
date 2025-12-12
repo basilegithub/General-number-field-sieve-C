@@ -7,13 +7,13 @@
 #include "NFS_relations.h"
 
 void build_sparse_matrix(
-    dyn_array_classic *sparse_matrix,
-    nfs_relations *relations,
-    dyn_array_classic *rational_primes,
-    algebraic_base *algebraic_primes,
-    quadratic_character_base *quad_char,
-    unsigned long *divide_leading,
-    unsigned long len_divide_leading
+    dyn_array_classic * restrict sparse_matrix,
+    const nfs_relations * restrict relations,
+    const dyn_array_classic * restrict rational_primes,
+    const algebraic_base *restrict algebraic_primes,
+    const quadratic_character_base * restrict quad_char,
+    const unsigned long * restrict divide_leading,
+    const unsigned long len_divide_leading
 );
 
 #endif // BUILD_MATRIX_H

@@ -22,7 +22,7 @@ void compute_e(mpf_t e)
     mpf_clears(fac, tmp, NULL);
 }
 
-void recursive_exp(mpf_t res, mpz_t pow, mpf_t e)
+void recursive_exp(mpf_t res, mpz_t pow, const mpf_t e)
 {
     if (!mpz_cmp_ui(pow, 0)) mpf_set_ui(res, 1);
     else if (!mpz_cmp_ui(pow, 1)) mpf_set(res, e);
@@ -51,7 +51,7 @@ void recursive_exp(mpf_t res, mpz_t pow, mpf_t e)
     }
 }
 
-void myexp(mpf_t res, mpf_t x, mpf_t e)
+void myexp(mpf_t res, mpf_t x, const mpf_t e)
 {
     int flag = 0;
     if (mpf_cmp_ui(x, 0) < 0)
@@ -95,7 +95,7 @@ void myexp(mpf_t res, mpf_t x, mpf_t e)
     mpf_clears(tmpf, tmpf2, rest, tmp_res, tmp_rest, fact, NULL);
 }
 
-void natural_log(mpf_t res, mpf_t x, mpf_t ln2, mpf_t e)
+void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
 {
     mpz_t tmp;
 
@@ -123,7 +123,7 @@ void natural_log(mpf_t res, mpf_t x, mpf_t ln2, mpf_t e)
     mpf_clears(tmpf, a, NULL);
 }
 
-void nth_root(mpf_t r, mpf_t x, unsigned long n)
+void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
 {
     mpf_t tmpf, tmpf2, tmpf3, tmpf4;
     mpf_inits(tmpf, tmpf2, tmpf3, tmpf4, NULL);
@@ -162,7 +162,7 @@ unsigned long gcd(unsigned long a, unsigned long b)
     return a;
 }
 
-bool fermat_primality(mpz_t n)
+bool fermat_primality(const mpz_t n)
 {
     mpz_t res, base, exponent;
     mpz_init_set_ui(base, 2);
@@ -178,7 +178,7 @@ bool fermat_primality(mpz_t n)
     return to_return;
 }
 
-int my_legendre(mpz_t n, unsigned long p)
+int my_legendre(const mpz_t n, unsigned long p)
 {
     mpz_t tmp;
     mpz_init(tmp);
@@ -292,7 +292,7 @@ void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state)
     mpz_clears(z, tmp, tmp2, P_value, generator, lambda, omega, res, m, two_mpz, NULL);
 }
 
-void convert_to_vec(mpz_t embedding, unsigned long relations_len, bool tmp_vec[relations_len])
+void convert_to_vec(mpz_t embedding, const unsigned long relations_len, bool * restrict tmp_vec)
 {
     mpz_t tmp, tmp2;
     mpz_inits(tmp, tmp2, NULL);

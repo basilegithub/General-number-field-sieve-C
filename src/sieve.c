@@ -13,7 +13,7 @@
 
 void sieve(
     nfs_relations * restrict smooth_candidates,
-    const polynomial_mpz sieve_poly,
+    const polynomial_mpz * restrict sieve_poly,
     const algebraic_base * restrict alg_base,
     const dyn_array_classic * restrict logs,
     const mpz_t leading_coeff,
@@ -100,16 +100,16 @@ void sieve(
 
     if (b&1)
     {
-        mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
-        for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
+        mpz_t *algebraic_difs = calloc(sieve_poly->degree + 1, sizeof(mpz_t));
+        for (size_t i = 0 ; i <= sieve_poly->degree ; i++)
         {
             mpz_init(algebraic_difs[i]);
             evaluate_poly(algebraic_difs[i], sieve_poly, a+i);
         }
         
-        for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
+        for (size_t q = 1 ; q <= sieve_poly->degree ; q++)
         {
-            for (size_t k = sieve_poly.degree ; k > q-1 ; k--)
+            for (size_t k = sieve_poly->degree ; k > q-1 ; k--)
             {
                 mpz_sub(algebraic_difs[k], algebraic_difs[k], algebraic_difs[k-1]);
             }
@@ -157,7 +157,7 @@ void sieve(
 
             mpz_add(algebraic_eval, algebraic_eval, algebraic_difs[1]);
 
-            for (size_t q = 1 ; q < sieve_poly.degree ; q++)
+            for (size_t q = 1 ; q < sieve_poly->degree ; q++)
             {
                 mpz_add(algebraic_difs[q], algebraic_difs[q], algebraic_difs[q+1]);
             }
@@ -165,7 +165,7 @@ void sieve(
             mpz_add(rational_eval, rational_eval, m1);
         }
 
-        for (size_t i = 0 ; i <= sieve_poly.degree ; i++) mpz_clear(algebraic_difs[i]);
+        for (size_t i = 0 ; i <= sieve_poly->degree ; i++) mpz_clear(algebraic_difs[i]);
         free(algebraic_difs);
     }
     else // If b is even, then a cannot be even -> skip them
@@ -179,16 +179,16 @@ void sieve(
             mpz_add(rational_eval, rational_eval, m1);
         }
 
-        mpz_t *algebraic_difs = calloc(sieve_poly.degree + 1, sizeof(mpz_t));
-        for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
+        mpz_t *algebraic_difs = calloc(sieve_poly->degree + 1, sizeof(mpz_t));
+        for (size_t i = 0 ; i <= sieve_poly->degree ; i++)
         {
             mpz_init(algebraic_difs[i]);
             evaluate_poly(algebraic_difs[i], sieve_poly, a + 2*i);
         }
         
-        for (size_t q = 1 ; q <= sieve_poly.degree ; q++)
+        for (size_t q = 1 ; q <= sieve_poly->degree ; q++)
         {
-            for (size_t k = sieve_poly.degree ; k > q-1 ; k--)
+            for (size_t k = sieve_poly->degree ; k > q-1 ; k--)
             {
                 mpz_sub(algebraic_difs[k], algebraic_difs[k], algebraic_difs[k-1]);
             }
@@ -236,7 +236,7 @@ void sieve(
 
             mpz_add(algebraic_eval, algebraic_eval, algebraic_difs[1]);
 
-            for (size_t q = 1 ; q < sieve_poly.degree ; q++)
+            for (size_t q = 1 ; q < sieve_poly->degree ; q++)
             {
                 mpz_add(algebraic_difs[q], algebraic_difs[q], algebraic_difs[q+1]);
             }

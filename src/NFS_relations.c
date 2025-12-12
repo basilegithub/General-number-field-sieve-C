@@ -5,14 +5,14 @@
 #include "polynomial_structures.h"
 #include "NFS_relations.h"
 
-void init_relations(nfs_relations *relations)
+void init_relations(nfs_relations * restrict relations)
 {
     relations->rels = calloc(1, sizeof(nfs_relation));
     relations->len = 0;
     relations->size = 1;
 }
 
-void init_new_relation(nfs_relations *relations, size_t len_divide_leading)
+void init_new_relation(nfs_relations * restrict relations, const size_t len_divide_leading)
 {
     if (relations->len == relations->size)
     {
@@ -32,7 +32,7 @@ void init_new_relation(nfs_relations *relations, size_t len_divide_leading)
     relations->len++;
 }
 
-void clear_relations(nfs_relations *relations)
+void clear_relations(nfs_relations * restrict relations)
 {
     for (size_t i = 0 ; i < relations->len ; i++)
     {

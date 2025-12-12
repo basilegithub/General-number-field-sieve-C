@@ -13,11 +13,10 @@
 #include "smooth_test.h"
 
 void mono_cpu_sieve(
-    nfs_relations *relations,
-    polynomial_mpz f_x,
-    polynomial_mpz g_x,
-    dyn_array_classic *rat_base,
-    algebraic_base *alg_base,
+    nfs_relations * restrict relations,
+    polynomial_mpz *f_x,
+    const dyn_array_classic * restrict rat_base,
+    const algebraic_base * restrict alg_base,
     size_t nb_Algebraic_pairs,
     size_t nb_Quadratic_characters,
     mpz_t leading_coeff,
@@ -27,10 +26,10 @@ void mono_cpu_sieve(
     size_t sieve_len,
     mpz_t const1,
     mpz_t const2,
-    unsigned long *divide_leading,
-    mpz_t *pow_div,
+    unsigned long * restrict divide_leading,
+    mpz_t * restrict pow_div,
     size_t len_divide_leading,
-    dyn_array_classic *logs,
+    dyn_array_classic * restrict logs,
     gmp_randstate_t state,
     FILE *logfile,
     int flag_batch_smooth
@@ -82,9 +81,9 @@ void mono_cpu_sieve(
         init_relations(&smooth_candidates);
 
         polynomial_mpz sieve_poly;
-        init_poly_degree(&sieve_poly, f_x.degree);
+        init_poly_degree(&sieve_poly, f_x->degree);
 
-        copy_polynomial(&sieve_poly, &f_x);
+        copy_polynomial(&sieve_poly, f_x);
         for (size_t i = 0 ; i <= sieve_poly.degree ; i++)
         {
             mpz_set_ui(tmp, b);
@@ -98,7 +97,7 @@ void mono_cpu_sieve(
 
         sieve(
             &smooth_candidates,
-            sieve_poly,
+            &sieve_poly,
             alg_base,
             logs,
             leading_coeff,
