@@ -21,8 +21,19 @@ typedef struct
 
 // Functions definition
 
-void quadratic_base_init(quadratic_character_base *b);
-void quadratic_base_clear(quadratic_character_base *b);
-unsigned long create_quadratic_characters_base(quadratic_character_base *q_base, polynomial_mpz f, polynomial_mpz f_derivative, mpz_t n, mpz_t leading_coeff, unsigned long required_size, unsigned long start_prime, gmp_randstate_t state);
+void quadratic_base_init(quadratic_character_base * restrict b);
+
+void quadratic_base_clear(quadratic_character_base * restrict b);
+
+unsigned long create_quadratic_characters_base(
+    quadratic_character_base * restrict q_base,
+    const polynomial_mpz * restrict f,
+    const polynomial_mpz * restrict f_derivative,
+    const mpz_t n,
+    const mpz_t leading_coeff,
+    const unsigned long required_size,
+    const unsigned long start_prime, 
+    gmp_randstate_t state
+);
 
 #endif // QUADRATIC_CHARACTERS_H

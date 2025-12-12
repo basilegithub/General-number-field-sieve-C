@@ -237,7 +237,7 @@ int main()
     quadratic_base_init(&quad_char_base);
 
     // unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 1, mpz_get_ui(large_prime_constant2), state);
-    unsigned long factor = create_quadratic_characters_base(&quad_char_base, f_x, f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
+    unsigned long factor = create_quadratic_characters_base(&quad_char_base, &f_x, &f_derivative, n, leading_coeff, 3*mpz_sizeinbase(n, 2), mpz_get_ui(large_prime_constant2), state);
 
     if (factor) // If we have found a factor while building the quadratic characters base
     {
