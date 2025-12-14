@@ -6,6 +6,62 @@
 #include "polynomial_functions.h"
 #include "utils.h"
 
+void evaluate_legendre(
+    const unsigned long n,
+    const double x,
+    double * restrict P,
+    double * restrict dP
+)
+{
+    double P0 = 1.0;
+    double P1 = x;
+    double Pn;
+
+    for (int k = 2; k <= n; k++) {
+        Pn = ((2.0*k - 1.0)*x*P1 - (k - 1.0)*P0) / k;
+        P0 = P1;
+        P1 = Pn;
+    }
+
+    *P = (n == 0) ? P0 : (n == 1) ? P1 : Pn;
+    *dP = n * (x * (*P) - P0) / (x*x - 1.0);
+}
+
+void nodes_and_weights_gauss(
+    const unsigned long n,
+    double * restrict x,
+    double * restrict w
+)
+{
+    const double EPS = 1e-14;
+    int m = (n + 1) / 2;
+
+    for (int i = 0; i < m; i++) {
+        // Initial guess (good approximation)
+        double z = cos(M_PI * (i + 0.75) / (n + 0.5));
+        double z1;
+
+        // Newton-Raphson
+        do {
+            double P, dP;
+            evaluate_legendre(n, z, &P, &dP);
+            z1 = z;
+            z = z1 - P / dP;
+        } while (fabs(z - z1) > EPS);
+
+        // Store symmetric roots
+        x[i] = -z;
+        x[n - 1 - i] = z;
+
+        // Weight
+        double P, dP;
+        evaluate_legendre(n, z, &P, &dP);
+        double wi = 2.0 / ((1.0 - z*z) * dP * dP);
+        w[i] = wi;
+        w[n - 1 - i] = wi;
+    }
+}
+
 void get_Lnorm(
     mpz_t res,
     const polynomial_mpz * restrict F,

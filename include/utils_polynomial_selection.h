@@ -14,6 +14,6 @@ void get_Lnorm(
     const unsigned long smoothness_bound,
     const mpf_t ln2,
     const mpf_t e
-)
+);
 
 #endif // UTILS_POLYNOMIAL_SELECTION
