@@ -123,6 +123,52 @@ void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
     mpf_clears(tmpf, a, NULL);
 }
 
+unsigned long isqrt(unsigned long n)
+{
+    unsigned long a, b
+    if (n < 17)
+    {
+        a = n;
+        b = (n+1)>>1;
+    }
+    else
+    {
+        unsigned long s = 1;
+        unsigned long S = 1;
+        while (S<<4 < n)
+        {
+            a = 4;
+            b = 16;
+            unsigned long c = 2;
+            while (b*S < n)
+            {
+                c = a;
+                a = b;
+                b = b*b;
+            }
+            s *= c;
+            S = s*s;
+        }
+        if (S<<2 < n)
+        {
+            b = s<<2;
+            a = n;
+        }
+        else
+        {
+            b = s<<1;
+            a = n;
+        }
+    }
+    while (b < a)
+    {
+        unsigned long c = (b*b + n)/(b<<1);
+        a = b;
+        b = c;
+    }
+    return a;
+}
+
 void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
 {
     mpf_t tmpf, tmpf2, tmpf3, tmpf4;

@@ -14,6 +14,8 @@ void myexp(mpf_t res, mpf_t x, const mpf_t e);
 
 void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e);
 
+unsigned long isqrt(unsigned long n);
+
 void nth_root(mpf_t r, const mpf_t x, const unsigned long n);
 
 unsigned long gcd(unsigned long a, unsigned long b);
