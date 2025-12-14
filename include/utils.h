@@ -18,6 +18,8 @@ unsigned long isqrt(unsigned long n);
 
 void nth_root(mpf_t r, const mpf_t x, const unsigned long n);
 
+unsigned long my_power(unsigned long a, unsigned long n);
+
 unsigned long gcd(unsigned long a, unsigned long b);
 
 bool fermat_primality(const mpz_t n);

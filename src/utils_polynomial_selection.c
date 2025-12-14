@@ -4,6 +4,7 @@
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 #include "polynomial_functions.h"
+#include "dickman_table.h"
 #include "utils.h"
 
 void evaluate_legendre(
@@ -60,6 +61,19 @@ void nodes_and_weights_gauss(
         w[i] = wi;
         w[n - 1 - i] = wi;
     }
+}
+
+unsigned double get_Escore(
+    const polynomial_mpz * restrict f,
+    const polynomial_mpz * restrict g,
+    const double alpha,
+    const unsigned long smoothness_bound,
+    const unsigned long x_limit,
+    const unisgned long y_limit,
+    dickman_table * restrict table
+)
+{
+    return 1;
 }
 
 void get_Lnorm(

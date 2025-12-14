@@ -16,4 +16,17 @@ void get_Lnorm(
     const mpf_t e
 );
 
+void evaluate_legendre(
+    const unsigned long n,
+    const double x,
+    double * restrict P,
+    double * restrict dP
+);
+
+void nodes_and_weights_gauss(
+    const unsigned long n,
+    double * restrict x,
+    double * restrict w
+);
+
 #endif // UTILS_POLYNOMIAL_SELECTION

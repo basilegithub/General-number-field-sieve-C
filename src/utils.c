@@ -203,6 +203,22 @@ void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
     mpf_clears(tmpf, tmpf2, tmpf3, tmpf4, NULL);
 }
 
+unsigned long my_power(unsigned long a, unsigned long n)
+{
+    unsigned long res = 1;
+
+    while (n)
+    {
+        if (n&1)
+        {
+            res *= a;
+        }
+        a *= a;
+        n >>= 1;
+    }
+    return res;
+}
+
 unsigned long gcd(unsigned long a, unsigned long b)
 {
     while (b != 0) {
