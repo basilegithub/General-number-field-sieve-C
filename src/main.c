@@ -15,6 +15,7 @@
 #include "polynomial_structures.h"
 #include "NFS_relations.h"
 #include "polynomial_functions.h"
+#include "dickman_table.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"

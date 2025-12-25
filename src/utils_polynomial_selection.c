@@ -1,5 +1,6 @@
 #include <gmp.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
@@ -196,17 +197,17 @@ void get_Lnorm(
         mpz_mul(tmp, tmp, F->coeffs[i]);
 
         mpz_set_ui(tmp2, (i+1)*(n-i));
-        mpz_div(tmp, tmp2);
+        mpz_div(tmp, tmp, tmp2);
 
         mpz_add(res, res, tmp);
 
-        mpz_divexact(current_X, base_X);
-        mpz_mul(current_Y, base_Y);
+        mpz_divexact(current_X, current_X, base_X);
+        mpz_mul(current_Y, current_Y, base_Y);
     }
 
     mpz_abs(res, res);
     
-    mpz_t res_f, x;
+    mpf_t res_f, x;
     mpf_init(res_f);
     mpf_init(x);
 

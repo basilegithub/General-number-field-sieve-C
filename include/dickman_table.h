@@ -14,15 +14,15 @@ typedef struct
 
 void init_dickman_table(
     dickman_table * restrict table,
-    size_t nb_coefficients,
+    const size_t nb_coefficients
 );
 
 void compute_dickman_coeffs(
     dickman_table * restrict table,
-    size_t nb_lines
+    const size_t nb_lines
 );
 
-void evaluate_dickman(
+double evaluate_dickman(
     dickman_table * restrict table,
     const double x
 );

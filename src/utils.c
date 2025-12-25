@@ -125,7 +125,7 @@ void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
 
 unsigned long isqrt(unsigned long n)
 {
-    unsigned long a, b
+    unsigned long a, b;
     if (n < 17)
     {
         a = n;
