@@ -456,6 +456,50 @@ void central(
     }
 }
 
+void non_central(
+    mpf_t res,
+    unsigned long k,
+    double l,
+    double x,
+    mpf_t e
+)
+{
+    if (x < 0.0)
+    {
+        mpf_set_ui(res, 0);
+    }
+    else
+    {
+        mpf_set_ui(res, 0);
+
+        mpf_t tmpf, tmpf2, tmpf3;
+        mpf_inits(tmpf, tmpf2, tmpf3, NULL);
+
+        mpf_set_ui(tmpf2, 1);
+        mpf_set_ui(tmpf3, 1);
+
+        for (size_t i = 0 ; i < 100 ; i++)
+        {
+            mpf_mul(tmpf, tmpf2, tmpf3);
+            central(tmpf2, k + 2*i, x, e);
+            mpf_mul(tmpf, tmpf, tmpf2);
+            mpf_add(res, res, tmpf);
+
+            mpf_set_d(tmpf, l/2);
+            mpf_mul(tmpf2, tmpf2, tmpf);
+
+            mpf_set_ui(tmpf, i+1);
+            mpf_div(tmpf3, tmpf3, tmpf);
+        }
+
+        myexp(tmpf, -l/2, e);
+
+        mpf_mul(res, res, tmpf);
+
+        mpf_clears(tmpf, tmpf2, tmpf3, NULL);
+    }
+}
+
 void convert_to_vec(mpz_t embedding, const unsigned long relations_len, bool * restrict tmp_vec)
 {
     mpz_t tmp, tmp2;
