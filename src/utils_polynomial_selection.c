@@ -63,7 +63,7 @@ void nodes_and_weights_gauss(
     }
 }
 
-unsigned double get_Escore(
+double get_Escore(
     const polynomial_mpz * restrict f,
     const polynomial_mpz * restrict g,
     const double alpha,
@@ -103,7 +103,7 @@ unsigned double get_Escore(
         weights[i] = 0.5 * (b - a) * weights[i];
     }
 
-    unsigned double res = 0;
+    double res = 0;
 
     mpz_t X_mpz, Y_mpz, res1, res2;
     mpz_inits(X_mpz, Y_mpz, res1, res2, NULL);

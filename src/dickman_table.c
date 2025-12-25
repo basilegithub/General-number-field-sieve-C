@@ -48,10 +48,28 @@ void compute_dickman_coeffs(
     }
 }
 
-void evaluate_dickman(
+double evaluate_dickman(
     dickman_table * restrict table,
-    const unsigned double x
+    const double x
 )
 {
-    
+    unsigned long integer_part = (unsigned long) x;
+    double delta = integer_part + 1 - x;
+
+    if (integer_part > table->nb_lines)
+    {
+        free(table->coefficients);
+        compute_dickman_coeffs(table, integer_part + 1);
+    }
+
+    double tmp = 1.0;
+    double res = 0.0;
+
+    for (size_t i = 0 ; i < table->nb_coefficients ; i++)
+    {
+        res += table->coefficients[table->nb_coefficients * (integer_part - 1) + i] * tmp;
+        tmp *= delta;
+    }
+
+    return res;
 }
