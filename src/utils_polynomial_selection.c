@@ -253,30 +253,30 @@ void get_Epscore(
     double *nodes_mu = calloc(n, sizeof(double));
     nodes_and_weights_gauss(n, nodes_mu, weights_mu);
 
-    double a, b;
-    a = c;
-    b = 6*c; // pi
+    double a_mu, b_mu;
+    a_mu = c;
+    b_mu = 6*c; // pi
 
     for (size_t i = 0 ; i < n ; i++)
     {
         // Shift nodes and weights from [-1, 1] to the required interval [c, 6c]
-        nodes_mu[i] = 0.5 * (b - a) * nodes_mu[i] + 0.5 * (b + a);
-        weights_mu[i] = 0.5 * (b - a) * weights_mu[i];
+        nodes_mu[i] = 0.5 * (b_mu - a_mu) * nodes_mu[i] + 0.5 * (b_mu + a_mu);
+        weights_mu[i] = 0.5 * (b_mu - a_mu) * weights_mu[i];
     }
 
     double *weights_th = calloc(n, sizeof(double));
     double *nodes_th = calloc(n, sizeof(double));
     nodes_and_weights_gauss(n, nodes_th, weights_th);
 
-    double a, b;
-    a = c;
-    b = 6*c; // pi
+    double a_th, b_th;
+    a_th = 0;
+    b_th = 3.141592; // pi
 
     for (size_t i = 0 ; i < n ; i++)
     {
         // Shift nodes and weights from [-1, 1] to the required interval [0, pi]
-        nodes_th[i] = 0.5 * (b - a) * nodes_th[i] + 0.5 * (b + a);
-        weights_th[i] = 0.5 * (b - a) * weights_th[i];
+        nodes_th[i] = 0.5 * (b_th - a_th) * nodes_th[i] + 0.5 * (b_th + a_th);
+        weights_th[i] = 0.5 * (b_th - a_th) * weights_th[i];
     }
 
     double res = 0.0;
@@ -284,9 +284,12 @@ void get_Epscore(
     mpz_t X_mpz, Y_mpz, res1, res2;
     mpz_inits(X_mpz, Y_mpz, res1, res2, NULL);
 
+    mpf_t non_central_eval;
+    mpf_init(non_central_eval);
+
     for (size_t i = 0 ; i < n ; i++)
     {
-        double non_central_eval = non_central(k, l, nodes_mu[i]);
+        non_central(non_central_eval, k, l, nodes_mu[i], e);
 
         for (size_t j = 0 ; j < n ; j++)
         {
@@ -324,7 +327,7 @@ void get_Epscore(
             mpf_mul(tmpf, tmpf, tmpf2);
             mpf_set_d(tmpf2, weights_th[j]);
             mpf_mul(tmpf, tmpf, tmpf2);
-            mpf_set_d(tmpf2, non_central_eval);
+            mpf_set(tmpf2, non_central_eval);
             mpf_mul(tmpf, tmpf, tmpf2);
             
             res += mpf_get_d(tmpf);
@@ -333,6 +336,6 @@ void get_Epscore(
 
     mpz_clears(X_mpz, Y_mpz, res1, res2, NULL);
 
-    mpf_clears(tmpf, tmpf2, NULL);
+    mpf_clears(tmpf, tmpf2, non_central_eval, NULL);
 
 }

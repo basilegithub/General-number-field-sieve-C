@@ -419,7 +419,7 @@ void central(
     mpf_t res,
     unsigned long k,
     double x,
-    mpf_t e
+    const mpf_t e
 )
 {
     if (x < 0)
@@ -461,7 +461,7 @@ void non_central(
     unsigned long k,
     double l,
     double x,
-    mpf_t e
+    const mpf_t e
 )
 {
     if (x < 0.0)
@@ -492,7 +492,9 @@ void non_central(
             mpf_div(tmpf3, tmpf3, tmpf);
         }
 
-        myexp(tmpf, -l/2, e);
+        mpf_set_d(tmpf2, -l/2);
+
+        myexp(tmpf, tmpf2, e);
 
         mpf_mul(res, res, tmpf);
 

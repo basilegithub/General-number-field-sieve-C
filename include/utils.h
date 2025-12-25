@@ -28,6 +28,28 @@ int my_legendre(const mpz_t n, unsigned long p);
 
 void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state);
 
+void my_factorial(mpz_t res, unsigned long n);
+
+void gamma_function_div2(
+    mpf_t res,
+    unsigned long k
+);
+
+void central(
+    mpf_t res,
+    unsigned long k,
+    double x,
+    const mpf_t e
+);
+
+void non_central(
+    mpf_t res,
+    unsigned long k,
+    double l,
+    double x,
+    const mpf_t e
+);
+
 void convert_to_vec(mpz_t embedding, unsigned long relations_len, bool * restrict tmp_vec);
 
 #endif // UTILS_H
