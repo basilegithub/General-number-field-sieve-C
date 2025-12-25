@@ -47,3 +47,11 @@ void compute_dickman_coeffs(
         table->coefficients[(i-2)*table->nb_coefficients] = c/(i-1);
     }
 }
+
+void evaluate_dickman(
+    dickman_table * restrict table,
+    const unsigned double x
+)
+{
+    
+}

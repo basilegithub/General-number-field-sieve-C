@@ -25,6 +25,6 @@ void compute_dickman_coeffs(
 void evaluate_dickman(
     dickman_table * restrict table,
     const unsigned double x
-)
+);
 
 #endif // DICKMAN_TABLE_H

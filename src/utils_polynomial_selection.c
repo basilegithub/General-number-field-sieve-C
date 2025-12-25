@@ -69,11 +69,86 @@ unsigned double get_Escore(
     const double alpha,
     const unsigned long smoothness_bound,
     const unsigned long x_limit,
-    const unisgned long y_limit,
-    dickman_table * restrict table
+    const unsigned long y_limit,
+    dickman_table * restrict table,
+    const mpf_t ln2,
+    const mpf_t e
 )
 {
-    return 1;
+    unsigned long n = 32;
+
+    double log_B;
+
+    mpf_t tmpf, tmpf2;
+    mpf_init_set_ui(tmpf, smoothness_bound);
+    mpf_init(tmpf2);
+
+    natural_log(tmpf2, tmpf, ln2, e);
+
+    log_B = mpf_get_d(tmpf2);
+
+
+    double *weights = calloc(n, sizeof(double));
+    double *nodes = calloc(n, sizeof(double));
+    nodes_and_weights_gauss(n, nodes, weights);
+
+    double a, b;
+    a = 0.0;
+    b = 3.141592; // pi
+
+    for (size_t i = 0 ; i < n ; i++)
+    {
+        // Shift nodes and weights from [-1, 1] to the required interval [0, pi]
+        nodes[i] = 0.5 * (b - a) * nodes[i] + 0.5 * (b + a);
+        weights[i] = 0.5 * (b - a) * weights[i];
+    }
+
+    unsigned double res = 0;
+
+    mpz_t X_mpz, Y_mpz, res1, res2;
+    mpz_inits(X_mpz, Y_mpz, res1, res2, NULL);
+
+    for (size_t i = 0 ; i < n ; i++)
+    {
+        double angle = nodes[i];
+        double X = (double)x_limit * cos(angle);
+        double Y = (double)(y_limit - 1) * sin(angle) + 1;
+
+        mpz_set_d(X_mpz, X);
+        mpz_set_d(Y_mpz, Y);
+
+        evaluate_homogeneous(res1, f, Y_mpz, Y_mpz);
+        mpz_abs(res1, res1);
+        mpf_set_z(tmpf, res1);
+        natural_log(tmpf2, tmpf, ln2, e);
+        mpf_set_d(tmpf, alpha);
+        mpf_sub(tmpf2, tmpf2, tmpf);
+        mpf_set_d(tmpf, log_B);
+        mpf_div(tmpf2, tmpf2, tmpf);
+
+        mpz_set_d(res1, evaluate_dickman(table, mpf_get_d(tmpf2)));
+
+        evaluate_homogeneous(res2, g, Y_mpz, Y_mpz);
+        mpz_abs(res1, res1);
+        mpf_set_z(tmpf, res1);
+        natural_log(tmpf2, tmpf, ln2, e);
+        mpf_set_d(tmpf, log_B);
+        mpf_div(tmpf2, tmpf2, tmpf);
+
+        mpz_set_d(res2, evaluate_dickman(table, mpf_get_d(tmpf2)));
+
+        mpz_mul(res1, res1, res2);
+        mpf_set_z(tmpf, res1);
+        mpf_set_d(tmpf2, weights[i]);
+        mpf_mul(tmpf, tmpf, tmpf2);
+        
+        res += mpf_get_d(tmpf);
+    }
+
+    mpz_clears(X_mpz, Y_mpz, res1, res2, NULL);
+
+    mpf_clears(tmpf, tmpf2, NULL);
+
 }
 
 void get_Lnorm(
