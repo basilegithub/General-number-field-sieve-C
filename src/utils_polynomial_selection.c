@@ -497,3 +497,64 @@ void get_sieve_region(
     mpf_clears(ratio_mean, tmp_mpf, tmp_mpf2, best_norm, NULL);
     free_polynomial(&F);
 }
+
+void build_poly_coeffs(
+    polynomial_mpz * restrict f,
+    const mpz_t m0,
+    const mpz_t m1,
+    const mpz_t a_d,
+    const mpz_t n,
+    const unsigned long d
+)
+{
+    set_coeff(f, a_d, d);
+    f->degree = d;
+
+    mpz_t r, delta, tmp_mpz, tmp_mpz2;
+    mpz_inits(delta, tmp_mpz, tmp_mpz2, NULL);
+    mpz_init_set(r, n);
+
+    for (size_t i = 0 ; i < d ; i++)
+    {
+        mpz_pow_ui(tmp_mpz, m0, d - i);
+        mpz_mul(tmp_mpz, tmp_mpz, f->coeffs[i]);
+        mpz_divexact(tmp_mpz, tmp_mpz, m1);
+
+        mpz_sub(r, r, tmp_mpz);
+
+        mpz_set(tmp_mpz, m1);
+        mpz_pow_ui(tmp_mpz2, m0, d - 1 - i);
+        mpz_invert(tmp_mpz, tmp_mpz, tmp_mpz2);
+        mpz_mul(tmp_mpz, tmp_mpz, m1);
+        mpz_mul(tmp_mpz, tmp_mpz, r);
+        mpz_neg(tmp_mpz, tmp_mpz);
+
+        mpz_mul(tmp_mpz2, tmp_mpz2, m1);
+        mpz_mod(delta, tmp_mpz, tmp_mpz2);
+
+        mpz_add(tmp_mpz, r, delta);
+        mpz_pow_ui(tmp_mpz2, m0, d - 1 - i);
+
+        mpz_divexact(tmp_mpz, tmp_mpz, tmp_mpz2);
+        set_coeff(f, tmp_mpz, d - 1 - i);
+    }
+
+    mpz_div_2exp(tmp_mpz, m0, 1);
+    mpz_neg(tmp_mpz2, tmp_mpz);
+
+    for (size_t i = 1 ; i <= f->degree ; i++)
+    {
+        if (mpz_cmp(f->coeffs[i], tmp_mpz) > 0)
+        {
+            mpz_sub(f->coeffs[i], f->coeffs[i], m0);
+            mpz_add(f->coeffs[i - 1], f->coeffs[i - 1], m1);
+        }
+        else if (mpz_cmp(f->coeffs[i], tmp_mpz2) < 0)
+        {
+            mpz_add(f->coeffs[i], f->coeffs[i], m0);
+            mpz_sub(f->coeffs[i - 1], f->coeffs[i - 1], m1);
+        }
+    }
+
+    mpz_clears(r, delta, tmp_mpz, tmp_mpz2, NULL);
+}
