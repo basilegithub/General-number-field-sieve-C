@@ -50,6 +50,12 @@ void non_central(
     const mpf_t e
 );
 
+void binom_coeff(
+    mpz_t res,
+    const unsigned long k,
+    const unsigned long n
+);
+
 void convert_to_vec(mpz_t embedding, unsigned long relations_len, bool * restrict tmp_vec);
 
 #endif // UTILS_H

@@ -502,6 +502,30 @@ void non_central(
     }
 }
 
+void binom_coeff(
+    mpz_t res,
+    const unsigned long k,
+    const unsigned long n
+)
+{
+    if (k > n)
+    {
+        mpz_set_ui(res, 0);
+        return;
+    }
+    if (k <= n>>1)
+    {
+        mpz_set_ui(res, 1);
+
+        for (size_t i = n - k + 1 ; i <= n ; i++) mpz_mul_ui(res, res, i);
+        for (size_t i = 2 ; i <= k ; i++) mpz_divexact_ui(res, res, i);
+    }
+    else
+    {
+        binom_coeff(res, n-k, n);
+    }
+}
+
 void convert_to_vec(mpz_t embedding, const unsigned long relations_len, bool * restrict tmp_vec)
 {
     mpz_t tmp, tmp2;
