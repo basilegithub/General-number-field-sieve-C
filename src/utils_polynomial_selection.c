@@ -339,3 +339,65 @@ void get_Epscore(
     mpf_clears(tmpf, tmpf2, non_central_eval, NULL);
 
 }
+
+void minimize_Lnorm(
+    polynomial_mpz * restrict f,
+    unsigned long skew_factor,
+    const unsigned long smoothness_bound,
+    mpz_t m0,
+    mpz_t m1,
+    mpf_t ln2,
+    mpf_t e
+)
+{
+    polynomial_mpz tmp_poly, tmp_poly2;
+    init_poly(&tmp_poly);
+    init_poly(&tmp_poly2);
+
+    mpf_t res, tmp_mpf;
+    mpf_inits(res, tmp_mpf, NULL);
+
+
+    size_t k = 1;
+
+    poly_prod(&tmp_poly, f, f);
+    get_Lnorm(res, &tmp_poly, skew_factor, smoothness_bound, ln2, e);
+
+    while (k > 0)
+    {
+        bool flag = false;
+
+        shift(&tmp_poly2, f, -k);
+        poly_prod(&tmp_poly, &tmp_poly2, &tmp_poly2);
+        get_Lnorm(tmp_mpf, &tmp_poly, skew_factor, smoothness_bound, ln2, e);
+
+        if (mpf_cmp(tmp_mpf, res) < 0)
+        {
+            mpf_set(res, tmp_mpf);
+            copy_polynomial(f, &tmp_poly2);
+            flag = true;
+            mpz_addmul_ui(m0, m1, k);
+            k <<= 1;
+        }
+
+        shift(&tmp_poly2, f, k);
+        poly_prod(&tmp_poly, &tmp_poly2, &tmp_poly2);
+        get_Lnorm(tmp_mpf, &tmp_poly, skew_factor, smoothness_bound, ln2, e);
+
+        if (mpf_cmp(tmp_mpf, res) < 0)
+        {
+            mpf_set(res, tmp_mpf);
+            copy_polynomial(f, &tmp_poly2);
+            flag = true;
+            mpz_submul_ui(m0, m1, k);
+            k <<= 1;
+        }
+
+        if (!flag) k >>= 1;
+    }
+
+    free_polynomial(&tmp_poly);
+    free_polynomial(&tmp_poly2);
+
+    mpf_clears(res, tmp_mpf, NULL);
+}

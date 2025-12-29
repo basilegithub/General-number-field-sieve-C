@@ -41,6 +41,16 @@ double get_Escore(
     const mpf_t e
 );
 
+void minimize_Lnorm(
+    polynomial_mpz * restrict f,
+    unsigned long skew_factor,
+    const unsigned long smoothness_bound,
+    mpz_t m0,
+    mpz_t m1,
+    mpf_t ln2,
+    mpf_t e
+);
+
 
 
 #endif // UTILS_POLYNOMIAL_SELECTION
