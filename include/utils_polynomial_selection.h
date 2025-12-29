@@ -60,6 +60,15 @@ void get_sieve_region(
     mpf_t e
 );
 
+void build_poly_coeffs(
+    polynomial_mpz * restrict f,
+    const mpz_t m0,
+    const mpz_t m1,
+    const mpz_t a_d,
+    const mpz_t n,
+    const unsigned long d
+);
+
 
 
 #endif // UTILS_POLYNOMIAL_SELECTION
