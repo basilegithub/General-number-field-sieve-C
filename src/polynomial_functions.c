@@ -26,6 +26,34 @@ void poly_derivative(polynomial_mpz * restrict res, const polynomial_mpz * restr
     mpz_clear(tmp);
 }
 
+void shift(
+    polynomial_mpz * restrict res,
+    const polynomial_mpz * restrict f,
+    const long k
+)
+{
+    copy_polynomial(res, f);
+
+    mpz_t tmp_mpz, tmp_mpz2;
+    mpz_inits(tmp_mpz, tmp_mpz2, NULL);
+
+    for (size_t i = 0 ; i < f->degree ; i++)
+    {
+        for (size_t j = i + 1 ; j <= f->degree ; j++)
+        {
+            binom_coeff(tmp_mpz, j - i, f->degree - i);
+
+            mpz_set_si(tmp_mpz2, k);
+            mpz_pow_ui(tmp_mpz2, tmp_mpz2, j - i);
+
+            mpz_mul(tmp_mpz, tmp_mpz, tmp_mpz2);
+            mpz_addmul(res->coeffs[j], tmp_mpz, f->coeffs[i]);
+        }
+    }
+
+    mpz_clears(tmp_mpz, tmp_mpz2, NULL);
+}
+
 void evaluate_poly(mpz_t res, const polynomial_mpz * restrict f, const signed long x)
 {
     if (!x)
