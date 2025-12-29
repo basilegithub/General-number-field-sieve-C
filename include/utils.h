@@ -30,21 +30,16 @@ void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state);
 
 void my_factorial(mpz_t res, unsigned long n);
 
-void gamma_function_div2(
-    mpf_t res,
-    unsigned long k
-);
-
 void central(
     mpf_t res,
-    unsigned long k,
+    double k,
     double x,
     const mpf_t e
 );
 
 void non_central(
     mpf_t res,
-    unsigned long k,
+    double k,
     double l,
     double x,
     const mpf_t e

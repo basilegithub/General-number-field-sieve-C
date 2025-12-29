@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include "dynamic_arrays.h"
 #include "utils.h"
@@ -385,39 +386,9 @@ void my_factorial(mpz_t res, unsigned long n)
     }
 }
 
-void gamma_function_div2(
-    mpf_t res,
-    unsigned long k
-)
-{
-    if (!(k&1)) // If k even
-    {
-        mpz_t res_mpz;
-        mpz_init(res_mpz);
-
-        my_factorial(res_mpz, (k>>1) - 1);
-
-        mpf_set_z(res, res_mpz);
-
-        mpz_clear(res_mpz);
-    }
-    else // if k odd
-    {
-        mpf_set_d(res, 1.3772453); // sqrt(pi)
-
-        unsigned long n = k>>1;
-
-        for (size_t i = n+1 ; i <= 2*n ; i++)
-        {
-            mpf_div_ui(res, res, 4);
-            mpf_mul_ui(res, res, i);
-        }
-    }
-}
-
 void central(
     mpf_t res,
-    unsigned long k,
+    double k,
     double x,
     const mpf_t e
 )
@@ -428,37 +399,24 @@ void central(
     }
     else
     {
-        mpf_t tmpf, tmpf2, tmpf3;
-        mpf_inits(tmpf, tmpf2, tmpf3, NULL);
+        mpf_t tmpf;
+        mpf_init(tmpf);
 
-        double tmp = my_power_d(x, k);
-        mpf_set_d(tmpf, tmp);
-        nth_root(tmpf2, tmpf, 2);
+        double alpha = k / 2.0;
 
-        mpf_set_d(tmpf, x);
-        mpf_div(tmpf, tmpf2, tmpf);
+        double logpdf = -alpha * log(2.0) - lgamma(alpha) + (alpha - 1) * log(x) - x/2.0;
 
-        mpf_set_d(tmpf3, -x/2);
-        myexp(tmpf2, tmpf3, e);
-        mpf_mul(tmpf, tmpf, tmpf2);
+        mpf_set_d(tmpf, logpdf);
 
-        mpf_set_ui(tmpf2, 1);
-        mpf_mul_2exp(tmpf2, tmpf2, k);
-        nth_root(tmpf3, tmpf2, 2);
-        mpf_div(tmpf, tmpf, tmpf3);
+        myexp(res, tmpf, e);
 
-        gamma_function_div2(tmpf2, k);
-        mpf_div(tmpf, tmpf, tmpf2);
-
-        mpf_set(res, tmpf);
-
-        mpf_clears(tmpf, tmpf2, tmpf3, NULL);
+        mpf_clear(tmpf);
     }
 }
 
 void non_central(
     mpf_t res,
-    unsigned long k,
+    double k,
     double l,
     double x,
     const mpf_t e
