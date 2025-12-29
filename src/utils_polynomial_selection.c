@@ -65,7 +65,7 @@ void nodes_and_weights_gauss(
 }
 
 void get_Lnorm(
-    mpz_t res,
+    mpf_t res,
     const polynomial_mpz * restrict F,
     const unsigned long skew,
     const unsigned long smoothness_bound,
@@ -95,10 +95,13 @@ void get_Lnorm(
     mpz_mul(base_X, base_X, base_X);
     mpz_mul(base_Y, base_Y, base_Y);
 
-    mpz_set_ui(res, 0);
+    mpz_t tmp, tmp2, res_z;
+    mpz_inits(tmp, tmp2, res_z, NULL);
 
-    mpz_t tmp, tmp2;
-    mpz_inits(tmp, tmp2, NULL);
+    mpf_t tmp_mpf, tmp_mpf2;
+    mpf_inits(tmp_mpf, tmp_mpf2, NULL);
+
+    mpz_set_ui(res_z, 0);
 
     for (size_t i = 0 ; i < n ; i += 2)
     {
@@ -111,26 +114,24 @@ void get_Lnorm(
         mpz_set_ui(tmp2, (i+1)*(n-i));
         mpz_div(tmp, tmp, tmp2);
 
-        mpz_add(res, res, tmp);
+        mpz_add(res_z, res_z, tmp);
 
         mpz_divexact(current_X, current_X, base_X);
         mpz_mul(current_Y, current_Y, base_Y);
     }
 
-    mpz_abs(res, res);
+    mpz_abs(res_z, res_z);
     
-    mpf_t res_f, x;
-    mpf_init(res_f);
+    mpf_t x;
     mpf_init(x);
 
     mpf_set_prec(x, 2048);
-    mpf_set_z(x, res);
+    mpf_set_z(x, res_z);
 
-    natural_log(res_f, x, ln2, e);
-    mpz_set_f(res, res_f);
+    natural_log(res, x, ln2, e);
 
     mpz_clears(base_X, base_Y, current_X, current_Y, tmp, tmp, NULL);
-    mpf_clears(res_f, x, NULL);
+    mpf_clears(x, tmp_mpf, tmp_mpf2, NULL);
 }
 
 double get_Escore(
@@ -400,4 +401,99 @@ void minimize_Lnorm(
     free_polynomial(&tmp_poly2);
 
     mpf_clears(res, tmp_mpf, NULL);
+}
+
+void get_sieve_region(
+    const polynomial_mpz * restrict f,
+    const unsigned long smoothness_bound,
+    unsigned long * restrict max_a_norm,
+    unsigned long * restrict skew_factor,
+    mpf_t ln2,
+    mpf_t e
+)
+{
+    polynomial_mpz F;
+    init_poly(&F);
+
+    poly_prod(&F, f, f);
+
+    mpz_t tmp_mpz, tmp_mpz2;
+    mpz_inits(tmp_mpz, tmp_mpz2, NULL);
+
+    mpf_t ratio_mean, tmp_mpf, tmp_mpf2;
+    mpf_inits(ratio_mean, tmp_mpf, tmp_mpf2, NULL);
+
+    mpf_set_ui(ratio_mean, 0);
+
+    for (size_t i = 0 ; i < f->degree ; i++)
+    {
+        mpf_set_z(tmp_mpf, f->coeffs[i]);
+        mpf_abs(tmp_mpf, tmp_mpf);
+        mpf_add_ui(tmp_mpf, tmp_mpf, 1);
+
+        mpf_set_z(tmp_mpf2, f->coeffs[i+1]);
+        mpf_abs(tmp_mpf2, tmp_mpf2);
+
+        mpf_div(tmp_mpf, tmp_mpf2, tmp_mpf);
+        
+        mpf_set_d(tmp_mpf2, 1e-7);
+        mpf_add(tmp_mpf, tmp_mpf, tmp_mpf2);
+
+        natural_log(tmp_mpf2, tmp_mpf, ln2, e);
+
+        mpf_add(ratio_mean, ratio_mean, tmp_mpf2);
+    }
+
+    mpf_div_ui(tmp_mpf, ratio_mean, f->degree);
+    myexp(ratio_mean, tmp_mpf, e);
+
+    *skew_factor = 2 * mpf_get_ui(ratio_mean);
+
+    unsigned long k = 1;
+
+    mpf_t best_norm;
+    mpf_init_set_si(best_norm, -1);
+
+    while (k > 0)
+    {
+        bool updated = false;
+
+        if (*skew_factor > k)
+        {
+            get_Lnorm(tmp_mpf, &F, *skew_factor - k, smoothness_bound, ln2, e);
+
+            if (mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
+            {
+                *skew_factor = *skew_factor - k;
+                mpf_set(best_norm, tmp_mpf);
+                updated = true;
+                k <<= 1;
+            }
+        }
+
+        if (*skew_factor + k < smoothness_bound)
+        {
+            get_Lnorm(tmp_mpf, &F, *skew_factor + k, smoothness_bound, ln2, e);
+
+            if (mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
+            {
+                *skew_factor = *skew_factor + k;
+                mpf_set(best_norm, tmp_mpf);
+                updated = true;
+                k <<= 1;
+            }
+        }
+
+        if (!updated) k >>= 1;
+    }
+
+    mpf_set_ui(tmp_mpf2, *skew_factor);
+    nth_root(tmp_mpf, tmp_mpf2, 2);
+    mpf_mul_ui(tmp_mpf, tmp_mpf, smoothness_bound);
+
+    *max_a_norm = mpf_get_ui(tmp_mpf);
+
+    mpz_clears(tmp_mpz, tmp_mpz2, NULL);
+    mpf_clears(ratio_mean, tmp_mpf, tmp_mpf2, best_norm, NULL);
+    free_polynomial(&F);
 }

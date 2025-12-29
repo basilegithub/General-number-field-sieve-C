@@ -21,7 +21,7 @@ void nodes_and_weights_gauss(
 );
 
 void get_Lnorm(
-    mpz_t res,
+    mpf_t res,
     const polynomial_mpz * restrict F,
     const unsigned long skew,
     const unsigned long smoothness_bound,
@@ -47,6 +47,15 @@ void minimize_Lnorm(
     const unsigned long smoothness_bound,
     mpz_t m0,
     mpz_t m1,
+    mpf_t ln2,
+    mpf_t e
+);
+
+void get_sieve_region(
+    const polynomial_mpz * restrict f,
+    const unsigned long smoothness_bound,
+    unsigned long * restrict max_a_norm,
+    unsigned long * restrict skew_factor,
     mpf_t ln2,
     mpf_t e
 );
