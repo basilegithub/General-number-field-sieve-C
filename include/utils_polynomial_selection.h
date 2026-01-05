@@ -78,5 +78,12 @@ void get_alpha_score(
     gmp_randstate_t state
 );
 
+void compute_m_mu(
+    mpz_t res,
+    const mpz_t m0,
+    const mpz_t * restrict components,
+    size_t l
+);
+
 
 #endif // UTILS_POLYNOMIAL_SELECTION

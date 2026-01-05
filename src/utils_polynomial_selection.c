@@ -788,3 +788,18 @@ void get_alpha_score(
     mpf_clears(tmp_mpf, tmp_mpf2, NULL);
     mpz_clears(tmp_mpz, tmp_mpz2, tmp_mpz3, NULL);
 }
+
+void compute_m_mu(
+    mpz_t res,
+    const mpz_t m0,
+    const mpz_t * restrict components,
+    size_t l
+)
+{
+    mpz_set(res, m0);
+
+    for (size_t i = 0 ; i < l ; i++)
+    {
+        mpz_add(res, res, components[i]);
+    }
+}
