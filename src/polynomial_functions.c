@@ -102,6 +102,34 @@ unsigned long evaluate_mod_p(const polynomial_mpz * restrict f, const unsigned l
     return res;
 }
 
+void evaluate_mod_p_mpz(const polynomial_mpz * restrict f, mpz_t res, const mpz_t x, const mpz_t p)
+{
+    mpz_t tmp_res;
+    mpz_init(tmp_res);
+
+    if (!x)
+    {
+        mpz_set(tmp_res, f->coeffs[f->degree]);
+        mpz_mod(tmp_res, tmp_res, p);
+    }
+    else
+    {
+        mpz_set(tmp_res, f->coeffs[0]);
+
+        for (size_t i = 1 ; i <= f->degree ; i++)
+        {
+            mpz_mul(tmp_res, tmp_res, x);
+            mpz_mod(tmp_res, tmp_res, p);
+            mpz_add(tmp_res, tmp_res, f->coeffs[i]);
+            mpz_mod(tmp_res, tmp_res, p);
+        }
+    }
+
+    mpz_set(res, tmp_res);
+
+    mpz_clear(tmp_res);
+}
+
 void evaluate_homogeneous(mpz_t res, const polynomial_mpz * restrict f, const mpz_t x, const mpz_t y)
 {
     mpz_set(res, f->coeffs[0]);

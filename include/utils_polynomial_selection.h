@@ -47,8 +47,8 @@ void minimize_Lnorm(
     const unsigned long smoothness_bound,
     mpz_t m0,
     mpz_t m1,
-    mpf_t ln2,
-    mpf_t e
+    const mpf_t ln2,
+    const mpf_t e
 );
 
 void get_sieve_region(
@@ -56,8 +56,8 @@ void get_sieve_region(
     const unsigned long smoothness_bound,
     unsigned long * restrict max_a_norm,
     unsigned long * restrict skew_factor,
-    mpf_t ln2,
-    mpf_t e
+    const mpf_t ln2,
+    const mpf_t e
 );
 
 void build_poly_coeffs(
@@ -69,6 +69,14 @@ void build_poly_coeffs(
     const unsigned long d
 );
 
+void get_alpha_score(
+    double * restrict res,
+    polynomial_mpz * restrict f,
+    dyn_array_classic * restrict primes,
+    const mpf_t ln2,
+    const mpf_t e,
+    gmp_randstate_t state
+);
 
 
 #endif // UTILS_POLYNOMIAL_SELECTION

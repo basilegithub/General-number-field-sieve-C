@@ -146,6 +146,41 @@ void insert_classic(dyn_array_classic * restrict array, const unsigned long elem
     array->len++;
 }
 
+void copy_classic(
+    dyn_array_classic * restrict target,
+    dyn_array_classic * restrict to_copy
+)
+{
+    free(target->start);
+
+    target->start = calloc(to_copy->size, sizeof(unsigned long));
+    target->len = to_copy->len;
+    target->size = to_copy->size;
+
+    for (size_t i = 0 ; i < to_copy->len ; i++)
+    {
+        target->start[i] = to_copy->start[i];
+    }
+}
+
+void copy_dyn(
+    dyn_array * restrict target,
+    dyn_array * restrict to_copy
+)
+{
+    for (size_t i = 0 ; i < target->len ; i++) mpz_clear(target->start[i]);
+    free(target->start);
+
+    target->start = calloc(to_copy->size, sizeof(mpz_t));
+    target->len = to_copy->len;
+    target->size = to_copy->size;
+
+    for (size_t i = 0 ; i < to_copy->len ; i++)
+    {
+        mpz_init_set(target->start[i], to_copy->start[i]);
+    }
+}
+
 void reset(dyn_array * restrict array)
 {
     array->len = 0;

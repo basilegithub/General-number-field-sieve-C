@@ -347,8 +347,8 @@ void minimize_Lnorm(
     const unsigned long smoothness_bound,
     mpz_t m0,
     mpz_t m1,
-    mpf_t ln2,
-    mpf_t e
+    const mpf_t ln2,
+    const mpf_t e
 )
 {
     polynomial_mpz tmp_poly, tmp_poly2;
@@ -408,8 +408,8 @@ void get_sieve_region(
     const unsigned long smoothness_bound,
     unsigned long * restrict max_a_norm,
     unsigned long * restrict skew_factor,
-    mpf_t ln2,
-    mpf_t e
+    const mpf_t ln2,
+    const mpf_t e
 )
 {
     polynomial_mpz F;
@@ -557,4 +557,234 @@ void build_poly_coeffs(
     }
 
     mpz_clears(r, delta, tmp_mpz, tmp_mpz2, NULL);
+}
+
+void get_alpha_score(
+    double * restrict res,
+    polynomial_mpz * restrict f,
+    dyn_array_classic * restrict primes,
+    const mpf_t ln2,
+    const mpf_t e,
+    gmp_randstate_t state
+)
+{
+    double E = 0.0;
+    double F = 0.0;
+
+    polynomial_mpz f_derivative;
+    init_poly(&f_derivative);
+
+    poly_derivative(&f_derivative, f);
+
+    double baseline_term = 0.0;
+
+    mpf_t tmp_mpf, tmp_mpf2;
+    mpf_inits(tmp_mpf, tmp_mpf2, NULL);
+
+    mpz_t tmp_mpz, tmp_mpz2, tmp_mpz3;
+    mpz_inits(tmp_mpz, tmp_mpz2, tmp_mpz3, NULL);
+
+    size_t upto = f->degree + 5;
+
+    for (size_t i = 0 ; i < primes->len ; i++)
+    {
+        unsigned long p = primes->start[i];
+
+        mpf_set_ui(tmp_mpf, p);
+        natural_log(tmp_mpf2, tmp_mpf, ln2, e);
+
+        double log_p = mpf_get_d(tmp_mpf2);
+
+        baseline_term += log_p/(p+1);
+
+        double Ep = 0.0;
+        double Fp = 0.0;
+
+        dyn_array_classic roots;
+        init_classic(&roots);
+
+        dyn_array ramified_roots;
+        init(&ramified_roots);
+
+        find_roots(f, &roots, p, state);
+
+        for (size_t j = 0 ; j < roots.len ; j++)
+        {
+            if (!evaluate_mod_p(&f_derivative, roots.start[j], p))
+            {
+                mpz_set_ui(tmp_mpz, roots.start[j]);
+                append(&ramified_roots, tmp_mpz);
+                Ep += 1/(double)p;
+                Fp += 1/(double)p;
+            }
+            else
+            {
+                Ep += 1/(double)(p - 1);
+                Fp += (p+1)/(double)((p - 1)*(p-1));
+            }
+        }
+
+        if (ramified_roots.len)
+        {
+            mpz_set_ui(tmp_mpz, p);
+
+            for (size_t j = 2 ; j < upto ; j++)
+            {
+                dyn_array new;
+                init(&new);
+
+                for (size_t r = 0 ; r < ramified_roots.len ; r++)
+                {
+                    mpz_mul_ui(tmp_mpz2, tmp_mpz, p);
+
+                    evaluate_mod_p_mpz(f, tmp_mpz3, ramified_roots.start[r], tmp_mpz2);
+
+                    if (!mpz_cmp_ui(tmp_mpz3, 0))
+                    {
+                        mpz_set(tmp_mpz2, ramified_roots.start[r]);
+                        for (size_t k = 0 ; k < p ; k++)
+                        {
+                            append(&new, tmp_mpz2);
+                            mpz_add(tmp_mpz2, tmp_mpz2, tmp_mpz);
+                        }
+
+                        mpf_set_z(tmp_mpf, tmp_mpz);
+                        mpf_set_d(tmp_mpf2, 1.0);
+                        mpf_div(tmp_mpf, tmp_mpf2, tmp_mpf);
+
+                        Ep += mpf_get_d(tmp_mpf);
+                        Fp += (2*j - 1)*mpf_get_d(tmp_mpf);
+                    }
+                }
+
+                mpz_mul_ui(tmp_mpz, tmp_mpz, p);
+                copy_dyn(&ramified_roots, &new);
+
+                free_dyn_array(&new);
+            }
+
+            mpz_set_ui(tmp_mpz2, p);
+            mpz_pow_ui(tmp_mpz2, tmp_mpz2, upto - 2);
+            mpz_mul_ui(tmp_mpz2, tmp_mpz2, p - 1);
+
+            mpf_set_z(tmp_mpf, tmp_mpz2);
+            mpf_set_ui(tmp_mpf2, ramified_roots.len);
+            mpf_div(tmp_mpf, tmp_mpf2, tmp_mpf);
+            Ep += mpf_get_d(tmp_mpf);
+
+            mpf_set_d(tmp_mpf, (double)upto*upto + 2*upto/(double)(p-1) + (p+1)/(double)((p-1)*(p-1)));
+            mpf_set_z(tmp_mpf2, tmp_mpz);
+            mpf_div(tmp_mpf, tmp_mpf, tmp_mpf2);
+            mpf_mul_ui(tmp_mpf, tmp_mpf, ramified_roots.len);
+
+            Fp += mpf_get_d(tmp_mpf);
+        }
+
+        if (mpz_divisible_ui_p(f->coeffs[0], p))
+        {
+            polynomial_mpz frev;
+            init_poly(&frev);
+            for (size_t i = 0 ; i <= f->degree ; i++)
+            {
+                set_coeff(&frev, f->coeffs[i], i);
+            }
+
+            polynomial_mpz frev_derivative;
+            init_poly(&frev_derivative);
+            poly_derivative(&frev_derivative, &frev);
+
+            if (evaluate_mod_p(&frev_derivative, 0, p))
+            {
+                Ep += 1/(double)(p - 1);
+                Fp += (p + 1)/(double)((p - 1) * (p - 1));
+            }
+            else
+            {
+                Ep += 1/(double)p;
+                Fp += 1/(double)p;
+
+                reset(&ramified_roots);
+                mpz_set_ui(tmp_mpz, 0);
+                append(&ramified_roots, tmp_mpz);
+
+                mpz_set_ui(tmp_mpz, p);
+
+                for (size_t j = 2 ; j < upto ; j++)
+                {
+                    dyn_array new;
+                    init(&new);
+
+                    for (size_t r = 0 ; r < ramified_roots.len ; r++)
+                    {
+                        mpz_mul_ui(tmp_mpz2, tmp_mpz, p);
+
+                        evaluate_mod_p_mpz(f, tmp_mpz3, ramified_roots.start[r], tmp_mpz2);
+
+                        if (!mpz_cmp_ui(tmp_mpz3, 0))
+                        {
+                            mpz_set(tmp_mpz2, ramified_roots.start[r]);
+                            for (size_t k = 0 ; k < p ; k++)
+                            {
+                                append(&new, tmp_mpz2);
+                                mpz_add(tmp_mpz2, tmp_mpz2, tmp_mpz);
+                            }
+
+                            mpf_set_z(tmp_mpf, tmp_mpz);
+                            mpf_set_d(tmp_mpf2, 1.0);
+                            mpf_div(tmp_mpf, tmp_mpf2, tmp_mpf);
+
+                            Ep += mpf_get_d(tmp_mpf);
+                            Fp += (2*j - 1)*mpf_get_d(tmp_mpf);
+                        }
+                    }
+
+                    mpz_mul_ui(tmp_mpz, tmp_mpz, p);
+                    copy_dyn(&ramified_roots, &new);
+
+                    free_dyn_array(&new);
+                }
+
+                mpz_set_ui(tmp_mpz2, p);
+                mpz_pow_ui(tmp_mpz2, tmp_mpz2, upto - 2);
+                mpz_mul_ui(tmp_mpz2, tmp_mpz2, p - 1);
+
+                mpf_set_z(tmp_mpf, tmp_mpz2);
+                mpf_set_ui(tmp_mpf2, ramified_roots.len);
+                mpf_div(tmp_mpf, tmp_mpf2, tmp_mpf);
+                Ep += mpf_get_d(tmp_mpf);
+
+                mpf_set_d(tmp_mpf, (double)upto*upto + 2*upto/(double)(p-1) + (p+1)/(double)((p-1)*(p-1)));
+                mpf_set_z(tmp_mpf2, tmp_mpz);
+                mpf_div(tmp_mpf, tmp_mpf, tmp_mpf2);
+                mpf_mul_ui(tmp_mpf, tmp_mpf, ramified_roots.len);
+
+                Fp += mpf_get_d(tmp_mpf);
+            }
+
+            free_polynomial(&frev);
+            free_polynomial(&frev_derivative);
+        }
+
+        double tmpE = Ep*p/(p+1);
+        double tmpF = Fp*p/(p+1);
+
+        E += log_p * tmpE;
+        F += (tmpF - tmpE * tmpE) * log_p * log_p;
+
+        free(roots.start);
+        free_dyn_array(&ramified_roots);
+    }
+
+    free_polynomial(&f_derivative);
+
+    double k = 2*E - F/2;
+    double lbd = F/2 - E;
+
+    res[0] = E - baseline_term;
+    res[1] = k;
+    res[2] = lbd;
+    res[3] = baseline_term;
+
+    mpf_clears(tmp_mpf, tmp_mpf2, NULL);
+    mpz_clears(tmp_mpz, tmp_mpz2, tmp_mpz3, NULL);
 }

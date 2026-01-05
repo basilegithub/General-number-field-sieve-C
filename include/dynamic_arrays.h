@@ -59,6 +59,18 @@ void delete_dyn_unsorted(dyn_array * restrict array, const unsigned long index);
 
 void insert_classic(dyn_array_classic * restrict array, const unsigned long element, const unsigned long index);
 
+// Copy functions
+
+void copy_classic(
+    dyn_array_classic * restrict target,
+    dyn_array_classic * restrict to_copy
+);
+
+void copy_dyn(
+    dyn_array * restrict target,
+    dyn_array * restrict to_copy
+);
+
 // Liberating arrays
 
 void reset(dyn_array * restrict array);

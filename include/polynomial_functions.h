@@ -19,6 +19,8 @@ void evaluate_poly(mpz_t res, const polynomial_mpz * restrict f, const signed lo
 
 unsigned long evaluate_mod_p(const polynomial_mpz * restrict f, const unsigned long x, const unsigned long p);
 
+void evaluate_mod_p_mpz(const polynomial_mpz * restrict f, mpz_t res, const mpz_t x, const mpz_t p);
+
 void evaluate_homogeneous(mpz_t res, const polynomial_mpz * restrict f, const mpz_t x, const mpz_t y);
 
 void basic_find_roots(const polynomial_mpz * restrict f, dyn_array_classic * restrict roots, const unsigned long p);
