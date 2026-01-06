@@ -1008,3 +1008,82 @@ void create_first_array(
 
     free(vec);
 }
+
+void create_second_array(
+    const unsigned long nb_roots,
+    const unsigned long vec_len,
+    const unsigned long d,
+    const unsigned long nb_rows,
+    const unsigned long nb_cols,
+    const mpf_t f[nb_roots][d],
+    mpf_t * restrict array2_u_values,
+    unsigned long array2_indices[nb_rows][nb_cols]
+)
+{
+    unsigned long * vec = calloc(nb_cols, sizeof(unsigned long));
+
+    size_t i = 0;
+
+    mpf_t U, tmp_mpf;
+    mpf_inits(U, tmp_mpf, NULL);
+
+    while (vec[nb_cols  - 1] < d)
+    {
+        mpf_set_ui(U, 0);
+
+        for (size_t j = 0 ; j < nb_cols ; j++)
+        {
+            mpf_add(U, U, f[j + vec_len][vec[j]]);
+        }
+        mpf_neg(U, U);
+
+        mpf_floor(tmp_mpf, U);
+        mpf_sub(U, U, tmp_mpf);
+
+        if (!i || mpf_cmp(U, array2_u_values[i]) > 0)
+        {
+            mpf_set(array2_u_values[i], U);
+            for (size_t j = 0 ; j < nb_cols; j++) array2_indices[i][j] = vec[j];
+        }
+        else
+        {
+            unsigned long tmp_a = 0;
+            unsigned long tmp_b = i - 1;
+            unsigned long tmp_c = (tmp_a + tmp_b)>>1;
+
+            while (tmp_a <= tmp_b)
+            {
+                if (mpf_cmp(U, array2_u_values[tmp_c]) < 0) tmp_b = tmp_c - 1;
+                else tmp_a = tmp_c + 1;
+                tmp_c = (tmp_a + tmp_b)>>1;
+            }
+            for (size_t j = i-1 ; j > tmp_a ; j++)
+            {
+                mpf_set(array2_u_values[j], array2_u_values[j-1]);
+                for (size_t k = 0 ; k < nb_cols ; k++)
+                {
+                    array2_indices[j][k] = array2_indices[j-1][k];
+                }
+            }
+            mpf_set(array2_u_values[tmp_a], U);
+            for (size_t j = 0 ; j < nb_cols ; j++) array2_indices[tmp_a][j] = vec[j];
+        }
+
+        vec[0]++;
+        for (size_t j = 0 ; j < nb_cols - 1 ; j++)
+        {
+            if (vec[j] == d)
+            {
+                vec[j] = 0;
+                vec[j+1]++;
+            }
+            else break;
+        }
+
+        i++;
+    }
+
+    mpf_clears(U, tmp_mpf, NULL);
+
+    free(vec);
+}
