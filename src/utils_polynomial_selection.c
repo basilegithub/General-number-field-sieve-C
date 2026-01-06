@@ -792,14 +792,161 @@ void get_alpha_score(
 void compute_m_mu(
     mpz_t res,
     const mpz_t m0,
-    const mpz_t * restrict components,
-    size_t l
+    size_t l,
+    unsigned long d,
+    const mpz_t components[l][d],
+    const unsigned long * restrict vec
 )
 {
     mpz_set(res, m0);
 
     for (size_t i = 0 ; i < l ; i++)
     {
-        mpz_add(res, res, components[i]);
+        mpz_add(res, res, components[i][vec[i]]);
     }
+}
+
+void compute_e(
+    mpz_t m0,
+    unsigned long nb_roots,
+    unsigned long d,
+    mpz_t roots_used[nb_roots][d],
+    mpz_t prod,
+    mpz_t a_d,
+    mpz_t n,
+    mpz_t e[nb_roots][d]
+)
+{
+    mpz_t tmp_m;
+    mpz_init(tmp_m);
+
+    unsigned long * vec = calloc(nb_roots, sizeof(unsigned long));
+
+    polynomial_mpz tmp_poly;
+    init_poly(&tmp_poly);
+
+    compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
+    
+    build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+
+    mpz_t base;
+    mpz_init_set(base, tmp_poly.coeffs[1]);
+    mpz_mod(base, base, prod);
+
+    for (size_t i = 0 ; i < nb_roots ; i++)
+    {
+        for (size_t j = 0 ; j < d ; j++)
+        {
+            if (!i)
+            {
+                for (size_t k = 0 ; k < nb_roots ; k++) vec[k] = 0;
+                vec[0] = j;
+
+                compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
+                build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+
+                mpz_mod(e[i][j], tmp_poly.coeffs[1], prod);
+            }
+            else if (j)
+            {
+                for (size_t k = 0 ; k < nb_roots ; k++) vec[k] = 0;
+                vec[i] = j;
+
+                compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
+                build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+
+                mpz_sub(e[i][j], tmp_poly.coeffs[1], base);
+                mpz_mod(e[i][j], e[i][j], prod);
+            }
+            else
+            {
+                mpz_set_ui(e[i][0], 0);
+            }
+        }
+    }
+
+
+    mpz_clears(tmp_m, base, NULL);
+    free_polynomial(&tmp_poly);
+
+    free(vec);
+}
+
+void create_first_array(
+    mpf_t * array1_u_values,
+    unsigned long dim1,
+    unsigned long dim2,
+    unsigned long array1_indices[dim1][dim2],
+    unsigned long nb_roots,
+    unsigned long nrow,
+    unsigned long ncol,
+    mpf_t f0,
+    mpf_t f[nrow][ncol],
+    unsigned long d
+)
+{
+    unsigned long * vec = calloc(nb_roots>>1, sizeof(unsigned long));
+
+    size_t i = 0;
+
+    mpf_t U, tmp_mpf;
+    mpf_inits(U, tmp_mpf, NULL);
+
+    while (vec[(nb_roots>>1)  - 1] != d)
+    {
+        mpf_set(U, f0);
+
+        for (size_t j = 0 ; j < nb_roots>>1 ; j++)
+        {
+            mpf_add(U, U, f[j][vec[j]]);
+        }
+        mpf_floor(tmp_mpf, U);
+        mpf_sub(U, U, tmp_mpf);
+
+        if (!i || mpf_cmp(U, array1_u_values[i]) > 0)
+        {
+            mpf_set(array1_u_values[i], U);
+            for (size_t j = 0 ; j < nb_roots>>1 ; j++) array1_indices[i][j] = vec[j];
+        }
+        else
+        {
+            unsigned long tmp_a = 0;
+            unsigned long tmp_b = i - 1;
+            unsigned long tmp_c = (tmp_a + tmp_b)>>1;
+
+            while (tmp_a <= tmp_b)
+            {
+                if (mpf_cmp(U, array1_u_values[tmp_c]) < 0) tmp_b = tmp_c - 1;
+                else tmp_a = tmp_c + 1;
+                tmp_c = (tmp_a + tmp_b)>>1;
+            }
+            for (size_t j = i-1 ; j > tmp_a ; j++)
+            {
+                mpf_set(array1_u_values[j], array1_u_values[j-1]);
+                for (size_t k = 0 ; k < nb_roots>>1 ; k++)
+                {
+                    array1_indices[j][k] = array1_indices[j-1][k];
+                }
+            }
+            mpf_set(array1_u_values[tmp_a], U);
+            for (size_t j = 0 ; j < nb_roots>>1 ; j++) array1_indices[tmp_a][j] = vec[j];
+        }
+
+        vec[0]++;
+        for (size_t j = 0 ; j < (nb_roots>>1) - 1 ; j++)
+        {
+            if (vec[j] == d)
+            {
+                vec[j] = 0;
+                vec[j+1]++;
+            }
+            else break;
+        }
+
+        i++;
+    }
+
+    mpf_clears(U, tmp_mpf, NULL);
+
+    free(vec);
 }

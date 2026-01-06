@@ -81,8 +81,10 @@ void get_alpha_score(
 void compute_m_mu(
     mpz_t res,
     const mpz_t m0,
-    const mpz_t * restrict components,
-    size_t l
+    size_t l,
+    unsigned long d,
+    const mpz_t components[l][d],
+    const unsigned long * restrict vec
 );
 
 
