@@ -81,21 +81,45 @@ void get_alpha_score(
 void compute_m_mu(
     mpz_t res,
     const mpz_t m0,
-    size_t l,
-    unsigned long d,
+    const size_t l,
+    const unsigned long d,
     const mpz_t components[l][d],
     const unsigned long * restrict vec
 );
 
 void compute_e(
-    mpz_t m0,
-    unsigned long nb_roots,
-    unsigned long d,
-    mpz_t roots_used[nb_roots][d],
-    mpz_t prod,
-    mpz_t a_d,
-    mpz_t n,
+    const mpz_t m0,
+    const unsigned long nb_roots,
+    const unsigned long d,
+    const mpz_t roots_used[nb_roots][d],
+    const mpz_t prod,
+    const mpz_t a_d,
+    const mpz_t n,
     mpz_t e[nb_roots][d]
+);
+
+void compute_f(
+    const mpz_t n,
+    const mpz_t a_d,
+    const mpz_t m0,
+    const unsigned long d,
+    const mpz_t prod,
+    const unsigned long nb_roots,
+    const mpz_t roots_used[nb_roots][d],
+    const mpz_t e[nb_roots][d],
+    mpf_t f[nb_roots][d],
+    mpf_t f0
+);
+
+void create_first_array(
+    const unsigned long nb_roots,
+    const unsigned long d,
+    const mpf_t f0,
+    const mpf_t f[nb_roots][d],
+    const unsigned long nb_rows,
+    const unsigned long nb_cols,
+    mpf_t * restrict array1_u_values,
+    unsigned long array1_indices[nb_rows][nb_cols],
 );
 
 
