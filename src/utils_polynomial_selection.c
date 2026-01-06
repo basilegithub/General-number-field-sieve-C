@@ -806,7 +806,7 @@ void compute_m_mu(
     }
 }
 
-void compute_e(
+void compute_e_array(
     const mpz_t m0,
     const unsigned long nb_roots,
     const unsigned long d,
@@ -940,7 +940,7 @@ void create_first_array(
     const unsigned long nb_rows,
     const unsigned long nb_cols,
     mpf_t * restrict array1_u_values,
-    unsigned long array1_indices[nb_rows][nb_cols],
+    unsigned long array1_indices[nb_rows][nb_cols]
 )
 {
     unsigned long * vec = calloc(nb_cols, sizeof(unsigned long));

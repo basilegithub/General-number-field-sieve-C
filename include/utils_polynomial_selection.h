@@ -87,7 +87,7 @@ void compute_m_mu(
     const unsigned long * restrict vec
 );
 
-void compute_e(
+void compute_e_array(
     const mpz_t m0,
     const unsigned long nb_roots,
     const unsigned long d,
@@ -120,6 +120,17 @@ void create_first_array(
     const unsigned long nb_cols,
     mpf_t * restrict array1_u_values,
     unsigned long array1_indices[nb_rows][nb_cols],
+);
+
+void create_second_array(
+    const unsigned long nb_roots,
+    const unsigned long vec_len,
+    const unsigned long d,
+    const unsigned long nb_rows,
+    const unsigned long nb_cols,
+    const mpf_t f[nb_roots][d],
+    mpf_t * restrict array2_u_values,
+    unsigned long array2_indices[nb_rows][nb_cols]
 );
 
 
