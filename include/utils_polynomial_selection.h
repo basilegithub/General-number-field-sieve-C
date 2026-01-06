@@ -87,5 +87,16 @@ void compute_m_mu(
     const unsigned long * restrict vec
 );
 
+void compute_e(
+    mpz_t m0,
+    unsigned long nb_roots,
+    unsigned long d,
+    mpz_t roots_used[nb_roots][d],
+    mpz_t prod,
+    mpz_t a_d,
+    mpz_t n,
+    mpz_t e[nb_roots][d]
+);
+
 
 #endif // UTILS_POLYNOMIAL_SELECTION

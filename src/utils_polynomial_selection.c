@@ -872,6 +872,66 @@ void compute_e(
     free(vec);
 }
 
+void compute_f(
+    mpz_t n,
+    mpz_t a_d,
+    mpz_t m0,
+    unsigned long d,
+    mpz_t prod,
+    unsigned long nb_roots,
+    mpz_t roots_used[nb_roots][d],
+    mpz_t e[nb_roots][d],
+    mpf_t f[nb_roots][d],
+    mpf_t f0
+)
+{
+    mpz_t tmp_mpz, prod2;
+    mpz_inits(tmp_mpz, prod2, NULL);
+
+    mpz_mul(prod2, prod, prod);
+
+    mpf_t tmp_mpf, tmp_mpf2, tmp_mpf3;
+    mpf_inits(tmp_mpf, tmp_mpf2, tmp_mpf3, NULL);
+
+    mpz_pow_ui(tmp_mpz, m0, d);
+    mpz_mul(tmp_mpz, tmp_mpz, a_d);
+    mpz_sub(tmp_mpz, n, tmp_mpz);
+    mpf_set_z(tmp_mpf, tmp_mpz);
+
+    mpz_pow_ui(tmp_mpz, m0, d - 1);
+    mpz_mul(tmp_mpz, tmp_mpz, prod);
+    mpz_mul(tmp_mpz, tmp_mpz, prod);
+    mpf_set_z(tmp_mpf2, tmp_mpz);
+
+    mpf_div(f0, tmp_mpf, tmp_mpf2);
+
+    for (size_t i = 0 ; i < nb_roots ; i++)
+    {
+        for (size_t j = 0 ; j < d ; j++)
+        {
+            mpz_mul_ui(tmp_mpz, a_d, d);
+            mpz_mul(tmp_mpz, tmp_mpz, roots_used[i][j]);
+            mpf_set_z(tmp_mpf, tmp_mpz);
+
+            mpf_set_z(tmp_mpf2, prod2);
+
+            mpf_div(tmp_mpf, tmp_mpf, tmp_mpf2);
+
+
+            mpf_set_z(tmp_mpf2, e[i][j]);
+            mpf_set_z(tmp_mpf3, prod);
+            mpf_div(tmp_mpf2, tmp_mpf2, tmp_mpf3);
+
+            mpf_add(tmp_mpf, tmp_mpf, tmp_mpf2);
+            mpf_neg(f[i][j], tmp_mpf);
+        }
+    }
+
+    mpz_clears(tmp_mpz, prod2, NULL);
+
+    mpf_clears(tmp_mpf, tmp_mpf2, tmp_mpf3, NULL);
+}
+
 void create_first_array(
     mpf_t * array1_u_values,
     unsigned long dim1,
