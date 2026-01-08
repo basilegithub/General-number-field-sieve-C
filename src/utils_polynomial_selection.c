@@ -881,7 +881,7 @@ void compute_f(
     const unsigned long nb_roots,
     const mpz_t roots_used[nb_roots][d],
     const mpz_t e[nb_roots][d],
-    mpf_t f[nb_roots][d],
+    mpf_t * restrict f,
     mpf_t f0
 )
 {
@@ -923,7 +923,7 @@ void compute_f(
             mpf_div(tmp_mpf2, tmp_mpf2, tmp_mpf3);
 
             mpf_add(tmp_mpf, tmp_mpf, tmp_mpf2);
-            mpf_neg(f[i][j], tmp_mpf);
+            mpf_neg(f[i*d + j], tmp_mpf);
         }
     }
 
@@ -936,11 +936,11 @@ void create_first_array(
     const unsigned long nb_roots,
     const unsigned long d,
     const mpf_t f0,
-    const mpf_t f[nb_roots][d],
+    const mpf_t * restrict f,
     const unsigned long nb_rows,
     const unsigned long nb_cols,
     mpf_t * restrict array1_u_values,
-    unsigned long array1_indices[nb_rows][nb_cols]
+    unsigned long * restrict array1_indices
 )
 {
     unsigned long * vec = calloc(nb_cols, sizeof(unsigned long));
@@ -964,7 +964,7 @@ void create_first_array(
         if (!i || mpf_cmp(U, array1_u_values[i]) > 0)
         {
             mpf_set(array1_u_values[i], U);
-            for (size_t j = 0 ; j < nb_cols; j++) array1_indices[i][j] = vec[j];
+            for (size_t j = 0 ; j < nb_cols; j++) array1_indices[i*nb_cols + j] = vec[j];
         }
         else
         {
@@ -983,11 +983,11 @@ void create_first_array(
                 mpf_set(array1_u_values[j], array1_u_values[j-1]);
                 for (size_t k = 0 ; k < nb_cols ; k++)
                 {
-                    array1_indices[j][k] = array1_indices[j-1][k];
+                    array1_indices[j*nb_cols + k] = array1_indices[(j-1)*nb_cols + k];
                 }
             }
             mpf_set(array1_u_values[tmp_a], U);
-            for (size_t j = 0 ; j < nb_cols ; j++) array1_indices[tmp_a][j] = vec[j];
+            for (size_t j = 0 ; j < nb_cols ; j++) array1_indices[tmp_a*nb_cols + j] = vec[j];
         }
 
         vec[0]++;
@@ -1015,9 +1015,9 @@ void create_second_array(
     const unsigned long d,
     const unsigned long nb_rows,
     const unsigned long nb_cols,
-    const mpf_t f[nb_roots][d],
+    const mpf_t * restrict f,
     mpf_t * restrict array2_u_values,
-    unsigned long array2_indices[nb_rows][nb_cols]
+    unsigned long * restrict array2_indices
 )
 {
     unsigned long * vec = calloc(nb_cols, sizeof(unsigned long));
@@ -1043,7 +1043,7 @@ void create_second_array(
         if (!i || mpf_cmp(U, array2_u_values[i]) > 0)
         {
             mpf_set(array2_u_values[i], U);
-            for (size_t j = 0 ; j < nb_cols; j++) array2_indices[i][j] = vec[j];
+            for (size_t j = 0 ; j < nb_cols; j++) array2_indices[i*nb_cols + j] = vec[j];
         }
         else
         {
@@ -1062,11 +1062,11 @@ void create_second_array(
                 mpf_set(array2_u_values[j], array2_u_values[j-1]);
                 for (size_t k = 0 ; k < nb_cols ; k++)
                 {
-                    array2_indices[j][k] = array2_indices[j-1][k];
+                    array2_indices[j*nb_cols + k] = array2_indices[(j-1)*nb_cols + k];
                 }
             }
             mpf_set(array2_u_values[tmp_a], U);
-            for (size_t j = 0 ; j < nb_cols ; j++) array2_indices[tmp_a][j] = vec[j];
+            for (size_t j = 0 ; j < nb_cols ; j++) array2_indices[tmp_a*nb_cols + j] = vec[j];
         }
 
         vec[0]++;

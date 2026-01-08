@@ -215,9 +215,6 @@ void Kleinjung_poly_selection(
         mpz_t product;
         mpz_init(product);
 
-        mpz_t prod;
-        mpz_init(prod);
-
         mpz_t roots_used[nb_roots][d];
         for (size_t i = 0 ; i < nb_roots ; i++)
         {
@@ -227,8 +224,8 @@ void Kleinjung_poly_selection(
             }
         }
 
-        mpz_t m0;
-        mpz_init(m0);
+        mpz_t m0_local;
+        mpz_init(m0_local);
 
         while (true)
         {
@@ -264,9 +261,9 @@ void Kleinjung_poly_selection(
                     }
                 }
 
-                mpz_neg(m0, mw);
-                mpz_mod(m0, m0, product);
-                mpz_sub(m0, mw, m0);
+                mpz_neg(m0_local, mw);
+                mpz_mod(m0_local, m0_local, product);
+                mpz_sub(m0_local, mw, m0_local);
 
                 mpz_t e_array[nb_roots][d];
 
@@ -279,7 +276,7 @@ void Kleinjung_poly_selection(
                 }
 
                 compute_e_array(
-                    m0,
+                    m0_local,
                     nb_roots,
                     d,
                     roots_used,
@@ -292,20 +289,17 @@ void Kleinjung_poly_selection(
                 mpf_t f0;
                 mpf_init(f0);
 
-                mpf_t f[nb_roots][d];
+                mpf_t f = calloc(nb_roots*d, sizeof(mpf_t));
 
-                for (size_t i = 0 ; i < nb_roots ; i++)
+                for (size_t i = 0 ; i < nb_roots*d ; i++)
                 {
-                    for (size_t j = 0 ; j < d ; j++)
-                    {
-                        mpf_init(f[i][j]);
-                    }
+                    mpf_init(f[i]);
                 }
 
                 compute_f(
                     n,
                     a_d,
-                    m0,
+                    m0_local,
                     d,
                     product,
                     nb_roots,
@@ -319,7 +313,7 @@ void Kleinjung_poly_selection(
                 mpf_init(epsilon);
 
                 mpf_set_z(tmp_mpf, ad2max);
-                mpf_set_z(tmp_mpf2, m0);
+                mpf_set_z(tmp_mpf2, m0_local);
                 mpf_div(epsilon, tmp_mpf, tmp_mpf2);
 
                 unsigned long len_vec1 = nb_roots>>1;
@@ -327,11 +321,11 @@ void Kleinjung_poly_selection(
                 unsigned long nrows1 = my_power(d, len_vec1);
                 unsigned long ncols1 = len_vec1;
 
-                unsigned long array1_indices[nrows1][ncols1];
+                unsigned long * array1_indices = calloc(nrows1*ncols1, sizeof(unsigned long));
 
                 mpf_t * array1_u_values = calloc(nrows1, sizeof(mpf_t));
 
-                for (size_t i = 0 ; i < nrwos1 ; i++)
+                for (size_t i = 0 ; i < nrows1 ; i++)
                 {
                     mpf_init(array1_u_values[i]);
                 }
@@ -352,11 +346,11 @@ void Kleinjung_poly_selection(
                 unsigned long nrows2 = my_power(d, len_vec2);
                 unsigned long ncols2 = len_vec2;
 
-                unsigned long array2_indices[nrows2][ncols2];
+                unsigned long * array2_indices = calloc(nrows2*ncols2, sizeof(unsigned long));
 
                 mpf_t * array2_u_values = calloc(nrows2, sizeof(mpf_t));
 
-                for (size_t i = 0 ; i < nrwos2 ; i++)
+                for (size_t i = 0 ; i < nrows2 ; i++)
                 {
                     mpf_init(array2_u_values[i]);
                 }
@@ -414,29 +408,31 @@ void Kleinjung_poly_selection(
                     }
                 }
 
-                for (size_t i = 0 ; i < nb_roots ; i++)
+                for (size_t i = 0 ; i < nb_roots*d ; i++)
                 {
-                    for (size_t j = 0 ; j < d ; j++)
-                    {
-                        mpf_clear(f[i][j]);
-                    }
+                        mpf_clear(f[i]);
                 }
 
-                for (size_t i = 0 ; i < nrwos1 ; i++)
+                free(f);
+
+                for (size_t i = 0 ; i < nrows1 ; i++)
                 {
                     mpf_clear(array1_u_values[i]);
                 }
 
-                for (size_t i = 0 ; i < nrwos2 ; i++)
+                for (size_t i = 0 ; i < nrows2 ; i++)
                 {
                     mpf_clear(array2_u_values[i]);
                 }
 
                 free(array1_u_values);
+                free(array2_u_values);
+                free(array1_indices);
+                free(array2_indices);
 
                 free(Q_used.start);
 
-                mpf_clear(f0);
+                mpf_clears(f0, epsilon, NULL);
             }
 
             long j = nb_roots - 1;
@@ -454,9 +450,12 @@ void Kleinjung_poly_selection(
 
         free(indexes);
 
+        free(Q);
+
         mpz_clears(product, m0, NULL);
     }
 
+    free(kept_primes.start);
 
     mpf_clears(tmp_mpf, tmp_mpf2, NULL);
     mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, NULL);

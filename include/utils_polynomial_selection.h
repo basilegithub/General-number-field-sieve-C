@@ -108,7 +108,7 @@ void compute_f(
     const unsigned long nb_roots,
     const mpz_t roots_used[nb_roots][d],
     const mpz_t e[nb_roots][d],
-    mpf_t f[nb_roots][d],
+    mpf_t * restrict f,
     mpf_t f0
 );
 
@@ -116,11 +116,11 @@ void create_first_array(
     const unsigned long nb_roots,
     const unsigned long d,
     const mpf_t f0,
-    const mpf_t f[nb_roots][d],
+    const mpf_t * restrict f,
     const unsigned long nb_rows,
     const unsigned long nb_cols,
     mpf_t * restrict array1_u_values,
-    unsigned long array1_indices[nb_rows][nb_cols]
+    unsigned long * restrict array1_indices
 );
 
 void create_second_array(
@@ -129,9 +129,9 @@ void create_second_array(
     const unsigned long d,
     const unsigned long nb_rows,
     const unsigned long nb_cols,
-    const mpf_t f[nb_roots][d],
+    const mpf_t * restrict f,
     mpf_t * restrict array2_u_values,
-    unsigned long array2_indices[nb_rows][nb_cols]
+    unsigned long * restrict array2_indices
 );
 
 
