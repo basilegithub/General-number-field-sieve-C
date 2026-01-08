@@ -956,7 +956,7 @@ void create_first_array(
 
         for (size_t j = 0 ; j < nb_cols ; j++)
         {
-            mpf_add(U, U, f[j][vec[j]]);
+            mpf_add(U, U, f[j*d + vec[j]]);
         }
         mpf_floor(tmp_mpf, U);
         mpf_sub(U, U, tmp_mpf);
@@ -1033,7 +1033,7 @@ void create_second_array(
 
         for (size_t j = 0 ; j < nb_cols ; j++)
         {
-            mpf_add(U, U, f[j + vec_len][vec[j]]);
+            mpf_add(U, U, f[(j + vec_len)*d + vec[j]]);
         }
         mpf_neg(U, U);
 

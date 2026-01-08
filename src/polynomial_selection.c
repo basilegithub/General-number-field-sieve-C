@@ -371,7 +371,7 @@ void Kleinjung_poly_selection(
                 for (size_t i = 0 ; i < nrows2 ; i++)
                 {
                     mpf_add(tmp_mpf, array1_u_values[minimum], epsilon);
-                    while (minimum < nrows1 && mpf_cmp(array2_u_values[i], tmp_mpf) > 0)
+                    while (minimum + 1 < nrows1 && mpf_cmp(array2_u_values[i], tmp_mpf) > 0)
                     {
                         minimum++;
                         mpf_add(tmp_mpf, array1_u_values[minimum], epsilon);
@@ -452,7 +452,7 @@ void Kleinjung_poly_selection(
 
         free(Q);
 
-        mpz_clears(product, m0, NULL);
+        mpz_clears(product, m0_local, NULL);
     }
 
     free(kept_primes.start);
