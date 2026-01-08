@@ -30,6 +30,8 @@ void append_element(
     mpz_init_set(ranking->ranking[ranking->len].m0, element->m0);
     mpz_init_set(ranking->ranking[ranking->len].m1, element->m1);
 
+    ranking->ranking[ranking->len].L2_score = element->L2_score;
+
     ranking->len++;
 }
 
@@ -44,13 +46,14 @@ void insert_element(
 
     if (ranking->len < ranking->size)
     {
-        append_element(ranking, ranking->ranking[ranking->len - 1]); // Shift last element
+        append_element(ranking, &ranking->ranking[ranking->len - 1]); // Shift last element
 
         for (size_t i = ranking->len - 2 ; i > index ; i--)
         {
             copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
             mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
             mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
+            ranking->ranking[i].L2_score = ranking->ranking[i - 1].L2_score;
         }
     }
     else
@@ -60,6 +63,7 @@ void insert_element(
             copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
             mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
             mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
+            ranking->ranking[i].L2_score = ranking->ranking[i - 1].L2_score;
         }
     }
 
@@ -68,7 +72,41 @@ void insert_element(
     mpz_set(ranking->ranking[index].m0, element->m0);
     mpz_set(ranking->ranking[index].m1, element->m1);
 
+    ranking->ranking[index].L2_score = element->L2_score;
+
     ranking->len++;
+}
+
+size_t find_rank(
+    polynomial_ranking * restrict ranking,
+    polynomial_ranking_element * restrict element
+)
+{
+    size_t a = 0;
+    size_t b = ranking->len - 1;
+    size_t c = (a+b)>>1;
+    while (a <= b)
+    {
+        if (ranking->ranking[c].L2_score < element->L2_score) a = c + 1;
+        else b = c - 1;
+        c = (a+b)>>1;
+    }
+
+    return c;
+}
+
+double compute_avg_score(
+    polynomial_ranking * ranking
+)
+{
+    double res = 0.0;
+
+    for (size_t i = 0 ; i < ranking->len ; i++)
+    {
+        res += ranking->ranking[i].L2_score;
+    }
+
+    return res / ranking->len;
 }
 
 void free_ranking(
@@ -137,6 +175,8 @@ void Kleinjung_poly_selection(
     const unsigned long d,
     const unsigned long nb_poly_coarse_eval,
     const unsigned long nb_poly_precise_eval,
+    const mpf_t ln2,
+    const mpf_t e,
     gmp_randstate_t state,
     FILE *logfile
 )
@@ -186,13 +226,18 @@ void Kleinjung_poly_selection(
     mpz_t mw, ad1max, ad2max, tmp_mpz2;
     mpz_inits(mw, ad1max, ad2max, tmp_mpz2, NULL);
 
-    polynomial_mpz tmp_poly;
-    init_poly(&tmp_poly);
-
     unsigned long * tmp_indexes = calloc(nb_roots, sizeof(unsigned long));
 
     mpz_t tmp_m_mu, tmp_prod;
     mpz_inits(tmp_m_mu, tmp_prod, NULL);
+
+    polynomial_ranking polynomial_ranks;
+    init_ranking(&polynomial_ranks, nb_poly_precise_eval);
+
+    polynomial_ranking_element tmp_element;
+    init_poly(&tmp_element.poly);
+    mpz_init(tmp_element.m0);
+    mpz_init(tmp_element.m1);
 
     while (mpz_cmp(a_d, a_d_max) < 0 && cpt < nb_poly_coarse_eval)
     {
@@ -479,17 +524,52 @@ void Kleinjung_poly_selection(
                             for (size_t i = 0 ; i < len_vec2 ; i++) tmp_indexes[len_vec1 + i] = array2_indices[i];
                             mpz_set(tmp_prod, product);
 
+                            reset_polynomial(&tmp_element.poly);
+
                             compute_m_mu(tmp_m_mu, m0_local, nb_roots, d, roots_used, tmp_indexes);
-                            build_poly_coeffs(&tmp_poly, tmp_m_mu, tmp_prod, a_d, n, d);
+
+                            mpz_set(tmp_element.m0, tmp_m_mu);
+                            mpz_set(tmp_element.m1, tmp_prod);
+
+                            build_poly_coeffs(&tmp_element.poly, tmp_element.m0, tmp_element.m1, a_d, n, d);
                             // Get the L2 norm value of the generated polynomial
+
+                            get_Lnorm(tmp_mpf, &tmp_element.poly, 1, primes->start[primes->len - 1], ln2, e);
+
+                            tmp_element.L2_score = mpf_get_d(tmp_mpf);
+
                             // Rank the polynomial, keep it if good
+
+                            if (!polynomial_ranks.len)
+                            {
+                                append_element(&polynomial_ranks, &tmp_element);
+                            }
+                            else
+                            {
+                                if (tmp_element.L2_score < polynomial_ranks.ranking[polynomial_ranks.len - 1].L2_score)
+                                {
+                                    size_t tmp_rank = find_rank(&polynomial_ranks, &tmp_element);
+                                    insert_element(&polynomial_ranks, &tmp_element, tmp_rank);
+                                }
+                                else if (polynomial_ranks.len < polynomial_ranks.size)
+                                {
+                                    append_element(&polynomial_ranks, &tmp_element);
+                                }
+                            }
+
+                            cpt++;
+
+                            avg = compute_avg_score(&polynomial_ranks);
+
                             // If enough polynomial have been checked, finish
 
 
                             z++;
+
+                            if (cpt > nb_poly_coarse_eval) break;
                         }
                     }
-
+                    if (cpt > nb_poly_coarse_eval) break;
                 }
 
 
@@ -527,6 +607,8 @@ void Kleinjung_poly_selection(
                 free(Q_used.start);
 
                 mpf_clears(f0, epsilon, NULL);
+
+                if (cpt > nb_poly_coarse_eval) break;
             }
 
             long j = nb_roots - 1;
@@ -552,8 +634,11 @@ void Kleinjung_poly_selection(
     free(kept_primes.start);
     free(tmp_indexes);
 
-    free_polynomial(&tmp_poly);
-
     mpf_clears(tmp_mpf, tmp_mpf2, NULL);
     mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, tmp_m_mu, tmp_prod, NULL);
+
+    free_ranking(&polynomial_ranks);
+
+    free_polynomial(&tmp_element.poly);
+    mpz_clears(tmp_element.m0, tmp_element.m1, NULL);
 }

@@ -8,6 +8,7 @@ typedef struct
     polynomial_mpz poly;
     mpz_t m0;
     mpz_t m1;
+    double L2_score;
 } polynomial_ranking_element;
 
 typedef struct
@@ -35,6 +36,15 @@ void insert_element(
     size_t index
 );
 
+size_t find_rank(
+    polynomial_ranking * restrict ranking,
+    polynomial_ranking_element * restrict element
+);
+
+double compute_avg_score(
+    polynomial_ranking * ranking
+);
+
 void free_ranking(
     polynomial_ranking * restrict ranking
 );
@@ -54,6 +64,8 @@ void Kleinjung_poly_selection(
     const unsigned long d,
     const unsigned long nb_poly_coarse_eval,
     const unsigned long nb_poly_precise_eval,
+    const mpf_t ln2,
+    const mpf_t e,
     gmp_randstate_t state,
     FILE *logfile
 );
