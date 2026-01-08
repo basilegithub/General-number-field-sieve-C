@@ -6,6 +6,7 @@
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
 #include "polynomial_functions.h"
+#include "dickman_table.h"
 
 void evaluate_legendre(
     const unsigned long n,
@@ -119,7 +120,7 @@ void create_first_array(
     const unsigned long nb_rows,
     const unsigned long nb_cols,
     mpf_t * restrict array1_u_values,
-    unsigned long array1_indices[nb_rows][nb_cols],
+    unsigned long array1_indices[nb_rows][nb_cols]
 );
 
 void create_second_array(

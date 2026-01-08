@@ -1,5 +1,6 @@
 #include <gmp.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "dynamic_arrays.h"
 #include "polynomial_structures.h"
@@ -44,6 +45,9 @@ void basic_polynomial_selection(polynomial_mpz * restrict polynomial, const mpz_
 }
 
 void Kleinjung_poly_selection(
+    polynomial_mpz * restrict res_poly,
+    mpz_t m0,
+    mpz_t m1,
     const mpz_t n,
     const dyn_array_classic * restrict primes,
     const unsigned long nb_roots,
@@ -92,7 +96,7 @@ void Kleinjung_poly_selection(
 
         nth_root(tmp_mpf2, tmp_mpf, d - 3);
         mpf_set_d(tmp_mpf, 0.5);
-        mpf_add_ui(tmp_mpf2, tmp_mpf2, tmp_mpf);
+        mpf_add(tmp_mpf2, tmp_mpf2, tmp_mpf);
         mpz_set_f(a_d_max, tmp_mpf2);
     }
 
@@ -155,7 +159,9 @@ void Kleinjung_poly_selection(
             mpz_mul(tmp_mpz, tmp_mpz, n);
             mpz_mod_ui(tmp_mpz, tmp_mpz, p);
 
-            mpz_powm_ui(tmp_mpz2, tmp_mpz, (p - 1)/d, p);
+            mpz_set_ui(tmp_mpz2, p);
+
+            mpz_powm_ui(tmp_mpz2, tmp_mpz, (p - 1)/d, tmp_mpz2);
 
             if (!mpz_cmp_ui(tmp_mpz2, 1)) nth_roots++;
         }
@@ -176,7 +182,7 @@ void Kleinjung_poly_selection(
             set_coeff(&tmp_poly, a_d, d);
 
             mpz_neg(tmp_mpz, n);
-            mpz_mod(tmp_mpz, tmp_mpz, p);
+            mpz_mod_ui(tmp_mpz, tmp_mpz, p);
 
             set_coeff(&tmp_poly, tmp_mpz, 0);
 
@@ -190,7 +196,7 @@ void Kleinjung_poly_selection(
                 Q[index] = p;
                 for (size_t j = 0 ; j < d ; j++)
                 {
-                    roots[index][j] = tmo_roots.start[j];
+                    roots[index][j] = tmp_roots.start[j];
                 }
 
                 index++;
@@ -209,6 +215,21 @@ void Kleinjung_poly_selection(
         mpz_t product;
         mpz_init(product);
 
+        mpz_t prod;
+        mpz_init(prod);
+
+        mpz_t roots_used[nb_roots][d];
+        for (size_t i = 0 ; i < nb_roots ; i++)
+        {
+            for (size_t j = 0 ; j < d ; j++)
+            {
+                mpz_init(roots_used[i][j]);
+            }
+        }
+
+        mpz_t m0;
+        mpz_init(m0);
+
         while (true)
         {
             mpz_set_ui(product, 1);
@@ -216,7 +237,206 @@ void Kleinjung_poly_selection(
 
             if (mpz_cmp(product, ad1max) < 0)
             {
-                // Do stuff
+                dyn_array_classic Q_used;
+                init_classic(&Q_used);
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    append_classic(&Q_used, Q[indexes[i]]);
+
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpz_set_ui(roots_used[i][j], roots[indexes[i]][j]);
+                    }
+                }
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    mpz_divexact_ui(tmp_mpz, product, Q_used.start[i]);
+                    mpz_set_ui(tmp_mpz2, Q_used.start[i]);
+                    mpz_invert(tmp_mpz2, tmp_mpz, tmp_mpz2);
+                    mpz_mul(tmp_mpz, tmp_mpz, tmp_mpz2);
+
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpz_mul(roots_used[i][j], roots_used[i][j], tmp_mpz);
+                        mpz_mod(roots_used[i][j], roots_used[i][j], product);
+                    }
+                }
+
+                mpz_neg(m0, mw);
+                mpz_mod(m0, m0, product);
+                mpz_sub(m0, mw, m0);
+
+                mpz_t e_array[nb_roots][d];
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpz_init(e_array[i][j]);
+                    }
+                }
+
+                compute_e_array(
+                    m0,
+                    nb_roots,
+                    d,
+                    roots_used,
+                    product,
+                    a_d,
+                    n,
+                    e_array
+                );
+
+                mpf_t f0;
+                mpf_init(f0);
+
+                mpf_t f[nb_roots][d];
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpf_init(f[i][j]);
+                    }
+                }
+
+                compute_f(
+                    n,
+                    a_d,
+                    m0,
+                    d,
+                    product,
+                    nb_roots,
+                    roots_used,
+                    e_array,
+                    f,
+                    f0
+                );
+
+                mpf_t epsilon;
+                mpf_init(epsilon);
+
+                mpf_set_z(tmp_mpf, ad2max);
+                mpf_set_z(tmp_mpf2, m0);
+                mpf_div(epsilon, tmp_mpf, tmp_mpf2);
+
+                unsigned long len_vec1 = nb_roots>>1;
+
+                unsigned long nrows1 = my_power(d, len_vec1);
+                unsigned long ncols1 = len_vec1;
+
+                unsigned long array1_indices[nrows1][ncols1];
+
+                mpf_t * array1_u_values = calloc(nrows1, sizeof(mpf_t));
+
+                for (size_t i = 0 ; i < nrwos1 ; i++)
+                {
+                    mpf_init(array1_u_values[i]);
+                }
+
+                create_first_array(
+                    nb_roots,
+                    d,
+                    f0,
+                    f,
+                    nrows1,
+                    ncols1,
+                    array1_u_values,
+                    array1_indices
+                );
+
+                unsigned long len_vec2 = nb_roots - len_vec1;
+
+                unsigned long nrows2 = my_power(d, len_vec2);
+                unsigned long ncols2 = len_vec2;
+
+                unsigned long array2_indices[nrows2][ncols2];
+
+                mpf_t * array2_u_values = calloc(nrows2, sizeof(mpf_t));
+
+                for (size_t i = 0 ; i < nrwos2 ; i++)
+                {
+                    mpf_init(array2_u_values[i]);
+                }
+
+                create_second_array(
+                    nb_roots,
+                    len_vec1,
+                    d,
+                    nrows2,
+                    ncols2,
+                    f,
+                    array2_u_values,
+                    array2_indices
+                );
+
+                size_t minimum = 0;
+
+                for (size_t i = 0 ; i < nrows2 ; i++)
+                {
+                    mpf_add(tmp_mpf, array1_u_values[minimum], epsilon);
+                    while (minimum < nrows1 && mpf_cmp(array2_u_values[i], tmp_mpf) > 0)
+                    {
+                        minimum++;
+                        mpf_add(tmp_mpf, array1_u_values[minimum], epsilon);
+                    }
+
+                    if (minimum == nrows1) break;
+
+                    size_t z = minimum;
+                    if (z < nrows1)
+                    {
+                        mpf_sub(tmp_mpf, array2_u_values[i], array1_u_values[z]);
+                        mpf_abs(tmp_mpf, tmp_mpf);
+                        while (z < nrows1 && mpf_cmp(tmp_mpf, epsilon) < 0)
+                        {
+                            // Compute the polynomial, the associated m_mu and prod
+                            // Get the L2 norm value of the generated polynomial
+                            // Rank the polynomial, keep it if good
+                            // If enough polynomial have been checked, finish
+
+
+                            z++;
+                        }
+                    }
+
+                }
+
+
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpz_clear(e_array[i][j]);
+                    }
+                }
+
+                for (size_t i = 0 ; i < nb_roots ; i++)
+                {
+                    for (size_t j = 0 ; j < d ; j++)
+                    {
+                        mpf_clear(f[i][j]);
+                    }
+                }
+
+                for (size_t i = 0 ; i < nrwos1 ; i++)
+                {
+                    mpf_clear(array1_u_values[i]);
+                }
+
+                for (size_t i = 0 ; i < nrwos2 ; i++)
+                {
+                    mpf_clear(array2_u_values[i]);
+                }
+
+                free(array1_u_values);
+
+                free(Q_used.start);
+
+                mpf_clear(f0);
             }
 
             long j = nb_roots - 1;
@@ -233,9 +453,11 @@ void Kleinjung_poly_selection(
         }
 
         free(indexes);
+
+        mpz_clears(product, m0, NULL);
     }
 
 
     mpf_clears(tmp_mpf, tmp_mpf2, NULL);
-    mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, product, NULL);
+    mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, NULL);
 }
