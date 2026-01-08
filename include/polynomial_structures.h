@@ -5,7 +5,7 @@
 
 typedef struct
 {
-    mpz_t* coeffs;
+    mpz_t *coeffs;
     unsigned long degree;
 } polynomial_mpz; // Polynomial of arbitrary size coefficients
 

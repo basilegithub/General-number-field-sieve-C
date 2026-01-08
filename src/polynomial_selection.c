@@ -6,6 +6,86 @@
 #include "polynomial_structures.h"
 #include "utils.h"
 #include "utils_polynomial_selection.h"
+#include "polynomial_selection.h"
+
+void init_ranking(
+    polynomial_ranking * restrict ranking,
+    size_t size
+)
+{
+    ranking->ranking = calloc(size, sizeof(polynomial_ranking_element));
+    ranking->size = size;
+    ranking->len = 0;
+}
+
+void append_element(
+    polynomial_ranking * restrict ranking,
+    polynomial_ranking_element * restrict element
+)
+{
+    // It is assumed that we have checked that the ranking still have space to append an element
+    init_poly(&ranking->ranking[ranking->len].poly);
+    copy_polynomial(&ranking->ranking[ranking->len].poly, &element->poly);
+
+    mpz_init_set(ranking->ranking[ranking->len].m0, element->m0);
+    mpz_init_set(ranking->ranking[ranking->len].m1, element->m1);
+
+    ranking->len++;
+}
+
+void insert_element(
+    polynomial_ranking * restrict ranking,
+    polynomial_ranking_element * restrict element,
+    size_t index
+)
+{
+    // If there is enough space, the ranking is extended.
+    // If not, the last polynomial is discarded
+
+    if (ranking->len < ranking->size)
+    {
+        append_element(ranking, ranking->ranking[ranking->len - 1]); // Shift last element
+
+        for (size_t i = ranking->len - 2 ; i > index ; i--)
+        {
+            copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
+            mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
+            mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
+        }
+    }
+    else
+    {
+        for (size_t i = ranking->len - 1 ; i > index ; i--) // Element at ranking->len - 1 will be overriden
+        {
+            copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
+            mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
+            mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
+        }
+    }
+
+    copy_polynomial(&ranking->ranking[index].poly, &element->poly);
+
+    mpz_set(ranking->ranking[index].m0, element->m0);
+    mpz_set(ranking->ranking[index].m1, element->m1);
+
+    ranking->len++;
+}
+
+void free_ranking(
+    polynomial_ranking * restrict ranking
+)
+{
+    for (size_t i = 0 ; i < ranking->len ; i++)
+    {
+        free_polynomial(&ranking->ranking[i].poly);
+        mpz_clear(ranking->ranking[i].m0);
+        mpz_clear(ranking->ranking[i].m1);
+    }
+
+    free(ranking->ranking);
+    ranking->len = 0;
+    ranking->size = 0;
+}
 
 void basic_polynomial_selection(polynomial_mpz * restrict polynomial, const mpz_t n, mpz_t m0, mpz_t m1, const unsigned long d)
 {
@@ -105,6 +185,14 @@ void Kleinjung_poly_selection(
 
     mpz_t mw, ad1max, ad2max, tmp_mpz2;
     mpz_inits(mw, ad1max, ad2max, tmp_mpz2, NULL);
+
+    polynomial_mpz tmp_poly;
+    init_poly(&tmp_poly);
+
+    unsigned long * tmp_indexes = calloc(nb_roots, sizeof(unsigned long));
+
+    mpz_t tmp_m_mu, tmp_prod;
+    mpz_inits(tmp_m_mu, tmp_prod, NULL);
 
     while (mpz_cmp(a_d, a_d_max) < 0 && cpt < nb_poly_coarse_eval)
     {
@@ -289,7 +377,7 @@ void Kleinjung_poly_selection(
                 mpf_t f0;
                 mpf_init(f0);
 
-                mpf_t f = calloc(nb_roots*d, sizeof(mpf_t));
+                mpf_t * f = calloc(nb_roots*d, sizeof(mpf_t));
 
                 for (size_t i = 0 ; i < nb_roots*d ; i++)
                 {
@@ -387,6 +475,12 @@ void Kleinjung_poly_selection(
                         while (z < nrows1 && mpf_cmp(tmp_mpf, epsilon) < 0)
                         {
                             // Compute the polynomial, the associated m_mu and prod
+                            for (size_t i = 0 ; i < len_vec1 ; i++) tmp_indexes[i] = array1_indices[i];
+                            for (size_t i = 0 ; i < len_vec2 ; i++) tmp_indexes[len_vec1 + i] = array2_indices[i];
+                            mpz_set(tmp_prod, product);
+
+                            compute_m_mu(tmp_m_mu, m0_local, nb_roots, d, roots_used, tmp_indexes);
+                            build_poly_coeffs(&tmp_poly, tmp_m_mu, tmp_prod, a_d, n, d);
                             // Get the L2 norm value of the generated polynomial
                             // Rank the polynomial, keep it if good
                             // If enough polynomial have been checked, finish
@@ -456,7 +550,10 @@ void Kleinjung_poly_selection(
     }
 
     free(kept_primes.start);
+    free(tmp_indexes);
+
+    free_polynomial(&tmp_poly);
 
     mpf_clears(tmp_mpf, tmp_mpf2, NULL);
-    mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, NULL);
+    mpz_clears(tmp_mpz, tmp_mpz2, a_d, a_d_max, mw, ad1max, ad2max, tmp_m_mu, tmp_prod, NULL);
 }
