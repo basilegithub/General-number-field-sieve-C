@@ -9,9 +9,17 @@
 
 void poly_derivative(polynomial_mpz * restrict res, const polynomial_mpz * restrict f);
 
+void shift(
+    polynomial_mpz * restrict res,
+    const polynomial_mpz * restrict f,
+    const long k
+);
+
 void evaluate_poly(mpz_t res, const polynomial_mpz * restrict f, const signed long x);
 
 unsigned long evaluate_mod_p(const polynomial_mpz * restrict f, const unsigned long x, const unsigned long p);
+
+void evaluate_mod_p_mpz(const polynomial_mpz * restrict f, mpz_t res, const mpz_t x, const mpz_t p);
 
 void evaluate_homogeneous(mpz_t res, const polynomial_mpz * restrict f, const mpz_t x, const mpz_t y);
 

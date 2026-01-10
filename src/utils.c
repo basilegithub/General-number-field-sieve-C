@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 #include "dynamic_arrays.h"
 #include "utils.h"
@@ -106,7 +107,8 @@ void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
     mpf_t a, tmpf;
 
     mpf_inits(a, tmpf, NULL);
-    mpf_set_prec(a, 32);
+    mpf_set_prec(a, 512);
+    mpf_set_prec(tmpf, 512);
     mpf_set_z(a, tmp);
     mpf_mul(a, a, ln2);
 
@@ -121,6 +123,52 @@ void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
 
     mpz_clear(tmp);
     mpf_clears(tmpf, a, NULL);
+}
+
+unsigned long isqrt(unsigned long n)
+{
+    unsigned long a, b;
+    if (n < 17)
+    {
+        a = n;
+        b = (n+1)>>1;
+    }
+    else
+    {
+        unsigned long s = 1;
+        unsigned long S = 1;
+        while (S<<4 < n)
+        {
+            a = 4;
+            b = 16;
+            unsigned long c = 2;
+            while (b*S < n)
+            {
+                c = a;
+                a = b;
+                b = b*b;
+            }
+            s *= c;
+            S = s*s;
+        }
+        if (S<<2 < n)
+        {
+            b = s<<2;
+            a = n;
+        }
+        else
+        {
+            b = s<<1;
+            a = n;
+        }
+    }
+    while (b < a)
+    {
+        unsigned long c = (b*b + n)/(b<<1);
+        a = b;
+        b = c;
+    }
+    return a;
 }
 
 void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
@@ -155,6 +203,38 @@ void nth_root(mpf_t r, const mpf_t x, const unsigned long n)
     mpf_set(r, tmpf3);
 
     mpf_clears(tmpf, tmpf2, tmpf3, tmpf4, NULL);
+}
+
+unsigned long my_power(unsigned long a, unsigned long n)
+{
+    unsigned long res = 1;
+
+    while (n)
+    {
+        if (n&1)
+        {
+            res *= a;
+        }
+        a *= a;
+        n >>= 1;
+    }
+    return res;
+}
+
+double my_power_d(double a, unsigned long n)
+{
+    double res = 1;
+
+    while (n)
+    {
+        if (n&1)
+        {
+            res *= a;
+        }
+        a *= a;
+        n >>= 1;
+    }
+    return res;
 }
 
 unsigned long gcd(unsigned long a, unsigned long b)
@@ -295,6 +375,114 @@ void sqrt_mod(mpz_t n, const unsigned long p, gmp_randstate_t state)
     }
 
     mpz_clears(z, tmp, tmp2, P_value, generator, lambda, omega, res, m, two_mpz, NULL);
+}
+
+void my_factorial(mpz_t res, unsigned long n)
+{
+    mpz_set_ui(res, 1);
+
+    for (size_t i = 2 ; i <= n ; i++)
+    {
+        mpz_mul_ui(res, res, i);
+    }
+}
+
+void central(
+    mpf_t res,
+    double k,
+    double x,
+    const mpf_t e
+)
+{
+    if (x < 0)
+    {
+        mpf_set_ui(res, 0);
+    }
+    else
+    {
+        mpf_t tmpf;
+        mpf_init(tmpf);
+
+        double alpha = k / 2.0;
+
+        double logpdf = -alpha * log(2.0) - lgamma(alpha) + (alpha - 1) * log(x) - x/2.0;
+
+        mpf_set_d(tmpf, logpdf);
+
+        myexp(res, tmpf, e);
+
+        mpf_clear(tmpf);
+    }
+}
+
+void non_central(
+    mpf_t res,
+    double k,
+    double l,
+    double x,
+    const mpf_t e
+)
+{
+    if (x < 0.0)
+    {
+        mpf_set_ui(res, 0);
+    }
+    else
+    {
+        mpf_set_ui(res, 0);
+
+        mpf_t tmpf, tmpf2, tmpf3;
+        mpf_inits(tmpf, tmpf2, tmpf3, NULL);
+
+        mpf_set_ui(tmpf2, 1);
+        mpf_set_ui(tmpf3, 1);
+
+        for (size_t i = 0 ; i < 100 ; i++)
+        {
+            mpf_mul(tmpf, tmpf2, tmpf3);
+            central(tmpf2, k + 2*i, x, e);
+            mpf_mul(tmpf, tmpf, tmpf2);
+            mpf_add(res, res, tmpf);
+
+            mpf_set_d(tmpf, l/2);
+            mpf_mul(tmpf2, tmpf2, tmpf);
+
+            mpf_set_ui(tmpf, i+1);
+            mpf_div(tmpf3, tmpf3, tmpf);
+        }
+
+        mpf_set_d(tmpf2, -l/2);
+
+        myexp(tmpf, tmpf2, e);
+
+        mpf_mul(res, res, tmpf);
+
+        mpf_clears(tmpf, tmpf2, tmpf3, NULL);
+    }
+}
+
+void binom_coeff(
+    mpz_t res,
+    const unsigned long k,
+    const unsigned long n
+)
+{
+    if (k > n)
+    {
+        mpz_set_ui(res, 0);
+        return;
+    }
+    if (k <= n>>1)
+    {
+        mpz_set_ui(res, 1);
+
+        for (size_t i = n - k + 1 ; i <= n ; i++) mpz_mul_ui(res, res, i);
+        for (size_t i = 2 ; i <= k ; i++) mpz_divexact_ui(res, res, i);
+    }
+    else
+    {
+        binom_coeff(res, n-k, n);
+    }
 }
 
 void convert_to_vec(mpz_t embedding, const unsigned long relations_len, bool * restrict tmp_vec)

@@ -15,6 +15,7 @@
 #include "polynomial_structures.h"
 #include "NFS_relations.h"
 #include "polynomial_functions.h"
+#include "dickman_table.h"
 #include "init_functions.h"
 #include "generate_primes.h"
 #include "polynomial_selection.h"
@@ -152,10 +153,46 @@ int main()
     polynomial_mpz f_x;
     init_poly(&f_x);
 
-    basic_polynomial_selection(&f_x, n, m0, m1, degree);
+    mpz_t M;
+    mpz_init(M);
+
+    mpf_t tmp_mpf, tmp_mpf2;
+    mpf_inits(tmp_mpf, tmp_mpf2, NULL);
+    mpf_set_prec(tmp_mpf, mpz_sizeinbase(n, 2) + 1024);
+    mpf_set_z(tmp_mpf, n);
+
+    nth_root(tmp_mpf2, tmp_mpf, degree + 1);
+
+    mpz_set_f(M, tmp_mpf2);
+
+    mpf_clears(tmp_mpf, tmp_mpf2, NULL);
+
+    Kleinjung_poly_selection(
+        &f_x,
+        m0,
+        m1,
+        n,
+        &primes,
+        3,
+        4096,
+        1,
+        M,
+        degree,
+        3000,
+        64,
+        ln2,
+        e,
+        state,
+        logfile
+    );
+
+    // basic_polynomial_selection(&f_x, n, m0, m1, degree);
 
     mpz_t tmp;
     mpz_init(tmp);
+
+    evaluate_homogeneous(tmp, &f_x, m0, m1);
+    mpz_mod(tmp, tmp, n);
 
     polynomial_mpz linear_poly;
     init_poly_degree(&linear_poly, 1);

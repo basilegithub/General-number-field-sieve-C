@@ -26,6 +26,34 @@ void poly_derivative(polynomial_mpz * restrict res, const polynomial_mpz * restr
     mpz_clear(tmp);
 }
 
+void shift(
+    polynomial_mpz * restrict res,
+    const polynomial_mpz * restrict f,
+    const long k
+)
+{
+    copy_polynomial(res, f);
+
+    mpz_t tmp_mpz, tmp_mpz2;
+    mpz_inits(tmp_mpz, tmp_mpz2, NULL);
+
+    for (size_t i = 0 ; i < f->degree ; i++)
+    {
+        for (size_t j = i + 1 ; j <= f->degree ; j++)
+        {
+            binom_coeff(tmp_mpz, j - i, f->degree - i);
+
+            mpz_set_si(tmp_mpz2, k);
+            mpz_pow_ui(tmp_mpz2, tmp_mpz2, j - i);
+
+            mpz_mul(tmp_mpz, tmp_mpz, tmp_mpz2);
+            mpz_addmul(res->coeffs[j], tmp_mpz, f->coeffs[i]);
+        }
+    }
+
+    mpz_clears(tmp_mpz, tmp_mpz2, NULL);
+}
+
 void evaluate_poly(mpz_t res, const polynomial_mpz * restrict f, const signed long x)
 {
     if (!x)
@@ -72,6 +100,34 @@ unsigned long evaluate_mod_p(const polynomial_mpz * restrict f, const unsigned l
     mpz_clear(tmp_res);
 
     return res;
+}
+
+void evaluate_mod_p_mpz(const polynomial_mpz * restrict f, mpz_t res, const mpz_t x, const mpz_t p)
+{
+    mpz_t tmp_res;
+    mpz_init(tmp_res);
+
+    if (!x)
+    {
+        mpz_set(tmp_res, f->coeffs[f->degree]);
+        mpz_mod(tmp_res, tmp_res, p);
+    }
+    else
+    {
+        mpz_set(tmp_res, f->coeffs[0]);
+
+        for (size_t i = 1 ; i <= f->degree ; i++)
+        {
+            mpz_mul(tmp_res, tmp_res, x);
+            mpz_mod(tmp_res, tmp_res, p);
+            mpz_add(tmp_res, tmp_res, f->coeffs[i]);
+            mpz_mod(tmp_res, tmp_res, p);
+        }
+    }
+
+    mpz_set(res, tmp_res);
+
+    mpz_clear(tmp_res);
 }
 
 void evaluate_homogeneous(mpz_t res, const polynomial_mpz * restrict f, const mpz_t x, const mpz_t y)
