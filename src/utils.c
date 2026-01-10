@@ -107,7 +107,8 @@ void natural_log(mpf_t res, mpf_t x, const mpf_t ln2, const mpf_t e)
     mpf_t a, tmpf;
 
     mpf_inits(a, tmpf, NULL);
-    mpf_set_prec(a, 32);
+    mpf_set_prec(a, 512);
+    mpf_set_prec(tmpf, 512);
     mpf_set_z(a, tmp);
     mpf_mul(a, a, ln2);
 

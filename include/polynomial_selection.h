@@ -8,7 +8,7 @@ typedef struct
     polynomial_mpz poly;
     mpz_t m0;
     mpz_t m1;
-    double L2_score;
+    mpf_t L2_score;
 } polynomial_ranking_element;
 
 typedef struct
@@ -41,8 +41,9 @@ size_t find_rank(
     polynomial_ranking_element * restrict element
 );
 
-double compute_avg_score(
-    polynomial_ranking * ranking
+void compute_avg_score(
+    polynomial_ranking * ranking,
+    mpf_t res
 );
 
 void free_ranking(

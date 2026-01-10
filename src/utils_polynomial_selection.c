@@ -73,17 +73,32 @@ void get_Lnorm(
     const mpf_t e
 )
 {
-    unsigned long square_root = isqrt(skew);
+    mpf_t tmp_mpf, tmp_mpf2;
+    mpf_inits(tmp_mpf, tmp_mpf2, NULL);
+
+    mpf_set_prec(tmp_mpf, 1024);
+    mpf_set_prec(tmp_mpf2, 1024);
+
+    mpz_t tmp, tmp2, res_z;
+    mpz_inits(tmp, tmp2, res_z, NULL);
+
+    mpf_set_ui(tmp_mpf, skew);
+    nth_root(tmp_mpf2, tmp_mpf, 2);
+
     unsigned long n = F->degree + 1;
 
     mpz_t base_X, base_Y;
-    mpz_init_set_ui(base_X, smoothness_bound);
-    mpz_init_set_ui(base_Y, smoothness_bound);
+    mpz_inits(base_X, base_Y, NULL);
+    
+    mpf_mul_ui(tmp_mpf, tmp_mpf2, smoothness_bound);
+    mpz_set_f(base_X, tmp_mpf);
 
-    mpz_mul_ui(base_X, base_X, square_root);
     mpz_div_2exp(base_X, base_X, 1);
 
-    mpz_div_ui(base_Y, base_Y, square_root);
+    mpf_set_ui(tmp_mpf, smoothness_bound);
+    mpf_div(tmp_mpf, tmp_mpf, tmp_mpf2);
+
+    mpz_set_f(base_Y, tmp_mpf);
     mpz_add_ui(base_Y, base_Y, 1);
 
     mpz_t current_X, current_Y;
@@ -94,12 +109,6 @@ void get_Lnorm(
 
     mpz_mul(base_X, base_X, base_X);
     mpz_mul(base_Y, base_Y, base_Y);
-
-    mpz_t tmp, tmp2, res_z;
-    mpz_inits(tmp, tmp2, res_z, NULL);
-
-    mpf_t tmp_mpf, tmp_mpf2;
-    mpf_inits(tmp_mpf, tmp_mpf2, NULL);
 
     mpz_set_ui(res_z, 0);
 
@@ -125,12 +134,12 @@ void get_Lnorm(
     mpf_t x;
     mpf_init(x);
 
-    mpf_set_prec(x, 2048);
+    mpf_set_prec(x, mpz_sizeinbase(res_z, 2) + 256);
     mpf_set_z(x, res_z);
 
     natural_log(res, x, ln2, e);
 
-    mpz_clears(base_X, base_Y, current_X, current_Y, tmp, tmp, NULL);
+    mpz_clears(base_X, base_Y, current_X, current_Y, tmp, NULL);
     mpf_clears(x, tmp_mpf, tmp_mpf2, NULL);
 }
 
@@ -444,12 +453,12 @@ void get_sieve_region(
         mpf_add(ratio_mean, ratio_mean, tmp_mpf2);
     }
 
-    mpf_div_ui(tmp_mpf, ratio_mean, f->degree);
+    mpf_div_ui(tmp_mpf, ratio_mean, 2*f->degree);
     myexp(ratio_mean, tmp_mpf, e);
 
     *skew_factor = 2 * mpf_get_ui(ratio_mean);
 
-    unsigned long k = 1;
+    unsigned long k = 8;
 
     mpf_t best_norm;
     mpf_init_set_si(best_norm, -1);
@@ -462,7 +471,7 @@ void get_sieve_region(
         {
             get_Lnorm(tmp_mpf, &F, *skew_factor - k, smoothness_bound, ln2, e);
 
-            if (mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
+            if (!mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
             {
                 *skew_factor = *skew_factor - k;
                 mpf_set(best_norm, tmp_mpf);
@@ -475,7 +484,7 @@ void get_sieve_region(
         {
             get_Lnorm(tmp_mpf, &F, *skew_factor + k, smoothness_bound, ln2, e);
 
-            if (mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
+            if (!mpf_cmp_si(best_norm, -1) || mpf_cmp(tmp_mpf, best_norm) < 0)
             {
                 *skew_factor = *skew_factor + k;
                 mpf_set(best_norm, tmp_mpf);
@@ -518,9 +527,8 @@ void build_poly_coeffs(
     {
         mpz_pow_ui(tmp_mpz, m0, d - i);
         mpz_mul(tmp_mpz, tmp_mpz, f->coeffs[i]);
-        mpz_divexact(tmp_mpz, tmp_mpz, m1);
-
         mpz_sub(r, r, tmp_mpz);
+        mpz_divexact(r, r, m1);
 
         mpz_set(tmp_mpz, m1);
         mpz_pow_ui(tmp_mpz2, m0, d - 1 - i);
@@ -539,22 +547,22 @@ void build_poly_coeffs(
         set_coeff(f, tmp_mpz, d - 1 - i);
     }
 
-    mpz_div_2exp(tmp_mpz, m0, 1);
-    mpz_neg(tmp_mpz2, tmp_mpz);
+    // mpz_div_2exp(tmp_mpz, m0, 1);
+    // mpz_neg(tmp_mpz2, tmp_mpz);
 
-    for (size_t i = 1 ; i <= f->degree ; i++)
-    {
-        if (mpz_cmp(f->coeffs[i], tmp_mpz) > 0)
-        {
-            mpz_sub(f->coeffs[i], f->coeffs[i], m0);
-            mpz_add(f->coeffs[i - 1], f->coeffs[i - 1], m1);
-        }
-        else if (mpz_cmp(f->coeffs[i], tmp_mpz2) < 0)
-        {
-            mpz_add(f->coeffs[i], f->coeffs[i], m0);
-            mpz_sub(f->coeffs[i - 1], f->coeffs[i - 1], m1);
-        }
-    }
+    // for (size_t i = 1 ; i <= f->degree ; i++)
+    // {
+    //     if (mpz_cmp(f->coeffs[i], tmp_mpz) > 0)
+    //     {
+    //         mpz_sub(f->coeffs[i], f->coeffs[i], m0);
+    //         mpz_add(f->coeffs[i - 1], f->coeffs[i - 1], m1);
+    //     }
+    //     else if (mpz_cmp(f->coeffs[i], tmp_mpz2) < 0)
+    //     {
+    //         mpz_add(f->coeffs[i], f->coeffs[i], m0);
+    //         mpz_sub(f->coeffs[i - 1], f->coeffs[i - 1], m1);
+    //     }
+    // }
 
     mpz_clears(r, delta, tmp_mpz, tmp_mpz2, NULL);
 }
@@ -827,7 +835,7 @@ void compute_e_array(
 
     compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
     
-    build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+    build_poly_coeffs(&tmp_poly, tmp_m, prod, a_d, n, d);
 
     mpz_t base;
     mpz_init_set(base, tmp_poly.coeffs[1]);
@@ -843,7 +851,7 @@ void compute_e_array(
                 vec[0] = j;
 
                 compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
-                build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+                build_poly_coeffs(&tmp_poly, tmp_m, prod, a_d, n, d);
 
                 mpz_mod(e[i][j], tmp_poly.coeffs[1], prod);
             }
@@ -853,7 +861,7 @@ void compute_e_array(
                 vec[i] = j;
 
                 compute_m_mu(tmp_m, m0, nb_roots, d, roots_used, vec);
-                build_poly_coeffs(&tmp_poly, m0, tmp_m, a_d, n, d);
+                build_poly_coeffs(&tmp_poly, tmp_m, prod, a_d, n, d);
 
                 mpz_sub(e[i][j], tmp_poly.coeffs[1], base);
                 mpz_mod(e[i][j], e[i][j], prod);
@@ -961,7 +969,7 @@ void create_first_array(
         mpf_floor(tmp_mpf, U);
         mpf_sub(U, U, tmp_mpf);
 
-        if (!i || mpf_cmp(U, array1_u_values[i]) > 0)
+        if (!i || mpf_cmp(U, array1_u_values[i - 1]) > 0)
         {
             mpf_set(array1_u_values[i], U);
             for (size_t j = 0 ; j < nb_cols; j++) array1_indices[i*nb_cols + j] = vec[j];
@@ -972,13 +980,18 @@ void create_first_array(
             unsigned long tmp_b = i - 1;
             unsigned long tmp_c = (tmp_a + tmp_b)>>1;
 
-            while (tmp_a <= tmp_b)
+            while (tmp_a <= tmp_b && tmp_b)
             {
-                if (mpf_cmp(U, array1_u_values[tmp_c]) < 0) tmp_b = tmp_c - 1;
+                if (mpf_cmp(U, array1_u_values[tmp_c]) < 0)
+                {
+                    if (tmp_c) tmp_b = tmp_c - 1;
+                    else tmp_b = tmp_c;
+                }
                 else tmp_a = tmp_c + 1;
                 tmp_c = (tmp_a + tmp_b)>>1;
             }
-            for (size_t j = i-1 ; j > tmp_a ; j++)
+
+            for (size_t j = i ; j > tmp_a ; j--)
             {
                 mpf_set(array1_u_values[j], array1_u_values[j-1]);
                 for (size_t k = 0 ; k < nb_cols ; k++)
@@ -1029,18 +1042,20 @@ void create_second_array(
 
     while (vec[nb_cols  - 1] < d)
     {
+
         mpf_set_ui(U, 0);
 
         for (size_t j = 0 ; j < nb_cols ; j++)
         {
             mpf_add(U, U, f[(j + vec_len)*d + vec[j]]);
         }
+
         mpf_neg(U, U);
 
         mpf_floor(tmp_mpf, U);
         mpf_sub(U, U, tmp_mpf);
 
-        if (!i || mpf_cmp(U, array2_u_values[i]) > 0)
+        if (!i || mpf_cmp(U, array2_u_values[i - 1]) > 0)
         {
             mpf_set(array2_u_values[i], U);
             for (size_t j = 0 ; j < nb_cols; j++) array2_indices[i*nb_cols + j] = vec[j];
@@ -1051,13 +1066,18 @@ void create_second_array(
             unsigned long tmp_b = i - 1;
             unsigned long tmp_c = (tmp_a + tmp_b)>>1;
 
-            while (tmp_a <= tmp_b)
+            while (tmp_a <= tmp_b && tmp_b)
             {
-                if (mpf_cmp(U, array2_u_values[tmp_c]) < 0) tmp_b = tmp_c - 1;
+                if (mpf_cmp(U, array2_u_values[tmp_c]) < 0)
+                {
+                    if (tmp_c) tmp_b = tmp_c - 1;
+                    else tmp_b = tmp_c;
+                }
                 else tmp_a = tmp_c + 1;
                 tmp_c = (tmp_a + tmp_b)>>1;
             }
-            for (size_t j = i-1 ; j > tmp_a ; j++)
+
+            for (size_t j = i ; j > tmp_a ; j--)
             {
                 mpf_set(array2_u_values[j], array2_u_values[j-1]);
                 for (size_t k = 0 ; k < nb_cols ; k++)

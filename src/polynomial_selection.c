@@ -24,13 +24,15 @@ void append_element(
 )
 {
     // It is assumed that we have checked that the ranking still have space to append an element
-    init_poly(&ranking->ranking[ranking->len].poly);
+    init_poly_degree(&ranking->ranking[ranking->len].poly, element->poly.degree);
     copy_polynomial(&ranking->ranking[ranking->len].poly, &element->poly);
 
     mpz_init_set(ranking->ranking[ranking->len].m0, element->m0);
     mpz_init_set(ranking->ranking[ranking->len].m1, element->m1);
 
-    ranking->ranking[ranking->len].L2_score = element->L2_score;
+    mpf_init(ranking->ranking[ranking->len].L2_score);
+    mpf_set_prec(ranking->ranking[ranking->len].L2_score, 512);
+    mpf_init_set(ranking->ranking[ranking->len].L2_score, element->L2_score);
 
     ranking->len++;
 }
@@ -53,7 +55,7 @@ void insert_element(
             copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
             mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
             mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
-            ranking->ranking[i].L2_score = ranking->ranking[i - 1].L2_score;
+            mpf_set(ranking->ranking[i].L2_score, ranking->ranking[i - 1].L2_score);
         }
     }
     else
@@ -63,7 +65,7 @@ void insert_element(
             copy_polynomial(&ranking->ranking[i].poly, &ranking->ranking[i - 1].poly);
             mpz_set(ranking->ranking[i].m0, ranking->ranking[i - 1].m0);
             mpz_set(ranking->ranking[i].m1, ranking->ranking[i - 1].m1);
-            ranking->ranking[i].L2_score = ranking->ranking[i - 1].L2_score;
+            mpf_set(ranking->ranking[i].L2_score, ranking->ranking[i - 1].L2_score);
         }
     }
 
@@ -72,9 +74,7 @@ void insert_element(
     mpz_set(ranking->ranking[index].m0, element->m0);
     mpz_set(ranking->ranking[index].m1, element->m1);
 
-    ranking->ranking[index].L2_score = element->L2_score;
-
-    ranking->len++;
+    mpf_set(ranking->ranking[index].L2_score, element->L2_score);
 }
 
 size_t find_rank(
@@ -85,28 +85,33 @@ size_t find_rank(
     size_t a = 0;
     size_t b = ranking->len - 1;
     size_t c = (a+b)>>1;
-    while (a <= b)
+    while (a <= b && b != 0)
     {
-        if (ranking->ranking[c].L2_score < element->L2_score) a = c + 1;
-        else b = c - 1;
+        if (mpf_cmp(ranking->ranking[c].L2_score, element->L2_score) < 0) a = c + 1;
+        else
+        {
+            if (c == 0) b = 0;
+            else b = c - 1;
+        }
         c = (a+b)>>1;
     }
 
     return c;
 }
 
-double compute_avg_score(
-    polynomial_ranking * ranking
+void compute_avg_score(
+    polynomial_ranking * ranking,
+    mpf_t res
 )
 {
-    double res = 0.0;
+    mpf_set_ui(res, 0);
 
     for (size_t i = 0 ; i < ranking->len ; i++)
     {
-        res += ranking->ranking[i].L2_score;
+        mpf_add(res, res, ranking->ranking[i].L2_score);
     }
 
-    return res / ranking->len;
+    mpf_div_ui(res, res, ranking->len);
 }
 
 void free_ranking(
@@ -118,6 +123,7 @@ void free_ranking(
         free_polynomial(&ranking->ranking[i].poly);
         mpz_clear(ranking->ranking[i].m0);
         mpz_clear(ranking->ranking[i].m1);
+        mpf_clear(ranking->ranking[i].L2_score);
     }
 
     free(ranking->ranking);
@@ -197,8 +203,8 @@ void Kleinjung_poly_selection(
     mpf_t tmp_mpf, tmp_mpf2;
     mpf_inits(tmp_mpf, tmp_mpf2, NULL);
 
-    mpf_set_prec(tmp_mpf, 2048);
-    mpf_set_prec(tmp_mpf2, 2048);
+    mpf_set_prec(tmp_mpf, mpz_sizeinbase(n, 2) + 1024);
+    mpf_set_prec(tmp_mpf2, mpz_sizeinbase(n, 2) + 1024);
 
     mpz_t tmp_mpz, a_d_max;
     mpz_inits(tmp_mpz, a_d_max, NULL);
@@ -221,7 +227,11 @@ void Kleinjung_poly_selection(
     }
 
     size_t cpt = 0;
-    double avg = 0.0;
+
+    mpf_t avg;
+    mpf_init(avg);
+    mpf_set_prec(avg, 512);
+    mpf_set_ui(avg, 0);
 
     mpz_t mw, ad1max, ad2max, tmp_mpz2;
     mpz_inits(mw, ad1max, ad2max, tmp_mpz2, NULL);
@@ -238,6 +248,8 @@ void Kleinjung_poly_selection(
     init_poly(&tmp_element.poly);
     mpz_init(tmp_element.m0);
     mpz_init(tmp_element.m1);
+    mpf_init(tmp_element.L2_score);
+    mpf_set_prec(tmp_element.L2_score, 512);
 
     while (mpz_cmp(a_d, a_d_max) < 0 && cpt < nb_poly_coarse_eval)
     {
@@ -245,11 +257,13 @@ void Kleinjung_poly_selection(
 
         mpf_set_z(tmp_mpf, n);
         mpf_set_z(tmp_mpf2, a_d);
+
         mpf_div(tmp_mpf, tmp_mpf, tmp_mpf2);
+
         nth_root(tmp_mpf2, tmp_mpf, d);
 
         mpz_set_f(mw, tmp_mpf2);
-        mpz_add_ui(mw, mw, 1);
+        // mpz_add_ui(mw, mw, 1);
 
 
         mpz_mul(tmp_mpz, M, M);
@@ -259,7 +273,9 @@ void Kleinjung_poly_selection(
 
         mpf_set_d(tmp_mpf2, 0.5);
         mpf_add(tmp_mpf, tmp_mpf, tmp_mpf2);
+
         mpz_set_f(ad1max, tmp_mpf);
+        if (!mpz_cmp_ui(ad1max, 0)) mpz_set_ui(ad1max, 1000);
 
 
         if (d <= 2 || d == 4) mpz_set(ad2max, M);
@@ -360,6 +376,7 @@ void Kleinjung_poly_selection(
         mpz_t m0_local;
         mpz_init(m0_local);
 
+
         while (true)
         {
             mpz_set_ui(product, 1);
@@ -396,7 +413,7 @@ void Kleinjung_poly_selection(
 
                 mpz_neg(m0_local, mw);
                 mpz_mod(m0_local, m0_local, product);
-                mpz_sub(m0_local, mw, m0_local);
+                mpz_add(m0_local, mw, m0_local);
 
                 mpz_t e_array[nb_roots][d];
 
@@ -520,8 +537,9 @@ void Kleinjung_poly_selection(
                         while (z < nrows1 && mpf_cmp(tmp_mpf, epsilon) < 0)
                         {
                             // Compute the polynomial, the associated m_mu and prod
-                            for (size_t i = 0 ; i < len_vec1 ; i++) tmp_indexes[i] = array1_indices[i];
-                            for (size_t i = 0 ; i < len_vec2 ; i++) tmp_indexes[len_vec1 + i] = array2_indices[i];
+                            for (size_t j = 0 ; j < len_vec1 ; j++) tmp_indexes[j] = array1_indices[z*ncols1 + j];
+                            for (size_t j = 0 ; j < len_vec2 ; j++) tmp_indexes[len_vec1 + j] = array2_indices[i*ncols2 + j];
+
                             mpz_set(tmp_prod, product);
 
                             reset_polynomial(&tmp_element.poly);
@@ -534,9 +552,16 @@ void Kleinjung_poly_selection(
                             build_poly_coeffs(&tmp_element.poly, tmp_element.m0, tmp_element.m1, a_d, n, d);
                             // Get the L2 norm value of the generated polynomial
 
-                            get_Lnorm(tmp_mpf, &tmp_element.poly, 1, primes->start[primes->len - 1], ln2, e);
+                            unsigned long skew_factor;
+                            unsigned long _;
 
-                            tmp_element.L2_score = mpf_get_d(tmp_mpf);
+                            get_sieve_region(&tmp_element.poly, primes->start[primes->len - 1], &_, &skew_factor, ln2, e);
+
+                            get_Lnorm(tmp_mpf, &tmp_element.poly, skew_factor, primes->start[primes->len - 1], ln2, e);
+
+                            mpf_set(tmp_element.L2_score, tmp_mpf);
+
+                            
 
                             // Rank the polynomial, keep it if good
 
@@ -546,8 +571,9 @@ void Kleinjung_poly_selection(
                             }
                             else
                             {
-                                if (tmp_element.L2_score < polynomial_ranks.ranking[polynomial_ranks.len - 1].L2_score)
+                                if (mpf_cmp(tmp_element.L2_score, polynomial_ranks.ranking[polynomial_ranks.len - 1].L2_score) < 0)
                                 {
+
                                     size_t tmp_rank = find_rank(&polynomial_ranks, &tmp_element);
                                     insert_element(&polynomial_ranks, &tmp_element, tmp_rank);
                                 }
@@ -559,17 +585,35 @@ void Kleinjung_poly_selection(
 
                             cpt++;
 
-                            avg = compute_avg_score(&polynomial_ranks);
+                            mpf_add(avg, avg, tmp_element.L2_score);
+                            mpf_div_ui(tmp_mpf, avg, cpt);
+
+                            gmp_printf("\r%zu polynomials tested, avg L2 score = %Ff",
+                                cpt,
+                                tmp_mpf
+                            );
+
+                            fflush(stdout);
 
                             // If enough polynomial have been checked, finish
 
-
                             z++;
+                            mpf_sub(tmp_mpf, array2_u_values[i], array1_u_values[z]);
+                            mpf_abs(tmp_mpf, tmp_mpf);
 
-                            if (cpt > nb_poly_coarse_eval) break;
+                            if (cpt >= nb_poly_coarse_eval)
+                            {
+                                compute_avg_score(&polynomial_ranks, avg);
+                                gmp_printf("\nAverage L2_norm of kept polynomials : %Ff\n", avg);
+
+                                copy_polynomial(res_poly, &polynomial_ranks.ranking[0].poly);
+                                mpz_set(m0, polynomial_ranks.ranking[0].m0);
+                                mpz_set(m1, polynomial_ranks.ranking[0].m1);
+                                break;
+                            }
                         }
                     }
-                    if (cpt > nb_poly_coarse_eval) break;
+                    if (cpt >= nb_poly_coarse_eval) break;
                 }
 
 
@@ -608,7 +652,7 @@ void Kleinjung_poly_selection(
 
                 mpf_clears(f0, epsilon, NULL);
 
-                if (cpt > nb_poly_coarse_eval) break;
+                if (cpt >= nb_poly_coarse_eval) break;
             }
 
             long j = nb_roots - 1;
@@ -629,6 +673,8 @@ void Kleinjung_poly_selection(
         free(Q);
 
         mpz_clears(product, m0_local, NULL);
+
+        mpz_add_ui(a_d, a_d, multiplier);
     }
 
     free(kept_primes.start);
