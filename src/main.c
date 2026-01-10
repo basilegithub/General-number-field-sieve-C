@@ -178,7 +178,7 @@ int main()
         1,
         M,
         degree,
-        5000,
+        3000,
         64,
         ln2,
         e,
@@ -190,6 +190,9 @@ int main()
 
     mpz_t tmp;
     mpz_init(tmp);
+
+    evaluate_homogeneous(tmp, &f_x, m0, m1);
+    mpz_mod(tmp, tmp, n);
 
     polynomial_mpz linear_poly;
     init_poly_degree(&linear_poly, 1);
