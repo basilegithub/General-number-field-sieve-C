@@ -102,24 +102,37 @@ void compute_free_relations(
     mpz_t tmp;
     mpz_init(tmp);
 
+    // gmp_printf("m1 = %Zd ; c_d = %Zd\n\n", m1, leading_coeff);
+
     while (alg_prime != NULL)
     {
         if (alg_prime->roots.len == degree)
         {
             init_new_relation(relations, len_divide_leading);
 
-            mpz_set_ui(tmp, 1);
-            set_coeff(&relations->rels[relations->len - 1].poly_f, tmp, 0); // f(x) = 1
+            mpz_set_ui(tmp, alg_prime->prime);
+            set_coeff(&relations->rels[relations->len - 1].poly_f, tmp, 0); // f(x) = p
 
-            set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = 1
+            mpz_mul(tmp, tmp, leading_coeff);
+            set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = c_d * p
+
+            // mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
+
+            if (!(degree&1))
+            {
+                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
+            }
+            else
+            {
+                mpz_set_ui(tmp, alg_prime->prime);
+                // mpz_pow_ui(tmp, tmp, degree);
+                // mpz_mul(tmp, tmp, leading_coeff);
+                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
+            }
 
             mpz_set_ui(tmp, alg_prime->prime);
-            mpz_pow_ui(tmp, tmp, degree);
-            mpz_mul(tmp, tmp, leading_coeff);
-            mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
-
-            mpz_set_ui(tmp, 1);
-            mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = 1
+            mpz_mul(tmp, tmp, m1);
+            mpz_set(relations->rels[relations->len - 1].rational_norm, tmp); // rational_norm = m_1 * p
 
             for (size_t i = 0 ; i < len_divide_leading ; i++)
             {

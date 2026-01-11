@@ -85,6 +85,7 @@ unsigned long evaluate_mod_p(const polynomial_mpz * restrict f, const unsigned l
     else
     {
         mpz_set(tmp_res, f->coeffs[0]);
+        mpz_mod_ui(tmp_res, tmp_res, p);
 
         for (size_t i = 1 ; i <= f->degree ; i++)
         {

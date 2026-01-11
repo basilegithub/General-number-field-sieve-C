@@ -111,7 +111,7 @@ void extract_solution(
     mpz_sub(tmp_mpz, x, algebraic_square_root);
 
     mpz_gcd(tmp_mpz, tmp_mpz, n);
-    mpz_gcd(tmp_mpz2, x, n);
+    mpz_gcd(tmp_mpz2, factor, n);
 
     gmp_printf("n | %Zd & n | %Zd\n", tmp_mpz, tmp_mpz2);
 
