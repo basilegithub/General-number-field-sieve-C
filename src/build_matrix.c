@@ -107,6 +107,8 @@ void build_sparse_matrix(
             }
         }
 
+        append_classic(sparse_matrix, relations->len);
+
         quadratic = quadratic->next;
     }
 
