@@ -116,19 +116,19 @@ void compute_free_relations(
             mpz_mul(tmp, tmp, leading_coeff);
             set_coeff(&relations->rels[relations->len - 1].poly_g, tmp, 0); // g(x) = c_d * p
 
-            mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
+            // mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
 
-            // if (!(degree&1))
-            // {
-            //     mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
-            // }
-            // else
-            // {
-            //     mpz_set_ui(tmp, alg_prime->prime);
-            //     // mpz_pow_ui(tmp, tmp, degree);
-            //     mpz_mul(tmp, tmp, leading_coeff);
-            //     mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
-            // }
+            if (!(degree&1))
+            {
+                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p
+            }
+            else
+            {
+                mpz_set_ui(tmp, alg_prime->prime);
+                // mpz_pow_ui(tmp, tmp, degree);
+                // mpz_mul(tmp, tmp, leading_coeff);
+                mpz_set(relations->rels[relations->len - 1].algebraic_norm, tmp); // algebraic_norm = c_d * p^d
+            }
 
             mpz_set_ui(tmp, alg_prime->prime);
             mpz_mul(tmp, tmp, m1);
