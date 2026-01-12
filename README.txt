@@ -8,7 +8,7 @@ This is a new project aiming at concluding my work on factoring algorithms.
 This project is a C implementation of the General number field sieve to factor integers.
 
 This a first working version, which contains the following features:
-- Basic polynomial selection (d-th root) ;
+- Basic polynomial selection (d-th root) and Kleinjung first algorithm for polynomial search ;
 - Uses free relations ;
 - Naive sieving ;
 - Naive and Batch smoothness test ;
@@ -61,8 +61,6 @@ You can run the GNFS.exe in the build folder, it will ask you for the number you
 Here are the next steps :
 
 - Implement large primes handling ;
-
-- Implement Kleinjung polynomial search algorithm ;
 
 - Implement parallel polynomial search ;
 
