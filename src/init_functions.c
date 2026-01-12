@@ -136,7 +136,7 @@ void compute_free_relations(
 
             for (size_t i = 0 ; i < len_divide_leading ; i++)
             {
-                relations->rels[relations->len - 1].divide_leading[i] = true;
+                relations->rels[relations->len - 1].divide_leading[i] = false;
             }
 
             relations->rels[relations->len - 1].nb_relations = 1;

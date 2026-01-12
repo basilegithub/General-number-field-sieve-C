@@ -112,7 +112,7 @@ void build_sparse_matrix(
         quadratic = quadratic->next;
     }
 
-    // Encode b dividing the leading coefficient
+    // Encode b dividing the leading coefficient aka projective roots
 
     for (size_t i = 0 ; i < len_divide_leading ; i++)
     {
@@ -120,8 +120,14 @@ void build_sparse_matrix(
 
         for (size_t j = 0 ; j < relations->len ; j++)
         {
+            if (relations->rels[j].poly_f.degree == 0)
+            {
+                gmp_printf("%Zd %lu ", current_prime, relations->rels[j].divide_leading[i]);
+                print_polynomial(&relations->rels[j].poly_f);
+            }
             if (relations->rels[j].divide_leading[i])
             {
+
                 bit_count = mpz_remove(tmp_mpz, relations->rels[j].algebraic_norm, current_prime);
                 parity_bit = bit_count&1;
 
@@ -130,9 +136,9 @@ void build_sparse_matrix(
                     append_classic(sparse_matrix, j);
                 }
             }
-            
-            append_classic(sparse_matrix, relations->len);
         }
+        
+        append_classic(sparse_matrix, relations->len);
     }
 
     // Encode parity of used relations

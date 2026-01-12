@@ -20,6 +20,7 @@ void sieve(
     const mpz_t m0,
     const mpz_t m1,
     const size_t len_divide_leading,
+    const unsigned long * restrict divide_leading,
     const unsigned long b,
     const unsigned long offset,
     const unsigned long sieve_len,
@@ -144,9 +145,9 @@ void sieve(
 
                     smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
 
-                    for (size_t i = 0 ; i < len_divide_leading ; i++)
+                    for (size_t k = 0 ; k < len_divide_leading ; k++)
                     {
-                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[k] = (bool)(b%divide_leading[k] == 0);
                     }
 
                     // Large prime array and list are left with no large prime for now
@@ -223,9 +224,9 @@ void sieve(
 
                     smooth_candidates->rels[smooth_candidates->len-1].nb_relations = 1;
 
-                    for (size_t i = 0 ; i < len_divide_leading ; i++)
+                    for (size_t k = 0 ; k < len_divide_leading ; k++)
                     {
-                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[i] = (bool)mpz_divisible_ui_p(leading_coeff, b);
+                        smooth_candidates->rels[smooth_candidates->len-1].divide_leading[k] = (bool)(b%divide_leading[k] == 0);
                     }
 
                     // Large prime array and list are left with no large prime for now

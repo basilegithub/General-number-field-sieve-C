@@ -66,7 +66,7 @@ void mono_cpu_sieve(
 
     unsigned short *sieve_array = calloc(2*sieve_len, sizeof(unsigned short));
 
-    while (relations->len < required_relations+20)
+    while (relations->len < required_relations+200)
     {
         // Update contribution of gcd of b and c_d
 
@@ -104,6 +104,7 @@ void mono_cpu_sieve(
             m0,
             m1,
             len_divide_leading,
+            divide_leading,
             b,
             new_offset,
             sieve_len,

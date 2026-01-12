@@ -21,6 +21,7 @@ void sieve(
     const mpz_t m0,
     const mpz_t m1,
     const size_t len_divide_leading,
+    const unsigned long * restrict divide_leading,
     const unsigned long b,
     const unsigned long offset,
     const unsigned long sieve_len,
