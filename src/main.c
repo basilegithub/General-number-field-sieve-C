@@ -175,7 +175,7 @@ int main()
         &primes,
         2,
         4096,
-        2,
+        6,
         M,
         degree,
         100,
@@ -426,15 +426,15 @@ int main()
     nfs_relations relations;
     init_relations(&relations);
 
-    // compute_free_relations(
-    //     &relations,
-    //     &Algebraic_base,
-    //     divide_leading,
-    //     leading_coeff,
-    //     m1,
-    //     len_divide_leading,
-    //     degree
-    // );
+    compute_free_relations(
+        &relations,
+        &Algebraic_base,
+        divide_leading,
+        leading_coeff,
+        m1,
+        len_divide_leading,
+        degree
+    );
 
     log_msg(logfile, "Starting with %lu free relations.", relations.len);
     log_blank_line(logfile);

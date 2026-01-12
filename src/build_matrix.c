@@ -120,11 +120,6 @@ void build_sparse_matrix(
 
         for (size_t j = 0 ; j < relations->len ; j++)
         {
-            if (relations->rels[j].poly_f.degree == 0)
-            {
-                gmp_printf("%Zd %lu ", current_prime, relations->rels[j].divide_leading[i]);
-                print_polynomial(&relations->rels[j].poly_f);
-            }
             if (relations->rels[j].divide_leading[i])
             {
 
